@@ -426,6 +426,7 @@ class MediaForgeProcessor(
         return when {
             mime.contains("png") -> "png"
             mime.contains("webp") -> "webp"
+            mime.contains("heic") || mime.contains("heif") -> "heic"
             else -> "jpeg"
         }
     }
@@ -441,6 +442,15 @@ class MediaForgeProcessor(
                     Bitmap.CompressFormat.WEBP
                 }
             }
+            "heic", "heif" -> {
+                try {
+                    val heifField = Bitmap.CompressFormat::class.java.getField("HEIF")
+                    @Suppress("UNCHECKED_CAST")
+                    heifField.get(null) as Bitmap.CompressFormat
+                } catch (_: Throwable) {
+                    Bitmap.CompressFormat.JPEG
+                }
+            }
             else -> Bitmap.CompressFormat.JPEG
         }
     }
@@ -449,6 +459,7 @@ class MediaForgeProcessor(
         return when (format) {
             "png" -> "image/png"
             "webp" -> "image/webp"
+            "heic", "heif" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) "image/heic" else "image/jpeg"
             else -> "image/jpeg"
         }
     }
@@ -457,6 +468,7 @@ class MediaForgeProcessor(
         return when (format) {
             "png" -> ".png"
             "webp" -> ".webp"
+            "heic", "heif" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ".heic" else ".jpg"
             else -> ".jpg"
         }
     }

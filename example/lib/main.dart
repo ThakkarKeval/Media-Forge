@@ -903,9 +903,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     border: OutlineInputBorder(),
                   ),
                   items: const [
-                    DropdownMenuItem(value: ImageFormat.jpeg, child: Text('JPEG')),
-                    DropdownMenuItem(value: ImageFormat.png, child: Text('PNG')),
-                    DropdownMenuItem(value: ImageFormat.webp, child: Text('WebP')),
+                    DropdownMenuItem(value: ImageFormat.jpeg, child: Text('JPEG (.jpg)')),
+                    DropdownMenuItem(value: ImageFormat.png, child: Text('PNG (.png)')),
+                    DropdownMenuItem(value: ImageFormat.webp, child: Text('WebP (.webp)')),
+                    DropdownMenuItem(value: ImageFormat.heic, child: Text('HEIC (.heic)')),
                   ],
                   onChanged: (fmt) {
                     if (fmt != null) setState(() => cfg.format = fmt);

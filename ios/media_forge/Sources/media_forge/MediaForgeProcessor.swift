@@ -58,13 +58,14 @@ final class MediaForgeProcessor: NSObject, MediaForgeProcessorApi {
     var uiImage = UIImage(cgImage: downsampledImage)
 
     // Determine target format
-    let targetFormat = options.format?.lowercased() ?? (sourceUrl.pathExtension.lowercased() == "png" ? "png" : "jpeg")
-    let isPng = targetFormat == "png"
-    let targetExt = isPng ? "png" : "jpg"
-    let targetMime = isPng ? "image/png" : "image/jpeg"
+    let rawFormat = options.format?.lowercased()
+    let isHeic = rawFormat == "heic" || rawFormat == "heif"
+    let isPng = rawFormat == "png" || (rawFormat == nil && sourceUrl.pathExtension.lowercased() == "png")
+    let targetExt = isHeic ? "heic" : (isPng ? "png" : "jpg")
+    let targetMime = isHeic ? "image/heic" : (isPng ? "image/png" : "image/jpeg")
 
     // If converting a transparent image to JPEG, composite onto white background
-    if !isPng && hasAlpha(cgImage: downsampledImage) {
+    if !isPng && !isHeic && hasAlpha(cgImage: downsampledImage) {
       let renderer = UIGraphicsImageRenderer(size: uiImage.size)
       uiImage = renderer.image { ctx in
         UIColor.white.setFill()
@@ -80,6 +81,7 @@ final class MediaForgeProcessor: NSObject, MediaForgeProcessorApi {
     let (compressedData, targetMet) = try compressImage(
       image: uiImage,
       isPng: isPng,
+      isHeic: isHeic,
       initialQuality: initialQuality,
       targetBytes: targetBytes
     )
@@ -247,6 +249,7 @@ final class MediaForgeProcessor: NSObject, MediaForgeProcessorApi {
   private func compressImage(
     image: UIImage,
     isPng: Bool,
+    isHeic: Bool = false,
     initialQuality: CGFloat,
     targetBytes: Int64?
   ) throws -> (Data, Bool?) {
@@ -255,6 +258,26 @@ final class MediaForgeProcessor: NSObject, MediaForgeProcessorApi {
         throw PigeonError(code: "encoding_failed", message: "Failed to encode PNG image", details: nil)
       }
       return (data, nil)
+    }
+
+    if isHeic {
+      let data = NSMutableData()
+      guard let destination = CGImageDestinationCreateWithData(data as CFMutableData, UTType.heic.identifier as CFString, 1, nil),
+            let cgImage = image.cgImage else {
+        // Fallback to JPEG if HEIC encoder is unavailable
+        guard let jpegData = image.jpegData(compressionQuality: initialQuality) else {
+          throw PigeonError(code: "encoding_failed", message: "Failed to encode image", details: nil)
+        }
+        return (jpegData, nil)
+      }
+
+      let options: [CFString: Any] = [
+        kCGImageDestinationLossyCompressionQuality: initialQuality
+      ]
+      CGImageDestinationAddImage(destination, cgImage, options as CFDictionary)
+      if CGImageDestinationFinalize(destination) {
+        return (data as Data, targetBytes != nil ? Int64(data.count) <= targetBytes! : nil)
+      }
     }
 
     if let target = targetBytes, target > 0 {

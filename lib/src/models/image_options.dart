@@ -1,13 +1,16 @@
 /// Supported target image formats for conversion and encoding.
 enum ImageFormat {
-  /// Joint Photographic Experts Group (lossy, no alpha channel).
+  /// Joint Photographic Experts Group (lossy, universally compatible).
   jpeg,
 
-  /// Portable Network Graphics (lossless, preserves alpha channel).
+  /// Portable Network Graphics (lossless, preserves transparency/alpha).
   png,
 
-  /// WebP format (lossy or lossless, efficient compression).
+  /// WebP format (modern efficient compression with alpha support).
   webp,
+
+  /// High Efficiency Image Container (HEIF/HEIC, modern mobile standard).
+  heic,
 }
 
 /// Configuration options for image optimization, resizing, and conversion.
