@@ -8,6 +8,9 @@ public class MediaForgePlugin: NSObject, FlutterPlugin, MediaForgePluginApi {
 
     let picker = MediaForgePicker()
     MediaForgePickerApiSetup.setUp(binaryMessenger: registrar.messenger(), api: picker)
+
+    let processor = MediaForgeProcessor()
+    MediaForgeProcessorApiSetup.setUp(binaryMessenger: registrar.messenger(), api: processor)
   }
 
   public func getPlatformVersion() throws -> String {
