@@ -1,17 +1,27 @@
 # media_forge_example
 
-Demonstrates how to use the media_forge plugin.
+Demonstration application for the [`media_forge`](https://pub.dev/packages/media_forge) Flutter plugin.
 
-## Getting Started
+## Features Demonstrated
 
-This project is a starting point for a Flutter application.
+* **Single & Multi Photo Picking**: Native gallery selection via Android Photo Picker and iOS `PHPickerViewController`.
+* **Camera Capture**: Photo and video capture with preferred camera lens (front/rear).
+* **Pre-selection Validation**: Enforcing maximum file sizes and allowed MIME types via `PickerValidator`.
+* **Image Optimization & Processing**: Resizing, quality compression, stripping GPS EXIF metadata, and iterative byte-budget searching (`targetSizeBytes`).
+* **Video Inspection**: Instant native extraction of video dimensions, duration, orientation, and MIME type.
+* **Video Frame Thumbnails**: Extracting frame images at specific offsets (`atTime`) with dimension constraints.
+* **Bounded-Concurrency Batch Processing**: Processing multiple images concurrently with live progress streams (`ProcessingEvent`) and cancellation support.
+* **Android Activity Recreation Recovery**: Testing state recovery via `retrieveLostData()`.
 
-A few resources to get you started if this is your first Flutter project:
+## Running the Example
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+### Android
+```bash
+flutter run -d android
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### iOS
+```bash
+cd ios && pod install && cd ..
+flutter run -d ios
+```

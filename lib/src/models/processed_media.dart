@@ -40,7 +40,7 @@ class ProcessedMedia {
   /// were applied. `false` indicates smart passthrough where the original was reused.
   final bool changed;
 
-  /// Whether the requested [targetSizeBytes] constraint was met.
+  /// Whether the requested `targetSizeBytes` constraint was met.
   /// `null` if no target size was requested.
   final bool? targetMet;
 
