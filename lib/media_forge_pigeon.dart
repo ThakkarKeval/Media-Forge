@@ -12,6 +12,7 @@ import 'src/models/media_type.dart';
 import 'src/models/picked_media.dart';
 import 'src/models/processed_media.dart';
 import 'src/models/selection_options.dart';
+import 'src/models/video_metadata.dart';
 
 /// An implementation of [MediaForgePlatform] that uses Pigeon for native platforms.
 class PigeonMediaForge extends MediaForgePlatform {
@@ -140,6 +141,35 @@ class PigeonMediaForge extends MediaForgePlatform {
     }
   }
 
+  @override
+  Future<VideoMetadata> inspectVideo(String path) async {
+    try {
+      final nativeMeta = await _processorApi.inspectVideo(path);
+      return _toVideoMetadata(nativeMeta);
+    } catch (e) {
+      throw _wrapException(e);
+    }
+  }
+
+  @override
+  Future<String> createVideoThumbnail({
+    required String videoPath,
+    Duration atTime = Duration.zero,
+    int? maxWidth,
+    int? maxHeight,
+  }) async {
+    try {
+      return await _processorApi.createVideoThumbnail(
+        videoPath,
+        atTime.inMilliseconds,
+        maxWidth,
+        maxHeight,
+      );
+    } catch (e) {
+      throw _wrapException(e);
+    }
+  }
+
   // --- Helpers ---
 
   NativeMediaSource _toNativeSource(MediaSource source) {
@@ -223,6 +253,23 @@ class PigeonMediaForge extends MediaForgePlatform {
       height: native.height,
       changed: native.changed,
       targetMet: native.targetMet,
+    );
+  }
+
+  VideoMetadata _toVideoMetadata(NativeVideoMetadata native) {
+    Duration? duration;
+    if (native.durationMs != null) {
+      duration = Duration(milliseconds: native.durationMs!);
+    }
+
+    return VideoMetadata(
+      path: native.path,
+      mimeType: native.mimeType,
+      sizeBytes: native.sizeBytes,
+      width: native.width,
+      height: native.height,
+      duration: duration,
+      rotationDegrees: native.rotationDegrees ?? 0,
     );
   }
 

@@ -8,6 +8,7 @@ import 'src/models/media_type.dart';
 import 'src/models/picked_media.dart';
 import 'src/models/processed_media.dart';
 import 'src/models/selection_options.dart';
+import 'src/models/video_metadata.dart';
 
 /// The common platform interface for the MediaForge plugin.
 abstract class MediaForgePlatform extends PlatformInterface {
@@ -80,5 +81,20 @@ abstract class MediaForgePlatform extends PlatformInterface {
   /// Clears managed temporary intermediate output files.
   Future<bool> clearCache() {
     throw UnimplementedError('clearCache() has not been implemented.');
+  }
+
+  /// Inspects metadata for a local video file at [path].
+  Future<VideoMetadata> inspectVideo(String path) {
+    throw UnimplementedError('inspectVideo() has not been implemented.');
+  }
+
+  /// Extracts a thumbnail image from a local video file.
+  Future<String> createVideoThumbnail({
+    required String videoPath,
+    Duration atTime = Duration.zero,
+    int? maxWidth,
+    int? maxHeight,
+  }) {
+    throw UnimplementedError('createVideoThumbnail() has not been implemented.');
   }
 }

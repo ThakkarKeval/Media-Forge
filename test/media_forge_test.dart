@@ -45,6 +45,18 @@ class MockMediaForgePlatform
 
   @override
   Future<bool> clearCache() => Future.value(true);
+
+  @override
+  Future<VideoMetadata> inspectVideo(String path) =>
+      Future.value(VideoMetadata(path: path));
+
+  @override
+  Future<String> createVideoThumbnail({
+    required String videoPath,
+    Duration atTime = Duration.zero,
+    int? maxWidth,
+    int? maxHeight,
+  }) => Future.value('${videoPath}_thumb.jpg');
 }
 
 void main() {

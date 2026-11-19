@@ -9,8 +9,11 @@ export 'src/models/picked_media.dart';
 export 'src/models/processed_media.dart';
 export 'src/models/selection_options.dart';
 export 'src/models/validation_result.dart';
+export 'src/models/video_metadata.dart';
+export 'src/models/batch_result.dart';
 export 'src/picker/media_picker.dart';
 export 'src/picker/picker_validator.dart';
+export 'src/processor/batch_job.dart';
 export 'src/processor/media_processor.dart';
 
 import 'media_forge_platform_interface.dart';
@@ -21,8 +24,10 @@ import 'src/models/media_type.dart';
 import 'src/models/picked_media.dart';
 import 'src/models/processed_media.dart';
 import 'src/models/selection_options.dart';
+import 'src/models/video_metadata.dart';
 import 'src/picker/media_picker.dart';
 import 'src/picker/picker_validator.dart';
+import 'src/processor/batch_job.dart';
 import 'src/processor/media_processor.dart';
 
 /// Top-level facade providing convenient access to picking and processing media.
@@ -104,6 +109,39 @@ class MediaForge {
   /// Clears managed temporary intermediate output files.
   static Future<bool> clearCache() {
     return MediaProcessor.clearCache();
+  }
+
+  /// Processes multiple images located at [paths] using a bounded concurrency pool.
+  static BatchJob processImages(
+    List<String> paths, {
+    ImageProcessingOptions options = const ImageProcessingOptions(),
+    int concurrency = 2,
+  }) {
+    return MediaProcessor.processImages(
+      paths,
+      options: options,
+      concurrency: concurrency,
+    );
+  }
+
+  /// Inspects metadata for a local video file located at [path].
+  static Future<VideoMetadata> inspectVideo(String path) {
+    return MediaProcessor.inspectVideo(path);
+  }
+
+  /// Extracts a video frame thumbnail at [atTime] (default start of video).
+  static Future<String> createVideoThumbnail({
+    required String videoPath,
+    Duration atTime = Duration.zero,
+    int? maxWidth,
+    int? maxHeight,
+  }) {
+    return MediaProcessor.createVideoThumbnail(
+      videoPath: videoPath,
+      atTime: atTime,
+      maxWidth: maxWidth,
+      maxHeight: maxHeight,
+    );
   }
 
   /// Retrieves any pending media recovered after Android Activity recreation.
