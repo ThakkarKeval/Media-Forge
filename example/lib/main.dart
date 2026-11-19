@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
@@ -35,6 +36,19 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
   final _mediaForgePlugin = const MediaForge();
   final List<PickedMedia> _pickedItems = [];
   final List<ProcessedMedia> _processedItems = [];
+
+  // Video Inspection state
+  final Map<String, VideoMetadata> _inspectedVideos = {};
+  final Map<String, String> _videoThumbnails = {};
+
+  // Batch Job state
+  BatchJob? _activeBatchJob;
+  StreamSubscription<ProcessingEvent>? _batchSubscription;
+  double? _batchProgressFraction;
+  String? _batchStageDescription;
+  int _batchCompletedCount = 0;
+  int _batchTotalCount = 0;
+
   String? _statusMessage;
   String? _errorMessage;
   bool _isLoading = false;
@@ -43,6 +57,12 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
   void initState() {
     super.initState();
     _loadPlatformVersion();
+  }
+
+  @override
+  void dispose() {
+    _batchSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadPlatformVersion() async {
@@ -223,6 +243,121 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
     }
   }
 
+  // --- Milestone 3: Video Inspection & Thumbnail ---
+
+  Future<void> _inspectAndThumbnailVideo(PickedMedia media) async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _statusMessage = 'Inspecting video and extracting thumbnail...';
+    });
+
+    try {
+      final metadata = await MediaForge.inspectVideo(media.path);
+      final thumbPath = await MediaForge.createVideoThumbnail(
+        videoPath: media.path,
+        atTime: const Duration(seconds: 1),
+        maxWidth: 400,
+        maxHeight: 400,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _inspectedVideos[media.path] = metadata;
+        _videoThumbnails[media.path] = thumbPath;
+        _statusMessage =
+            'Video inspected: ${metadata.width}×${metadata.height}, ${metadata.duration?.inSeconds}s (thumb extracted)';
+      });
+    } on MediaForgeException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = 'Video inspection error (${e.code.name}): ${e.message}';
+        _statusMessage = null;
+      });
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // --- Milestone 3: Bounded-Concurrency Batch Engine ---
+
+  void _startBatchOptimization() {
+    final imagePaths = _pickedItems.where((m) => m.isImage).map((m) => m.path).toList();
+    if (imagePaths.isEmpty) {
+      setState(() {
+        _errorMessage = 'No picked photos available for batch processing. Pick photos first.';
+      });
+      return;
+    }
+
+    _batchSubscription?.cancel();
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _batchProgressFraction = 0.0;
+      _batchCompletedCount = 0;
+      _batchTotalCount = imagePaths.length;
+      _batchStageDescription = 'Starting batch pool (concurrency: 2)...';
+      _statusMessage = 'Batch processing ${imagePaths.length} photos...';
+    });
+
+    final job = MediaForge.processImages(
+      imagePaths,
+      options: const ImageProcessingOptions(
+        maxWidth: 1024,
+        maxHeight: 1024,
+        quality: 75,
+        targetSizeBytes: 250 * 1024,
+        stripGpsMetadata: true,
+      ),
+      concurrency: 2,
+    );
+
+    _activeBatchJob = job;
+
+    _batchSubscription = job.events.listen((event) {
+      if (!mounted) return;
+      setState(() {
+        _batchCompletedCount = event.completedCount;
+        _batchTotalCount = event.totalCount;
+        _batchProgressFraction = event.progressFraction;
+        _batchStageDescription =
+            'Item ${event.itemIndex + 1}/${event.totalCount} [${event.stage.name}]';
+
+        if (event.stage == ProcessingStage.completed && event.result != null) {
+          _processedItems.insert(0, event.result!);
+        }
+      });
+    });
+
+    job.result.then((batchResult) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _activeBatchJob = null;
+        final status = batchResult.isCancelled ? 'cancelled' : 'finished';
+        _statusMessage =
+            'Batch $status: ${batchResult.successCount} succeeded, ${batchResult.failureCount} failed of ${batchResult.totalCount} items';
+        _batchStageDescription = null;
+      });
+    }).catchError((err) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _activeBatchJob = null;
+        _errorMessage = 'Batch error: $err';
+      });
+    });
+  }
+
+  void _cancelActiveBatch() {
+    _activeBatchJob?.cancel();
+    setState(() {
+      _statusMessage = 'Cancellation requested for batch processing...';
+    });
+  }
+
   Future<void> _testValidationConstraint() async {
     setState(() {
       _isLoading = true;
@@ -310,6 +445,8 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
     setState(() {
       _pickedItems.clear();
       _processedItems.clear();
+      _inspectedVideos.clear();
+      _videoThumbnails.clear();
       _statusMessage = 'Results cleared';
       _errorMessage = null;
     });
@@ -324,6 +461,8 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final hasImagesToBatch = _pickedItems.any((m) => m.isImage);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Media Forge Demo'),
@@ -349,10 +488,55 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          if (_isLoading)
+          if (_isLoading && _activeBatchJob == null)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
               child: LinearProgressIndicator(),
+            ),
+
+          // Active Batch Progress Bar
+          if (_activeBatchJob != null)
+            Card(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Batch In Progress (Concurrency: 2)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                        TextButton.icon(
+                          icon: const Icon(Icons.cancel, size: 18),
+                          label: const Text('Cancel Batch'),
+                          onPressed: _cancelActiveBatch,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    LinearProgressIndicator(
+                      value: _batchProgressFraction,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '$_batchCompletedCount / $_batchTotalCount items (${((_batchProgressFraction ?? 0) * 100).toStringAsFixed(0)}%)'
+                      '${_batchStageDescription != null ? ' • $_batchStageDescription' : ''}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
             ),
 
           if (_errorMessage != null)
@@ -462,7 +646,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Video & Mixed Media (M1)',
+                    'Video & Mixed Media (M1 + M3 Inspection)',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
@@ -499,7 +683,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
           ),
           const SizedBox(height: 12),
 
-          // --- Section 3: Image Optimization & Processor (M2) ---
+          // --- Section 3: Batch Engine & Processing (M2 + M3) ---
           Card(
             elevation: 1,
             color: Theme.of(context).colorScheme.primaryContainer.withAlpha(50),
@@ -511,12 +695,12 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
                   Row(
                     children: [
                       Icon(
-                        Icons.tune,
+                        Icons.dynamic_feed,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Image Optimization & Processing (M2)',
+                        'Batch Engine & Optimization (M3)',
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
@@ -524,7 +708,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Preset: Max 1280px, Quality 75, Target ≤ 300 KB, Strip GPS EXIF',
+                    'Bounded Concurrency (pool: 2), Event Stream, Cancellation Support',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 12),
@@ -537,9 +721,16 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
                         label: const Text('Pick & Optimize (≤ 300 KB)'),
                         onPressed: _isLoading ? null : _pickAndOptimizeImage,
                       ),
+                      FilledButton.tonalIcon(
+                        icon: const Icon(Icons.playlist_play),
+                        label: const Text('Batch Optimize Picked Photos'),
+                        onPressed: (_isLoading || !hasImagesToBatch)
+                            ? null
+                            : _startBatchOptimization,
+                      ),
                       OutlinedButton.icon(
                         icon: const Icon(Icons.cleaning_services_outlined),
-                        label: const Text('Clear Managed Cache'),
+                        label: const Text('Clear Cache'),
                         onPressed: _isLoading ? null : _clearCache,
                       ),
                     ],
@@ -587,7 +778,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
           ),
           const SizedBox(height: 16),
 
-          // --- Optimized Media Results (M2) ---
+          // --- Optimized Media Results ---
           if (_processedItems.isNotEmpty) ...[
             Text(
               'Optimized Media (${_processedItems.length})',
@@ -601,7 +792,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
             const SizedBox(height: 16),
           ],
 
-          // --- Picked Media Results (M1) ---
+          // --- Picked Media Results ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -726,6 +917,9 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
   Widget _buildMediaCard(BuildContext context, PickedMedia media) {
     final file = File(media.path);
     final fileExists = file.existsSync();
+    final inspected = _inspectedVideos[media.path];
+    final thumbPath = _videoThumbnails[media.path];
+    final thumbFile = thumbPath != null ? File(thumbPath) : null;
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -737,8 +931,8 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Container(
-                width: 72,
-                height: 72,
+                width: 76,
+                height: 76,
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 child: media.isImage && fileExists
                     ? Image.file(
@@ -747,13 +941,20 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
                         errorBuilder: (_, _, _) =>
                             const Icon(Icons.broken_image),
                       )
-                    : Icon(
-                        media.isVideo
-                            ? Icons.movie_outlined
-                            : Icons.image_outlined,
-                        size: 36,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    : (thumbFile != null && thumbFile.existsSync())
+                        ? Image.file(
+                            thumbFile,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) =>
+                                const Icon(Icons.movie_outlined),
+                          )
+                        : Icon(
+                            media.isVideo
+                                ? Icons.movie_outlined
+                                : Icons.image_outlined,
+                            size: 36,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
               ),
             ),
             const SizedBox(width: 12),
@@ -784,32 +985,54 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
                     runSpacing: 4,
                     children: [
                       _buildBadge(context, media.type.name.toUpperCase()),
-                      _buildBadge(context, _formatBytes(media.sizeBytes)),
-                      if (media.width != null && media.height != null)
-                        _buildBadge(context, '${media.width}×${media.height}'),
-                      if (media.duration != null)
+                      _buildBadge(context, _formatBytes(inspected?.sizeBytes ?? media.sizeBytes)),
+                      if ((inspected?.width ?? media.width) != null &&
+                          (inspected?.height ?? media.height) != null)
                         _buildBadge(
                           context,
-                          '${media.duration!.inSeconds}s',
+                          '${inspected?.width ?? media.width}×${inspected?.height ?? media.height}',
+                        ),
+                      if ((inspected?.duration ?? media.duration) != null)
+                        _buildBadge(
+                          context,
+                          '${(inspected?.duration ?? media.duration)!.inSeconds}s',
                           color: Colors.teal,
                         ),
-                      if (media.mimeType != null)
-                        _buildBadge(context, media.mimeType!),
+                      if (inspected?.rotationDegrees != null && inspected!.rotationDegrees > 0)
+                        _buildBadge(
+                          context,
+                          '${inspected.rotationDegrees}° ROT',
+                          color: Colors.purple,
+                        ),
+                      if ((inspected?.mimeType ?? media.mimeType) != null)
+                        _buildBadge(context, (inspected?.mimeType ?? media.mimeType)!),
                     ],
                   ),
-                  if (media.isImage) ...[
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        icon: const Icon(Icons.tune, size: 16),
-                        label: const Text('Optimize (≤ 400 KB)'),
-                        onPressed: _isLoading
-                            ? null
-                            : () => _optimizePickedImage(media),
-                      ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Wrap(
+                      spacing: 8,
+                      children: [
+                        if (media.isVideo)
+                          TextButton.icon(
+                            icon: const Icon(Icons.analytics_outlined, size: 16),
+                            label: const Text('Inspect & Thumbnail'),
+                            onPressed: _isLoading
+                                ? null
+                                : () => _inspectAndThumbnailVideo(media),
+                          ),
+                        if (media.isImage)
+                          TextButton.icon(
+                            icon: const Icon(Icons.tune, size: 16),
+                            label: const Text('Optimize (≤ 400 KB)'),
+                            onPressed: _isLoading
+                                ? null
+                                : () => _optimizePickedImage(media),
+                          ),
+                      ],
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
