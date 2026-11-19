@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <cache-path name="media_forge_cache" path="media_forge/" />
+    <external-cache-path name="media_forge_external_cache" path="media_forge/" />
+</paths>
