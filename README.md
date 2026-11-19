@@ -189,21 +189,6 @@ await MediaForge.clearCache();
 
 ---
 
-## 🧪 Testing
-
-MediaForge comes with 100% mocked platform interface tests and unit tests:
-
-```bash
-flutter test
-```
-
-Android native tests:
-```bash
-cd example/android && ./gradlew testDebugUnitTest
-```
-
----
-
 ## 📄 License
 
 BSD 3-Clause License. See [LICENSE](LICENSE) for details.
