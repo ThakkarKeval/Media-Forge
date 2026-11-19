@@ -34,6 +34,524 @@ Object? _extractReplyValueOrThrow(
   return replyList.firstOrNull;
 }
 
+bool _deepEquals(Object? a, Object? b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a is double && b is double) {
+    if (a.isNaN && b.isNaN) {
+      return true;
+    }
+    return a == b;
+  }
+  if (a is List && b is List) {
+    return a.length == b.length &&
+        a.indexed.every(
+          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
+        );
+  }
+  if (a is Map && b is Map) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (final MapEntry<Object?, Object?> entryA in a.entries) {
+      bool found = false;
+      for (final MapEntry<Object?, Object?> entryB in b.entries) {
+        if (_deepEquals(entryA.key, entryB.key)) {
+          if (_deepEquals(entryA.value, entryB.value)) {
+            found = true;
+            break;
+          } else {
+            return false;
+          }
+        }
+      }
+      if (!found) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return a == b;
+}
+
+int _deepHash(Object? value) {
+  if (value is List) {
+    return Object.hashAll(value.map(_deepHash));
+  }
+  if (value is Map) {
+    int result = 0;
+    for (final MapEntry<Object?, Object?> entry in value.entries) {
+      result += (_deepHash(entry.key) * 31) ^ _deepHash(entry.value);
+    }
+    return result;
+  }
+  if (value is double && value.isNaN) {
+    // Normalize NaN to a consistent hash.
+    return 0x7FF8000000000000.hashCode;
+  }
+  if (value is double && value == 0.0) {
+    // Normalize -0.0 to 0.0 so they have the same hash code.
+    return 0.0.hashCode;
+  }
+  return value.hashCode;
+}
+
+enum NativeMediaType { image, video, mixed }
+
+enum NativeMediaSource { gallery, camera }
+
+enum NativeCameraDevice { rear, front }
+
+class NativePickerOptions {
+  NativePickerOptions({
+    this.maxItems,
+    this.cameraDevice,
+    this.maxDurationSeconds,
+  });
+
+  int? maxItems;
+
+  NativeCameraDevice? cameraDevice;
+
+  int? maxDurationSeconds;
+
+  List<Object?> _toList() {
+    return <Object?>[maxItems, cameraDevice, maxDurationSeconds];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static NativePickerOptions decode(Object result) {
+    result as List<Object?>;
+    return NativePickerOptions(
+      maxItems: result[0] as int?,
+      cameraDevice: result[1] as NativeCameraDevice?,
+      maxDurationSeconds: result[2] as int?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! NativePickerOptions || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(maxItems, other.maxItems) &&
+        _deepEquals(cameraDevice, other.cameraDevice) &&
+        _deepEquals(maxDurationSeconds, other.maxDurationSeconds);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'NativePickerOptions(maxItems: $maxItems, cameraDevice: $cameraDevice, maxDurationSeconds: $maxDurationSeconds)';
+  }
+}
+
+class NativePickedMedia {
+  NativePickedMedia({
+    required this.path,
+    required this.type,
+    this.name,
+    this.mimeType,
+    this.sizeBytes,
+    this.width,
+    this.height,
+    this.durationMs,
+  });
+
+  String path;
+
+  NativeMediaType type;
+
+  String? name;
+
+  String? mimeType;
+
+  int? sizeBytes;
+
+  int? width;
+
+  int? height;
+
+  int? durationMs;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      path,
+      type,
+      name,
+      mimeType,
+      sizeBytes,
+      width,
+      height,
+      durationMs,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static NativePickedMedia decode(Object result) {
+    result as List<Object?>;
+    return NativePickedMedia(
+      path: result[0]! as String,
+      type: result[1]! as NativeMediaType,
+      name: result[2] as String?,
+      mimeType: result[3] as String?,
+      sizeBytes: result[4] as int?,
+      width: result[5] as int?,
+      height: result[6] as int?,
+      durationMs: result[7] as int?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! NativePickedMedia || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(path, other.path) &&
+        _deepEquals(type, other.type) &&
+        _deepEquals(name, other.name) &&
+        _deepEquals(mimeType, other.mimeType) &&
+        _deepEquals(sizeBytes, other.sizeBytes) &&
+        _deepEquals(width, other.width) &&
+        _deepEquals(height, other.height) &&
+        _deepEquals(durationMs, other.durationMs);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'NativePickedMedia(path: $path, type: $type, name: $name, mimeType: $mimeType, sizeBytes: $sizeBytes, width: $width, height: $height, durationMs: $durationMs)';
+  }
+}
+
+class NativeLostDataResponse {
+  NativeLostDataResponse({
+    required this.items,
+    this.errorCode,
+    this.errorMessage,
+  });
+
+  List<NativePickedMedia> items;
+
+  String? errorCode;
+
+  String? errorMessage;
+
+  List<Object?> _toList() {
+    return <Object?>[items, errorCode, errorMessage];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static NativeLostDataResponse decode(Object result) {
+    result as List<Object?>;
+    return NativeLostDataResponse(
+      items: (result[0]! as List<Object?>).cast<NativePickedMedia>(),
+      errorCode: result[1] as String?,
+      errorMessage: result[2] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! NativeLostDataResponse || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(items, other.items) &&
+        _deepEquals(errorCode, other.errorCode) &&
+        _deepEquals(errorMessage, other.errorMessage);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'NativeLostDataResponse(items: $items, errorCode: $errorCode, errorMessage: $errorMessage)';
+  }
+}
+
+class NativeImageProcessOptions {
+  NativeImageProcessOptions({
+    this.maxWidth,
+    this.maxHeight,
+    this.quality,
+    this.targetSizeBytes,
+    this.stripGpsMetadata,
+    this.format,
+  });
+
+  int? maxWidth;
+
+  int? maxHeight;
+
+  int? quality;
+
+  int? targetSizeBytes;
+
+  bool? stripGpsMetadata;
+
+  String? format;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      maxWidth,
+      maxHeight,
+      quality,
+      targetSizeBytes,
+      stripGpsMetadata,
+      format,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static NativeImageProcessOptions decode(Object result) {
+    result as List<Object?>;
+    return NativeImageProcessOptions(
+      maxWidth: result[0] as int?,
+      maxHeight: result[1] as int?,
+      quality: result[2] as int?,
+      targetSizeBytes: result[3] as int?,
+      stripGpsMetadata: result[4] as bool?,
+      format: result[5] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! NativeImageProcessOptions ||
+        other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(maxWidth, other.maxWidth) &&
+        _deepEquals(maxHeight, other.maxHeight) &&
+        _deepEquals(quality, other.quality) &&
+        _deepEquals(targetSizeBytes, other.targetSizeBytes) &&
+        _deepEquals(stripGpsMetadata, other.stripGpsMetadata) &&
+        _deepEquals(format, other.format);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'NativeImageProcessOptions(maxWidth: $maxWidth, maxHeight: $maxHeight, quality: $quality, targetSizeBytes: $targetSizeBytes, stripGpsMetadata: $stripGpsMetadata, format: $format)';
+  }
+}
+
+class NativeProcessedMedia {
+  NativeProcessedMedia({
+    required this.path,
+    required this.originalPath,
+    this.mimeType,
+    this.sizeBytes,
+    this.originalSizeBytes,
+    this.width,
+    this.height,
+    required this.changed,
+    this.targetMet,
+  });
+
+  String path;
+
+  String originalPath;
+
+  String? mimeType;
+
+  int? sizeBytes;
+
+  int? originalSizeBytes;
+
+  int? width;
+
+  int? height;
+
+  bool changed;
+
+  bool? targetMet;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      path,
+      originalPath,
+      mimeType,
+      sizeBytes,
+      originalSizeBytes,
+      width,
+      height,
+      changed,
+      targetMet,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static NativeProcessedMedia decode(Object result) {
+    result as List<Object?>;
+    return NativeProcessedMedia(
+      path: result[0]! as String,
+      originalPath: result[1]! as String,
+      mimeType: result[2] as String?,
+      sizeBytes: result[3] as int?,
+      originalSizeBytes: result[4] as int?,
+      width: result[5] as int?,
+      height: result[6] as int?,
+      changed: result[7]! as bool,
+      targetMet: result[8] as bool?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! NativeProcessedMedia || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(path, other.path) &&
+        _deepEquals(originalPath, other.originalPath) &&
+        _deepEquals(mimeType, other.mimeType) &&
+        _deepEquals(sizeBytes, other.sizeBytes) &&
+        _deepEquals(originalSizeBytes, other.originalSizeBytes) &&
+        _deepEquals(width, other.width) &&
+        _deepEquals(height, other.height) &&
+        _deepEquals(changed, other.changed) &&
+        _deepEquals(targetMet, other.targetMet);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'NativeProcessedMedia(path: $path, originalPath: $originalPath, mimeType: $mimeType, sizeBytes: $sizeBytes, originalSizeBytes: $originalSizeBytes, width: $width, height: $height, changed: $changed, targetMet: $targetMet)';
+  }
+}
+
+class NativeVideoMetadata {
+  NativeVideoMetadata({
+    required this.path,
+    this.mimeType,
+    this.sizeBytes,
+    this.width,
+    this.height,
+    this.durationMs,
+    this.rotationDegrees,
+  });
+
+  String path;
+
+  String? mimeType;
+
+  int? sizeBytes;
+
+  int? width;
+
+  int? height;
+
+  int? durationMs;
+
+  int? rotationDegrees;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      path,
+      mimeType,
+      sizeBytes,
+      width,
+      height,
+      durationMs,
+      rotationDegrees,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static NativeVideoMetadata decode(Object result) {
+    result as List<Object?>;
+    return NativeVideoMetadata(
+      path: result[0]! as String,
+      mimeType: result[1] as String?,
+      sizeBytes: result[2] as int?,
+      width: result[3] as int?,
+      height: result[4] as int?,
+      durationMs: result[5] as int?,
+      rotationDegrees: result[6] as int?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! NativeVideoMetadata || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(path, other.path) &&
+        _deepEquals(mimeType, other.mimeType) &&
+        _deepEquals(sizeBytes, other.sizeBytes) &&
+        _deepEquals(width, other.width) &&
+        _deepEquals(height, other.height) &&
+        _deepEquals(durationMs, other.durationMs) &&
+        _deepEquals(rotationDegrees, other.rotationDegrees);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'NativeVideoMetadata(path: $path, mimeType: $mimeType, sizeBytes: $sizeBytes, width: $width, height: $height, durationMs: $durationMs, rotationDegrees: $rotationDegrees)';
+  }
+}
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -41,6 +559,33 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
+    } else if (value is NativeMediaType) {
+      buffer.putUint8(129);
+      writeValue(buffer, value.index);
+    } else if (value is NativeMediaSource) {
+      buffer.putUint8(130);
+      writeValue(buffer, value.index);
+    } else if (value is NativeCameraDevice) {
+      buffer.putUint8(131);
+      writeValue(buffer, value.index);
+    } else if (value is NativePickerOptions) {
+      buffer.putUint8(132);
+      writeValue(buffer, value.encode());
+    } else if (value is NativePickedMedia) {
+      buffer.putUint8(133);
+      writeValue(buffer, value.encode());
+    } else if (value is NativeLostDataResponse) {
+      buffer.putUint8(134);
+      writeValue(buffer, value.encode());
+    } else if (value is NativeImageProcessOptions) {
+      buffer.putUint8(135);
+      writeValue(buffer, value.encode());
+    } else if (value is NativeProcessedMedia) {
+      buffer.putUint8(136);
+      writeValue(buffer, value.encode());
+    } else if (value is NativeVideoMetadata) {
+      buffer.putUint8(137);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -49,6 +594,27 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
+      case 129:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : NativeMediaType.values[value];
+      case 130:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : NativeMediaSource.values[value];
+      case 131:
+        final value = readValue(buffer) as int?;
+        return value == null ? null : NativeCameraDevice.values[value];
+      case 132:
+        return NativePickerOptions.decode(readValue(buffer)!);
+      case 133:
+        return NativePickedMedia.decode(readValue(buffer)!);
+      case 134:
+        return NativeLostDataResponse.decode(readValue(buffer)!);
+      case 135:
+        return NativeImageProcessOptions.decode(readValue(buffer)!);
+      case 136:
+        return NativeProcessedMedia.decode(readValue(buffer)!);
+      case 137:
+        return NativeVideoMetadata.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -72,7 +638,6 @@ class MediaForgePluginApi {
 
   final String pigeonVar_messageChannelSuffix;
 
-  /// Returns the system version of the host platform.
   Future<String> getPlatformVersion() async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.media_forge.MediaForgePluginApi.getPlatformVersion$pigeonVar_messageChannelSuffix';
@@ -89,5 +654,214 @@ class MediaForgePluginApi {
       isNullValid: false,
     );
     return pigeonVar_replyValue! as String;
+  }
+}
+
+class MediaForgePickerApi {
+  /// Constructor for [MediaForgePickerApi]. The [binaryMessenger] named argument is
+  /// available for dependency injection. If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  MediaForgePickerApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
+
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  Future<NativePickedMedia?> pickImage(
+    NativeMediaSource source,
+    NativePickerOptions? options,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickImage$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[source, options],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+    return pigeonVar_replyValue as NativePickedMedia?;
+  }
+
+  Future<NativePickedMedia?> pickVideo(
+    NativeMediaSource source,
+    NativePickerOptions? options,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickVideo$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[source, options],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+    return pigeonVar_replyValue as NativePickedMedia?;
+  }
+
+  Future<List<NativePickedMedia>> pickMultiple(
+    NativeMediaType type,
+    NativePickerOptions? options,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickMultiple$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[type, options],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<NativePickedMedia>();
+  }
+
+  Future<NativeLostDataResponse> retrieveLostData() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.media_forge.MediaForgePickerApi.retrieveLostData$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as NativeLostDataResponse;
+  }
+}
+
+class MediaForgeProcessorApi {
+  /// Constructor for [MediaForgeProcessorApi]. The [binaryMessenger] named argument is
+  /// available for dependency injection. If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  MediaForgeProcessorApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
+
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  Future<NativeProcessedMedia> processImage(
+    String path,
+    NativeImageProcessOptions options,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.processImage$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[path, options],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as NativeProcessedMedia;
+  }
+
+  Future<NativeVideoMetadata> inspectVideo(String path) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.inspectVideo$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[path],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as NativeVideoMetadata;
+  }
+
+  Future<String> createVideoThumbnail(
+    String videoPath,
+    int atMs,
+    int? maxWidth,
+    int? maxHeight,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.createVideoThumbnail$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[videoPath, atMs, maxWidth, maxHeight],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as String;
+  }
+
+  Future<bool> clearCache() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.clearCache$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
   }
 }

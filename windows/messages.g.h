@@ -50,12 +50,394 @@ template<class T> class ErrorOr {
 
  private:
   friend class MediaForgePluginApi;
+  friend class MediaForgePickerApi;
+  friend class MediaForgeProcessorApi;
   ErrorOr() = default;
   T TakeValue() && { return std::get<T>(std::move(v_)); }
 
   std::variant<T, FlutterError> v_;
 };
 
+
+enum class NativeMediaType {
+  kImage = 0,
+  kVideo = 1,
+  kMixed = 2
+};
+
+enum class NativeMediaSource {
+  kGallery = 0,
+  kCamera = 1
+};
+
+enum class NativeCameraDevice {
+  kRear = 0,
+  kFront = 1
+};
+
+
+// Generated class from Pigeon that represents data sent in messages.
+class NativePickerOptions {
+ public:
+  // Constructs an object setting all non-nullable fields.
+  NativePickerOptions();
+
+  // Constructs an object setting all fields.
+  explicit NativePickerOptions(
+    const int64_t* max_items,
+    const NativeCameraDevice* camera_device,
+    const int64_t* max_duration_seconds);
+
+  const int64_t* max_items() const;
+  void set_max_items(const int64_t* value_arg);
+  void set_max_items(int64_t value_arg);
+
+  const NativeCameraDevice* camera_device() const;
+  void set_camera_device(const NativeCameraDevice* value_arg);
+  void set_camera_device(const NativeCameraDevice& value_arg);
+
+  const int64_t* max_duration_seconds() const;
+  void set_max_duration_seconds(const int64_t* value_arg);
+  void set_max_duration_seconds(int64_t value_arg);
+
+  bool operator==(const NativePickerOptions& other) const;
+  bool operator!=(const NativePickerOptions& other) const;
+  /// Returns a hash code value for the object. This method is supported for the benefit of hash tables.
+  size_t Hash() const;
+  /// Stream output operator for formatted string representation.
+  friend std::ostream& operator<<(std::ostream& os, const NativePickerOptions& obj);
+ private:
+  static NativePickerOptions FromEncodableList(const ::flutter::EncodableList& list);
+  ::flutter::EncodableList ToEncodableList() const;
+  friend class MediaForgePluginApi;
+  friend class MediaForgePickerApi;
+  friend class MediaForgeProcessorApi;
+  friend class PigeonInternalCodecSerializer;
+  std::optional<int64_t> max_items_;
+  std::optional<NativeCameraDevice> camera_device_;
+  std::optional<int64_t> max_duration_seconds_;
+};
+
+
+// Generated class from Pigeon that represents data sent in messages.
+class NativePickedMedia {
+ public:
+  // Constructs an object setting all non-nullable fields.
+  explicit NativePickedMedia(
+    const std::string& path,
+    const NativeMediaType& type);
+
+  // Constructs an object setting all fields.
+  explicit NativePickedMedia(
+    const std::string& path,
+    const NativeMediaType& type,
+    const std::string* name,
+    const std::string* mime_type,
+    const int64_t* size_bytes,
+    const int64_t* width,
+    const int64_t* height,
+    const int64_t* duration_ms);
+
+  const std::string& path() const;
+  void set_path(std::string_view value_arg);
+
+  const NativeMediaType& type() const;
+  void set_type(const NativeMediaType& value_arg);
+
+  const std::string* name() const;
+  void set_name(const std::string_view* value_arg);
+  void set_name(std::string_view value_arg);
+
+  const std::string* mime_type() const;
+  void set_mime_type(const std::string_view* value_arg);
+  void set_mime_type(std::string_view value_arg);
+
+  const int64_t* size_bytes() const;
+  void set_size_bytes(const int64_t* value_arg);
+  void set_size_bytes(int64_t value_arg);
+
+  const int64_t* width() const;
+  void set_width(const int64_t* value_arg);
+  void set_width(int64_t value_arg);
+
+  const int64_t* height() const;
+  void set_height(const int64_t* value_arg);
+  void set_height(int64_t value_arg);
+
+  const int64_t* duration_ms() const;
+  void set_duration_ms(const int64_t* value_arg);
+  void set_duration_ms(int64_t value_arg);
+
+  bool operator==(const NativePickedMedia& other) const;
+  bool operator!=(const NativePickedMedia& other) const;
+  /// Returns a hash code value for the object. This method is supported for the benefit of hash tables.
+  size_t Hash() const;
+  /// Stream output operator for formatted string representation.
+  friend std::ostream& operator<<(std::ostream& os, const NativePickedMedia& obj);
+ private:
+  static NativePickedMedia FromEncodableList(const ::flutter::EncodableList& list);
+  ::flutter::EncodableList ToEncodableList() const;
+  friend class MediaForgePluginApi;
+  friend class MediaForgePickerApi;
+  friend class MediaForgeProcessorApi;
+  friend class PigeonInternalCodecSerializer;
+  std::string path_;
+  NativeMediaType type_;
+  std::optional<std::string> name_;
+  std::optional<std::string> mime_type_;
+  std::optional<int64_t> size_bytes_;
+  std::optional<int64_t> width_;
+  std::optional<int64_t> height_;
+  std::optional<int64_t> duration_ms_;
+};
+
+
+// Generated class from Pigeon that represents data sent in messages.
+class NativeLostDataResponse {
+ public:
+  // Constructs an object setting all non-nullable fields.
+  explicit NativeLostDataResponse(const ::flutter::EncodableList& items);
+
+  // Constructs an object setting all fields.
+  explicit NativeLostDataResponse(
+    const ::flutter::EncodableList& items,
+    const std::string* error_code,
+    const std::string* error_message);
+
+  const ::flutter::EncodableList& items() const;
+  void set_items(const ::flutter::EncodableList& value_arg);
+
+  const std::string* error_code() const;
+  void set_error_code(const std::string_view* value_arg);
+  void set_error_code(std::string_view value_arg);
+
+  const std::string* error_message() const;
+  void set_error_message(const std::string_view* value_arg);
+  void set_error_message(std::string_view value_arg);
+
+  bool operator==(const NativeLostDataResponse& other) const;
+  bool operator!=(const NativeLostDataResponse& other) const;
+  /// Returns a hash code value for the object. This method is supported for the benefit of hash tables.
+  size_t Hash() const;
+  /// Stream output operator for formatted string representation.
+  friend std::ostream& operator<<(std::ostream& os, const NativeLostDataResponse& obj);
+ private:
+  static NativeLostDataResponse FromEncodableList(const ::flutter::EncodableList& list);
+  ::flutter::EncodableList ToEncodableList() const;
+  friend class MediaForgePluginApi;
+  friend class MediaForgePickerApi;
+  friend class MediaForgeProcessorApi;
+  friend class PigeonInternalCodecSerializer;
+  ::flutter::EncodableList items_;
+  std::optional<std::string> error_code_;
+  std::optional<std::string> error_message_;
+};
+
+
+// Generated class from Pigeon that represents data sent in messages.
+class NativeImageProcessOptions {
+ public:
+  // Constructs an object setting all non-nullable fields.
+  NativeImageProcessOptions();
+
+  // Constructs an object setting all fields.
+  explicit NativeImageProcessOptions(
+    const int64_t* max_width,
+    const int64_t* max_height,
+    const int64_t* quality,
+    const int64_t* target_size_bytes,
+    const bool* strip_gps_metadata,
+    const std::string* format);
+
+  const int64_t* max_width() const;
+  void set_max_width(const int64_t* value_arg);
+  void set_max_width(int64_t value_arg);
+
+  const int64_t* max_height() const;
+  void set_max_height(const int64_t* value_arg);
+  void set_max_height(int64_t value_arg);
+
+  const int64_t* quality() const;
+  void set_quality(const int64_t* value_arg);
+  void set_quality(int64_t value_arg);
+
+  const int64_t* target_size_bytes() const;
+  void set_target_size_bytes(const int64_t* value_arg);
+  void set_target_size_bytes(int64_t value_arg);
+
+  const bool* strip_gps_metadata() const;
+  void set_strip_gps_metadata(const bool* value_arg);
+  void set_strip_gps_metadata(bool value_arg);
+
+  const std::string* format() const;
+  void set_format(const std::string_view* value_arg);
+  void set_format(std::string_view value_arg);
+
+  bool operator==(const NativeImageProcessOptions& other) const;
+  bool operator!=(const NativeImageProcessOptions& other) const;
+  /// Returns a hash code value for the object. This method is supported for the benefit of hash tables.
+  size_t Hash() const;
+  /// Stream output operator for formatted string representation.
+  friend std::ostream& operator<<(std::ostream& os, const NativeImageProcessOptions& obj);
+ private:
+  static NativeImageProcessOptions FromEncodableList(const ::flutter::EncodableList& list);
+  ::flutter::EncodableList ToEncodableList() const;
+  friend class MediaForgePluginApi;
+  friend class MediaForgePickerApi;
+  friend class MediaForgeProcessorApi;
+  friend class PigeonInternalCodecSerializer;
+  std::optional<int64_t> max_width_;
+  std::optional<int64_t> max_height_;
+  std::optional<int64_t> quality_;
+  std::optional<int64_t> target_size_bytes_;
+  std::optional<bool> strip_gps_metadata_;
+  std::optional<std::string> format_;
+};
+
+
+// Generated class from Pigeon that represents data sent in messages.
+class NativeProcessedMedia {
+ public:
+  // Constructs an object setting all non-nullable fields.
+  explicit NativeProcessedMedia(
+    const std::string& path,
+    const std::string& original_path,
+    bool changed);
+
+  // Constructs an object setting all fields.
+  explicit NativeProcessedMedia(
+    const std::string& path,
+    const std::string& original_path,
+    const std::string* mime_type,
+    const int64_t* size_bytes,
+    const int64_t* original_size_bytes,
+    const int64_t* width,
+    const int64_t* height,
+    bool changed,
+    const bool* target_met);
+
+  const std::string& path() const;
+  void set_path(std::string_view value_arg);
+
+  const std::string& original_path() const;
+  void set_original_path(std::string_view value_arg);
+
+  const std::string* mime_type() const;
+  void set_mime_type(const std::string_view* value_arg);
+  void set_mime_type(std::string_view value_arg);
+
+  const int64_t* size_bytes() const;
+  void set_size_bytes(const int64_t* value_arg);
+  void set_size_bytes(int64_t value_arg);
+
+  const int64_t* original_size_bytes() const;
+  void set_original_size_bytes(const int64_t* value_arg);
+  void set_original_size_bytes(int64_t value_arg);
+
+  const int64_t* width() const;
+  void set_width(const int64_t* value_arg);
+  void set_width(int64_t value_arg);
+
+  const int64_t* height() const;
+  void set_height(const int64_t* value_arg);
+  void set_height(int64_t value_arg);
+
+  bool changed() const;
+  void set_changed(bool value_arg);
+
+  const bool* target_met() const;
+  void set_target_met(const bool* value_arg);
+  void set_target_met(bool value_arg);
+
+  bool operator==(const NativeProcessedMedia& other) const;
+  bool operator!=(const NativeProcessedMedia& other) const;
+  /// Returns a hash code value for the object. This method is supported for the benefit of hash tables.
+  size_t Hash() const;
+  /// Stream output operator for formatted string representation.
+  friend std::ostream& operator<<(std::ostream& os, const NativeProcessedMedia& obj);
+ private:
+  static NativeProcessedMedia FromEncodableList(const ::flutter::EncodableList& list);
+  ::flutter::EncodableList ToEncodableList() const;
+  friend class MediaForgePluginApi;
+  friend class MediaForgePickerApi;
+  friend class MediaForgeProcessorApi;
+  friend class PigeonInternalCodecSerializer;
+  std::string path_;
+  std::string original_path_;
+  std::optional<std::string> mime_type_;
+  std::optional<int64_t> size_bytes_;
+  std::optional<int64_t> original_size_bytes_;
+  std::optional<int64_t> width_;
+  std::optional<int64_t> height_;
+  bool changed_;
+  std::optional<bool> target_met_;
+};
+
+
+// Generated class from Pigeon that represents data sent in messages.
+class NativeVideoMetadata {
+ public:
+  // Constructs an object setting all non-nullable fields.
+  explicit NativeVideoMetadata(const std::string& path);
+
+  // Constructs an object setting all fields.
+  explicit NativeVideoMetadata(
+    const std::string& path,
+    const std::string* mime_type,
+    const int64_t* size_bytes,
+    const int64_t* width,
+    const int64_t* height,
+    const int64_t* duration_ms,
+    const int64_t* rotation_degrees);
+
+  const std::string& path() const;
+  void set_path(std::string_view value_arg);
+
+  const std::string* mime_type() const;
+  void set_mime_type(const std::string_view* value_arg);
+  void set_mime_type(std::string_view value_arg);
+
+  const int64_t* size_bytes() const;
+  void set_size_bytes(const int64_t* value_arg);
+  void set_size_bytes(int64_t value_arg);
+
+  const int64_t* width() const;
+  void set_width(const int64_t* value_arg);
+  void set_width(int64_t value_arg);
+
+  const int64_t* height() const;
+  void set_height(const int64_t* value_arg);
+  void set_height(int64_t value_arg);
+
+  const int64_t* duration_ms() const;
+  void set_duration_ms(const int64_t* value_arg);
+  void set_duration_ms(int64_t value_arg);
+
+  const int64_t* rotation_degrees() const;
+  void set_rotation_degrees(const int64_t* value_arg);
+  void set_rotation_degrees(int64_t value_arg);
+
+  bool operator==(const NativeVideoMetadata& other) const;
+  bool operator!=(const NativeVideoMetadata& other) const;
+  /// Returns a hash code value for the object. This method is supported for the benefit of hash tables.
+  size_t Hash() const;
+  /// Stream output operator for formatted string representation.
+  friend std::ostream& operator<<(std::ostream& os, const NativeVideoMetadata& obj);
+ private:
+  static NativeVideoMetadata FromEncodableList(const ::flutter::EncodableList& list);
+  ::flutter::EncodableList ToEncodableList() const;
+  friend class MediaForgePluginApi;
+  friend class MediaForgePickerApi;
+  friend class MediaForgeProcessorApi;
+  friend class PigeonInternalCodecSerializer;
+  std::string path_;
+  std::optional<std::string> mime_type_;
+  std::optional<int64_t> size_bytes_;
+  std::optional<int64_t> width_;
+  std::optional<int64_t> height_;
+  std::optional<int64_t> duration_ms_;
+  std::optional<int64_t> rotation_degrees_;
+};
 
 
 class PigeonInternalCodecSerializer : public ::flutter::StandardCodecSerializer {
@@ -81,7 +463,6 @@ class MediaForgePluginApi {
   MediaForgePluginApi(const MediaForgePluginApi&) = delete;
   MediaForgePluginApi& operator=(const MediaForgePluginApi&) = delete;
   virtual ~MediaForgePluginApi() {}
-  // Returns the system version of the host platform.
   virtual ErrorOr<std::string> GetPlatformVersion() = 0;
 
   // The codec used by MediaForgePluginApi.
@@ -98,6 +479,77 @@ class MediaForgePluginApi {
   static ::flutter::EncodableValue WrapError(const FlutterError& error);
  protected:
   MediaForgePluginApi() = default;
+};
+// Generated interface from Pigeon that represents a handler of messages from Flutter.
+class MediaForgePickerApi {
+ public:
+  MediaForgePickerApi(const MediaForgePickerApi&) = delete;
+  MediaForgePickerApi& operator=(const MediaForgePickerApi&) = delete;
+  virtual ~MediaForgePickerApi() {}
+  virtual void PickImage(
+    const NativeMediaSource& source,
+    const NativePickerOptions* options,
+    std::function<void(ErrorOr<std::optional<NativePickedMedia>> reply)> result) = 0;
+  virtual void PickVideo(
+    const NativeMediaSource& source,
+    const NativePickerOptions* options,
+    std::function<void(ErrorOr<std::optional<NativePickedMedia>> reply)> result) = 0;
+  virtual void PickMultiple(
+    const NativeMediaType& type,
+    const NativePickerOptions* options,
+    std::function<void(ErrorOr<::flutter::EncodableList> reply)> result) = 0;
+  virtual void RetrieveLostData(std::function<void(ErrorOr<NativeLostDataResponse> reply)> result) = 0;
+
+  // The codec used by MediaForgePickerApi.
+  static const ::flutter::StandardMessageCodec& GetCodec();
+  // Sets up an instance of `MediaForgePickerApi` to handle messages through the `binary_messenger`.
+  static void SetUp(
+    ::flutter::BinaryMessenger* binary_messenger,
+    MediaForgePickerApi* api);
+  static void SetUp(
+    ::flutter::BinaryMessenger* binary_messenger,
+    MediaForgePickerApi* api,
+    const std::string& message_channel_suffix);
+  static ::flutter::EncodableValue WrapError(std::string_view error_message);
+  static ::flutter::EncodableValue WrapError(const FlutterError& error);
+ protected:
+  MediaForgePickerApi() = default;
+};
+// Generated interface from Pigeon that represents a handler of messages from Flutter.
+class MediaForgeProcessorApi {
+ public:
+  MediaForgeProcessorApi(const MediaForgeProcessorApi&) = delete;
+  MediaForgeProcessorApi& operator=(const MediaForgeProcessorApi&) = delete;
+  virtual ~MediaForgeProcessorApi() {}
+  virtual void ProcessImage(
+    const std::string& path,
+    const NativeImageProcessOptions& options,
+    std::function<void(ErrorOr<NativeProcessedMedia> reply)> result) = 0;
+  virtual void InspectVideo(
+    const std::string& path,
+    std::function<void(ErrorOr<NativeVideoMetadata> reply)> result) = 0;
+  virtual void CreateVideoThumbnail(
+    const std::string& video_path,
+    int64_t at_ms,
+    const int64_t* max_width,
+    const int64_t* max_height,
+    std::function<void(ErrorOr<std::string> reply)> result) = 0;
+  virtual void ClearCache(std::function<void(ErrorOr<bool> reply)> result) = 0;
+
+  // The codec used by MediaForgeProcessorApi.
+  static const ::flutter::StandardMessageCodec& GetCodec();
+  // Sets up an instance of `MediaForgeProcessorApi` to handle messages through the `binary_messenger`.
+  static void SetUp(
+    ::flutter::BinaryMessenger* binary_messenger,
+    MediaForgeProcessorApi* api);
+  static void SetUp(
+    ::flutter::BinaryMessenger* binary_messenger,
+    MediaForgeProcessorApi* api,
+    const std::string& message_channel_suffix);
+  static ::flutter::EncodableValue WrapError(std::string_view error_message);
+  static ::flutter::EncodableValue WrapError(const FlutterError& error);
+ protected:
+  MediaForgeProcessorApi() = default;
 };
 }  // namespace media_forge
 #endif  // PIGEON_MESSAGES_G_H_

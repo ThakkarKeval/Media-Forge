@@ -319,18 +319,1289 @@ std::string PigeonInternalToString(const ::flutter::EncodableValue& v) {
 }
 
 }  // namespace
+// NativePickerOptions
+
+NativePickerOptions::NativePickerOptions() {}
+
+NativePickerOptions::NativePickerOptions(
+  const int64_t* max_items,
+  const NativeCameraDevice* camera_device,
+  const int64_t* max_duration_seconds)
+ : max_items_(max_items ? std::optional<int64_t>(*max_items) : std::nullopt),
+    camera_device_(camera_device ? std::optional<NativeCameraDevice>(*camera_device) : std::nullopt),
+    max_duration_seconds_(max_duration_seconds ? std::optional<int64_t>(*max_duration_seconds) : std::nullopt) {}
+
+const int64_t* NativePickerOptions::max_items() const {
+  return max_items_ ? &(*max_items_) : nullptr;
+}
+
+void NativePickerOptions::set_max_items(const int64_t* value_arg) {
+  max_items_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativePickerOptions::set_max_items(int64_t value_arg) {
+  max_items_ = value_arg;
+}
+
+
+const NativeCameraDevice* NativePickerOptions::camera_device() const {
+  return camera_device_ ? &(*camera_device_) : nullptr;
+}
+
+void NativePickerOptions::set_camera_device(const NativeCameraDevice* value_arg) {
+  camera_device_ = value_arg ? std::optional<NativeCameraDevice>(*value_arg) : std::nullopt;
+}
+
+void NativePickerOptions::set_camera_device(const NativeCameraDevice& value_arg) {
+  camera_device_ = value_arg;
+}
+
+
+const int64_t* NativePickerOptions::max_duration_seconds() const {
+  return max_duration_seconds_ ? &(*max_duration_seconds_) : nullptr;
+}
+
+void NativePickerOptions::set_max_duration_seconds(const int64_t* value_arg) {
+  max_duration_seconds_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativePickerOptions::set_max_duration_seconds(int64_t value_arg) {
+  max_duration_seconds_ = value_arg;
+}
+
+
+EncodableList NativePickerOptions::ToEncodableList() const {
+  EncodableList list;
+  list.reserve(3);
+  list.push_back(max_items_ ? EncodableValue(*max_items_) : EncodableValue());
+  list.push_back(camera_device_ ? CustomEncodableValue(*camera_device_) : EncodableValue());
+  list.push_back(max_duration_seconds_ ? EncodableValue(*max_duration_seconds_) : EncodableValue());
+  return list;
+}
+
+NativePickerOptions NativePickerOptions::FromEncodableList(const EncodableList& list) {
+  NativePickerOptions decoded;
+  auto& encodable_max_items = list[0];
+  if (!encodable_max_items.IsNull()) {
+    decoded.set_max_items(std::get<int64_t>(encodable_max_items));
+  }
+  auto& encodable_camera_device = list[1];
+  if (!encodable_camera_device.IsNull()) {
+    decoded.set_camera_device(std::any_cast<const NativeCameraDevice&>(std::get<CustomEncodableValue>(encodable_camera_device)));
+  }
+  auto& encodable_max_duration_seconds = list[2];
+  if (!encodable_max_duration_seconds.IsNull()) {
+    decoded.set_max_duration_seconds(std::get<int64_t>(encodable_max_duration_seconds));
+  }
+  return decoded;
+}
+
+bool NativePickerOptions::operator==(const NativePickerOptions& other) const {
+  return PigeonInternalDeepEquals(max_items_, other.max_items_) && PigeonInternalDeepEquals(camera_device_, other.camera_device_) && PigeonInternalDeepEquals(max_duration_seconds_, other.max_duration_seconds_);
+}
+
+bool NativePickerOptions::operator!=(const NativePickerOptions& other) const {
+  return !(*this == other);
+}
+
+size_t NativePickerOptions::Hash() const {
+  size_t result = 1;
+  result = result * 31 + PigeonInternalDeepHash(max_items_);
+  result = result * 31 + PigeonInternalDeepHash(camera_device_);
+  result = result * 31 + PigeonInternalDeepHash(max_duration_seconds_);
+  return result;
+}
+
+std::ostream& operator<<(
+  std::ostream& os,
+  const NativePickerOptions& obj) {
+  os << "NativePickerOptions(";
+  os << "max_items: ";
+  if (obj.max_items_) {
+    os << PigeonInternalToString(*obj.max_items_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", camera_device: ";
+  if (obj.camera_device_) {
+    os << PigeonInternalToString(*obj.camera_device_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", max_duration_seconds: ";
+  if (obj.max_duration_seconds_) {
+    os << PigeonInternalToString(*obj.max_duration_seconds_);
+  }
+  else {
+    os << "null";
+  }
+  os << ")";
+  return os;
+}
+
+size_t PigeonInternalDeepHash(const NativePickerOptions& v) {
+  return v.Hash();
+}
+
+// NativePickedMedia
+
+NativePickedMedia::NativePickedMedia(
+  const std::string& path,
+  const NativeMediaType& type)
+ : path_(path),
+    type_(type) {}
+
+NativePickedMedia::NativePickedMedia(
+  const std::string& path,
+  const NativeMediaType& type,
+  const std::string* name,
+  const std::string* mime_type,
+  const int64_t* size_bytes,
+  const int64_t* width,
+  const int64_t* height,
+  const int64_t* duration_ms)
+ : path_(path),
+    type_(type),
+    name_(name ? std::optional<std::string>(*name) : std::nullopt),
+    mime_type_(mime_type ? std::optional<std::string>(*mime_type) : std::nullopt),
+    size_bytes_(size_bytes ? std::optional<int64_t>(*size_bytes) : std::nullopt),
+    width_(width ? std::optional<int64_t>(*width) : std::nullopt),
+    height_(height ? std::optional<int64_t>(*height) : std::nullopt),
+    duration_ms_(duration_ms ? std::optional<int64_t>(*duration_ms) : std::nullopt) {}
+
+const std::string& NativePickedMedia::path() const {
+  return path_;
+}
+
+void NativePickedMedia::set_path(std::string_view value_arg) {
+  path_ = value_arg;
+}
+
+
+const NativeMediaType& NativePickedMedia::type() const {
+  return type_;
+}
+
+void NativePickedMedia::set_type(const NativeMediaType& value_arg) {
+  type_ = value_arg;
+}
+
+
+const std::string* NativePickedMedia::name() const {
+  return name_ ? &(*name_) : nullptr;
+}
+
+void NativePickedMedia::set_name(const std::string_view* value_arg) {
+  name_ = value_arg ? std::optional<std::string>(*value_arg) : std::nullopt;
+}
+
+void NativePickedMedia::set_name(std::string_view value_arg) {
+  name_ = value_arg;
+}
+
+
+const std::string* NativePickedMedia::mime_type() const {
+  return mime_type_ ? &(*mime_type_) : nullptr;
+}
+
+void NativePickedMedia::set_mime_type(const std::string_view* value_arg) {
+  mime_type_ = value_arg ? std::optional<std::string>(*value_arg) : std::nullopt;
+}
+
+void NativePickedMedia::set_mime_type(std::string_view value_arg) {
+  mime_type_ = value_arg;
+}
+
+
+const int64_t* NativePickedMedia::size_bytes() const {
+  return size_bytes_ ? &(*size_bytes_) : nullptr;
+}
+
+void NativePickedMedia::set_size_bytes(const int64_t* value_arg) {
+  size_bytes_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativePickedMedia::set_size_bytes(int64_t value_arg) {
+  size_bytes_ = value_arg;
+}
+
+
+const int64_t* NativePickedMedia::width() const {
+  return width_ ? &(*width_) : nullptr;
+}
+
+void NativePickedMedia::set_width(const int64_t* value_arg) {
+  width_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativePickedMedia::set_width(int64_t value_arg) {
+  width_ = value_arg;
+}
+
+
+const int64_t* NativePickedMedia::height() const {
+  return height_ ? &(*height_) : nullptr;
+}
+
+void NativePickedMedia::set_height(const int64_t* value_arg) {
+  height_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativePickedMedia::set_height(int64_t value_arg) {
+  height_ = value_arg;
+}
+
+
+const int64_t* NativePickedMedia::duration_ms() const {
+  return duration_ms_ ? &(*duration_ms_) : nullptr;
+}
+
+void NativePickedMedia::set_duration_ms(const int64_t* value_arg) {
+  duration_ms_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativePickedMedia::set_duration_ms(int64_t value_arg) {
+  duration_ms_ = value_arg;
+}
+
+
+EncodableList NativePickedMedia::ToEncodableList() const {
+  EncodableList list;
+  list.reserve(8);
+  list.push_back(EncodableValue(path_));
+  list.push_back(CustomEncodableValue(type_));
+  list.push_back(name_ ? EncodableValue(*name_) : EncodableValue());
+  list.push_back(mime_type_ ? EncodableValue(*mime_type_) : EncodableValue());
+  list.push_back(size_bytes_ ? EncodableValue(*size_bytes_) : EncodableValue());
+  list.push_back(width_ ? EncodableValue(*width_) : EncodableValue());
+  list.push_back(height_ ? EncodableValue(*height_) : EncodableValue());
+  list.push_back(duration_ms_ ? EncodableValue(*duration_ms_) : EncodableValue());
+  return list;
+}
+
+NativePickedMedia NativePickedMedia::FromEncodableList(const EncodableList& list) {
+  NativePickedMedia decoded(
+    std::get<std::string>(list[0]),
+    std::any_cast<const NativeMediaType&>(std::get<CustomEncodableValue>(list[1])));
+  auto& encodable_name = list[2];
+  if (!encodable_name.IsNull()) {
+    decoded.set_name(std::get<std::string>(encodable_name));
+  }
+  auto& encodable_mime_type = list[3];
+  if (!encodable_mime_type.IsNull()) {
+    decoded.set_mime_type(std::get<std::string>(encodable_mime_type));
+  }
+  auto& encodable_size_bytes = list[4];
+  if (!encodable_size_bytes.IsNull()) {
+    decoded.set_size_bytes(std::get<int64_t>(encodable_size_bytes));
+  }
+  auto& encodable_width = list[5];
+  if (!encodable_width.IsNull()) {
+    decoded.set_width(std::get<int64_t>(encodable_width));
+  }
+  auto& encodable_height = list[6];
+  if (!encodable_height.IsNull()) {
+    decoded.set_height(std::get<int64_t>(encodable_height));
+  }
+  auto& encodable_duration_ms = list[7];
+  if (!encodable_duration_ms.IsNull()) {
+    decoded.set_duration_ms(std::get<int64_t>(encodable_duration_ms));
+  }
+  return decoded;
+}
+
+bool NativePickedMedia::operator==(const NativePickedMedia& other) const {
+  return PigeonInternalDeepEquals(path_, other.path_) && PigeonInternalDeepEquals(type_, other.type_) && PigeonInternalDeepEquals(name_, other.name_) && PigeonInternalDeepEquals(mime_type_, other.mime_type_) && PigeonInternalDeepEquals(size_bytes_, other.size_bytes_) && PigeonInternalDeepEquals(width_, other.width_) && PigeonInternalDeepEquals(height_, other.height_) && PigeonInternalDeepEquals(duration_ms_, other.duration_ms_);
+}
+
+bool NativePickedMedia::operator!=(const NativePickedMedia& other) const {
+  return !(*this == other);
+}
+
+size_t NativePickedMedia::Hash() const {
+  size_t result = 1;
+  result = result * 31 + PigeonInternalDeepHash(path_);
+  result = result * 31 + PigeonInternalDeepHash(type_);
+  result = result * 31 + PigeonInternalDeepHash(name_);
+  result = result * 31 + PigeonInternalDeepHash(mime_type_);
+  result = result * 31 + PigeonInternalDeepHash(size_bytes_);
+  result = result * 31 + PigeonInternalDeepHash(width_);
+  result = result * 31 + PigeonInternalDeepHash(height_);
+  result = result * 31 + PigeonInternalDeepHash(duration_ms_);
+  return result;
+}
+
+std::ostream& operator<<(
+  std::ostream& os,
+  const NativePickedMedia& obj) {
+  os << "NativePickedMedia(";
+  os << "path: ";
+  os << PigeonInternalToString(obj.path_);
+  os << ", type: ";
+  os << PigeonInternalToString(obj.type_);
+  os << ", name: ";
+  if (obj.name_) {
+    os << PigeonInternalToString(*obj.name_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", mime_type: ";
+  if (obj.mime_type_) {
+    os << PigeonInternalToString(*obj.mime_type_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", size_bytes: ";
+  if (obj.size_bytes_) {
+    os << PigeonInternalToString(*obj.size_bytes_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", width: ";
+  if (obj.width_) {
+    os << PigeonInternalToString(*obj.width_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", height: ";
+  if (obj.height_) {
+    os << PigeonInternalToString(*obj.height_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", duration_ms: ";
+  if (obj.duration_ms_) {
+    os << PigeonInternalToString(*obj.duration_ms_);
+  }
+  else {
+    os << "null";
+  }
+  os << ")";
+  return os;
+}
+
+size_t PigeonInternalDeepHash(const NativePickedMedia& v) {
+  return v.Hash();
+}
+
+// NativeLostDataResponse
+
+NativeLostDataResponse::NativeLostDataResponse(const EncodableList& items)
+ : items_(items) {}
+
+NativeLostDataResponse::NativeLostDataResponse(
+  const EncodableList& items,
+  const std::string* error_code,
+  const std::string* error_message)
+ : items_(items),
+    error_code_(error_code ? std::optional<std::string>(*error_code) : std::nullopt),
+    error_message_(error_message ? std::optional<std::string>(*error_message) : std::nullopt) {}
+
+const EncodableList& NativeLostDataResponse::items() const {
+  return items_;
+}
+
+void NativeLostDataResponse::set_items(const EncodableList& value_arg) {
+  items_ = value_arg;
+}
+
+
+const std::string* NativeLostDataResponse::error_code() const {
+  return error_code_ ? &(*error_code_) : nullptr;
+}
+
+void NativeLostDataResponse::set_error_code(const std::string_view* value_arg) {
+  error_code_ = value_arg ? std::optional<std::string>(*value_arg) : std::nullopt;
+}
+
+void NativeLostDataResponse::set_error_code(std::string_view value_arg) {
+  error_code_ = value_arg;
+}
+
+
+const std::string* NativeLostDataResponse::error_message() const {
+  return error_message_ ? &(*error_message_) : nullptr;
+}
+
+void NativeLostDataResponse::set_error_message(const std::string_view* value_arg) {
+  error_message_ = value_arg ? std::optional<std::string>(*value_arg) : std::nullopt;
+}
+
+void NativeLostDataResponse::set_error_message(std::string_view value_arg) {
+  error_message_ = value_arg;
+}
+
+
+EncodableList NativeLostDataResponse::ToEncodableList() const {
+  EncodableList list;
+  list.reserve(3);
+  list.push_back(EncodableValue(items_));
+  list.push_back(error_code_ ? EncodableValue(*error_code_) : EncodableValue());
+  list.push_back(error_message_ ? EncodableValue(*error_message_) : EncodableValue());
+  return list;
+}
+
+NativeLostDataResponse NativeLostDataResponse::FromEncodableList(const EncodableList& list) {
+  NativeLostDataResponse decoded(
+    std::get<EncodableList>(list[0]));
+  auto& encodable_error_code = list[1];
+  if (!encodable_error_code.IsNull()) {
+    decoded.set_error_code(std::get<std::string>(encodable_error_code));
+  }
+  auto& encodable_error_message = list[2];
+  if (!encodable_error_message.IsNull()) {
+    decoded.set_error_message(std::get<std::string>(encodable_error_message));
+  }
+  return decoded;
+}
+
+bool NativeLostDataResponse::operator==(const NativeLostDataResponse& other) const {
+  return PigeonInternalDeepEquals(items_, other.items_) && PigeonInternalDeepEquals(error_code_, other.error_code_) && PigeonInternalDeepEquals(error_message_, other.error_message_);
+}
+
+bool NativeLostDataResponse::operator!=(const NativeLostDataResponse& other) const {
+  return !(*this == other);
+}
+
+size_t NativeLostDataResponse::Hash() const {
+  size_t result = 1;
+  result = result * 31 + PigeonInternalDeepHash(items_);
+  result = result * 31 + PigeonInternalDeepHash(error_code_);
+  result = result * 31 + PigeonInternalDeepHash(error_message_);
+  return result;
+}
+
+std::ostream& operator<<(
+  std::ostream& os,
+  const NativeLostDataResponse& obj) {
+  os << "NativeLostDataResponse(";
+  os << "items: ";
+  os << PigeonInternalToString(obj.items_);
+  os << ", error_code: ";
+  if (obj.error_code_) {
+    os << PigeonInternalToString(*obj.error_code_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", error_message: ";
+  if (obj.error_message_) {
+    os << PigeonInternalToString(*obj.error_message_);
+  }
+  else {
+    os << "null";
+  }
+  os << ")";
+  return os;
+}
+
+size_t PigeonInternalDeepHash(const NativeLostDataResponse& v) {
+  return v.Hash();
+}
+
+// NativeImageProcessOptions
+
+NativeImageProcessOptions::NativeImageProcessOptions() {}
+
+NativeImageProcessOptions::NativeImageProcessOptions(
+  const int64_t* max_width,
+  const int64_t* max_height,
+  const int64_t* quality,
+  const int64_t* target_size_bytes,
+  const bool* strip_gps_metadata,
+  const std::string* format)
+ : max_width_(max_width ? std::optional<int64_t>(*max_width) : std::nullopt),
+    max_height_(max_height ? std::optional<int64_t>(*max_height) : std::nullopt),
+    quality_(quality ? std::optional<int64_t>(*quality) : std::nullopt),
+    target_size_bytes_(target_size_bytes ? std::optional<int64_t>(*target_size_bytes) : std::nullopt),
+    strip_gps_metadata_(strip_gps_metadata ? std::optional<bool>(*strip_gps_metadata) : std::nullopt),
+    format_(format ? std::optional<std::string>(*format) : std::nullopt) {}
+
+const int64_t* NativeImageProcessOptions::max_width() const {
+  return max_width_ ? &(*max_width_) : nullptr;
+}
+
+void NativeImageProcessOptions::set_max_width(const int64_t* value_arg) {
+  max_width_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeImageProcessOptions::set_max_width(int64_t value_arg) {
+  max_width_ = value_arg;
+}
+
+
+const int64_t* NativeImageProcessOptions::max_height() const {
+  return max_height_ ? &(*max_height_) : nullptr;
+}
+
+void NativeImageProcessOptions::set_max_height(const int64_t* value_arg) {
+  max_height_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeImageProcessOptions::set_max_height(int64_t value_arg) {
+  max_height_ = value_arg;
+}
+
+
+const int64_t* NativeImageProcessOptions::quality() const {
+  return quality_ ? &(*quality_) : nullptr;
+}
+
+void NativeImageProcessOptions::set_quality(const int64_t* value_arg) {
+  quality_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeImageProcessOptions::set_quality(int64_t value_arg) {
+  quality_ = value_arg;
+}
+
+
+const int64_t* NativeImageProcessOptions::target_size_bytes() const {
+  return target_size_bytes_ ? &(*target_size_bytes_) : nullptr;
+}
+
+void NativeImageProcessOptions::set_target_size_bytes(const int64_t* value_arg) {
+  target_size_bytes_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeImageProcessOptions::set_target_size_bytes(int64_t value_arg) {
+  target_size_bytes_ = value_arg;
+}
+
+
+const bool* NativeImageProcessOptions::strip_gps_metadata() const {
+  return strip_gps_metadata_ ? &(*strip_gps_metadata_) : nullptr;
+}
+
+void NativeImageProcessOptions::set_strip_gps_metadata(const bool* value_arg) {
+  strip_gps_metadata_ = value_arg ? std::optional<bool>(*value_arg) : std::nullopt;
+}
+
+void NativeImageProcessOptions::set_strip_gps_metadata(bool value_arg) {
+  strip_gps_metadata_ = value_arg;
+}
+
+
+const std::string* NativeImageProcessOptions::format() const {
+  return format_ ? &(*format_) : nullptr;
+}
+
+void NativeImageProcessOptions::set_format(const std::string_view* value_arg) {
+  format_ = value_arg ? std::optional<std::string>(*value_arg) : std::nullopt;
+}
+
+void NativeImageProcessOptions::set_format(std::string_view value_arg) {
+  format_ = value_arg;
+}
+
+
+EncodableList NativeImageProcessOptions::ToEncodableList() const {
+  EncodableList list;
+  list.reserve(6);
+  list.push_back(max_width_ ? EncodableValue(*max_width_) : EncodableValue());
+  list.push_back(max_height_ ? EncodableValue(*max_height_) : EncodableValue());
+  list.push_back(quality_ ? EncodableValue(*quality_) : EncodableValue());
+  list.push_back(target_size_bytes_ ? EncodableValue(*target_size_bytes_) : EncodableValue());
+  list.push_back(strip_gps_metadata_ ? EncodableValue(*strip_gps_metadata_) : EncodableValue());
+  list.push_back(format_ ? EncodableValue(*format_) : EncodableValue());
+  return list;
+}
+
+NativeImageProcessOptions NativeImageProcessOptions::FromEncodableList(const EncodableList& list) {
+  NativeImageProcessOptions decoded;
+  auto& encodable_max_width = list[0];
+  if (!encodable_max_width.IsNull()) {
+    decoded.set_max_width(std::get<int64_t>(encodable_max_width));
+  }
+  auto& encodable_max_height = list[1];
+  if (!encodable_max_height.IsNull()) {
+    decoded.set_max_height(std::get<int64_t>(encodable_max_height));
+  }
+  auto& encodable_quality = list[2];
+  if (!encodable_quality.IsNull()) {
+    decoded.set_quality(std::get<int64_t>(encodable_quality));
+  }
+  auto& encodable_target_size_bytes = list[3];
+  if (!encodable_target_size_bytes.IsNull()) {
+    decoded.set_target_size_bytes(std::get<int64_t>(encodable_target_size_bytes));
+  }
+  auto& encodable_strip_gps_metadata = list[4];
+  if (!encodable_strip_gps_metadata.IsNull()) {
+    decoded.set_strip_gps_metadata(std::get<bool>(encodable_strip_gps_metadata));
+  }
+  auto& encodable_format = list[5];
+  if (!encodable_format.IsNull()) {
+    decoded.set_format(std::get<std::string>(encodable_format));
+  }
+  return decoded;
+}
+
+bool NativeImageProcessOptions::operator==(const NativeImageProcessOptions& other) const {
+  return PigeonInternalDeepEquals(max_width_, other.max_width_) && PigeonInternalDeepEquals(max_height_, other.max_height_) && PigeonInternalDeepEquals(quality_, other.quality_) && PigeonInternalDeepEquals(target_size_bytes_, other.target_size_bytes_) && PigeonInternalDeepEquals(strip_gps_metadata_, other.strip_gps_metadata_) && PigeonInternalDeepEquals(format_, other.format_);
+}
+
+bool NativeImageProcessOptions::operator!=(const NativeImageProcessOptions& other) const {
+  return !(*this == other);
+}
+
+size_t NativeImageProcessOptions::Hash() const {
+  size_t result = 1;
+  result = result * 31 + PigeonInternalDeepHash(max_width_);
+  result = result * 31 + PigeonInternalDeepHash(max_height_);
+  result = result * 31 + PigeonInternalDeepHash(quality_);
+  result = result * 31 + PigeonInternalDeepHash(target_size_bytes_);
+  result = result * 31 + PigeonInternalDeepHash(strip_gps_metadata_);
+  result = result * 31 + PigeonInternalDeepHash(format_);
+  return result;
+}
+
+std::ostream& operator<<(
+  std::ostream& os,
+  const NativeImageProcessOptions& obj) {
+  os << "NativeImageProcessOptions(";
+  os << "max_width: ";
+  if (obj.max_width_) {
+    os << PigeonInternalToString(*obj.max_width_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", max_height: ";
+  if (obj.max_height_) {
+    os << PigeonInternalToString(*obj.max_height_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", quality: ";
+  if (obj.quality_) {
+    os << PigeonInternalToString(*obj.quality_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", target_size_bytes: ";
+  if (obj.target_size_bytes_) {
+    os << PigeonInternalToString(*obj.target_size_bytes_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", strip_gps_metadata: ";
+  if (obj.strip_gps_metadata_) {
+    os << PigeonInternalToString(*obj.strip_gps_metadata_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", format: ";
+  if (obj.format_) {
+    os << PigeonInternalToString(*obj.format_);
+  }
+  else {
+    os << "null";
+  }
+  os << ")";
+  return os;
+}
+
+size_t PigeonInternalDeepHash(const NativeImageProcessOptions& v) {
+  return v.Hash();
+}
+
+// NativeProcessedMedia
+
+NativeProcessedMedia::NativeProcessedMedia(
+  const std::string& path,
+  const std::string& original_path,
+  bool changed)
+ : path_(path),
+    original_path_(original_path),
+    changed_(changed) {}
+
+NativeProcessedMedia::NativeProcessedMedia(
+  const std::string& path,
+  const std::string& original_path,
+  const std::string* mime_type,
+  const int64_t* size_bytes,
+  const int64_t* original_size_bytes,
+  const int64_t* width,
+  const int64_t* height,
+  bool changed,
+  const bool* target_met)
+ : path_(path),
+    original_path_(original_path),
+    mime_type_(mime_type ? std::optional<std::string>(*mime_type) : std::nullopt),
+    size_bytes_(size_bytes ? std::optional<int64_t>(*size_bytes) : std::nullopt),
+    original_size_bytes_(original_size_bytes ? std::optional<int64_t>(*original_size_bytes) : std::nullopt),
+    width_(width ? std::optional<int64_t>(*width) : std::nullopt),
+    height_(height ? std::optional<int64_t>(*height) : std::nullopt),
+    changed_(changed),
+    target_met_(target_met ? std::optional<bool>(*target_met) : std::nullopt) {}
+
+const std::string& NativeProcessedMedia::path() const {
+  return path_;
+}
+
+void NativeProcessedMedia::set_path(std::string_view value_arg) {
+  path_ = value_arg;
+}
+
+
+const std::string& NativeProcessedMedia::original_path() const {
+  return original_path_;
+}
+
+void NativeProcessedMedia::set_original_path(std::string_view value_arg) {
+  original_path_ = value_arg;
+}
+
+
+const std::string* NativeProcessedMedia::mime_type() const {
+  return mime_type_ ? &(*mime_type_) : nullptr;
+}
+
+void NativeProcessedMedia::set_mime_type(const std::string_view* value_arg) {
+  mime_type_ = value_arg ? std::optional<std::string>(*value_arg) : std::nullopt;
+}
+
+void NativeProcessedMedia::set_mime_type(std::string_view value_arg) {
+  mime_type_ = value_arg;
+}
+
+
+const int64_t* NativeProcessedMedia::size_bytes() const {
+  return size_bytes_ ? &(*size_bytes_) : nullptr;
+}
+
+void NativeProcessedMedia::set_size_bytes(const int64_t* value_arg) {
+  size_bytes_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeProcessedMedia::set_size_bytes(int64_t value_arg) {
+  size_bytes_ = value_arg;
+}
+
+
+const int64_t* NativeProcessedMedia::original_size_bytes() const {
+  return original_size_bytes_ ? &(*original_size_bytes_) : nullptr;
+}
+
+void NativeProcessedMedia::set_original_size_bytes(const int64_t* value_arg) {
+  original_size_bytes_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeProcessedMedia::set_original_size_bytes(int64_t value_arg) {
+  original_size_bytes_ = value_arg;
+}
+
+
+const int64_t* NativeProcessedMedia::width() const {
+  return width_ ? &(*width_) : nullptr;
+}
+
+void NativeProcessedMedia::set_width(const int64_t* value_arg) {
+  width_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeProcessedMedia::set_width(int64_t value_arg) {
+  width_ = value_arg;
+}
+
+
+const int64_t* NativeProcessedMedia::height() const {
+  return height_ ? &(*height_) : nullptr;
+}
+
+void NativeProcessedMedia::set_height(const int64_t* value_arg) {
+  height_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeProcessedMedia::set_height(int64_t value_arg) {
+  height_ = value_arg;
+}
+
+
+bool NativeProcessedMedia::changed() const {
+  return changed_;
+}
+
+void NativeProcessedMedia::set_changed(bool value_arg) {
+  changed_ = value_arg;
+}
+
+
+const bool* NativeProcessedMedia::target_met() const {
+  return target_met_ ? &(*target_met_) : nullptr;
+}
+
+void NativeProcessedMedia::set_target_met(const bool* value_arg) {
+  target_met_ = value_arg ? std::optional<bool>(*value_arg) : std::nullopt;
+}
+
+void NativeProcessedMedia::set_target_met(bool value_arg) {
+  target_met_ = value_arg;
+}
+
+
+EncodableList NativeProcessedMedia::ToEncodableList() const {
+  EncodableList list;
+  list.reserve(9);
+  list.push_back(EncodableValue(path_));
+  list.push_back(EncodableValue(original_path_));
+  list.push_back(mime_type_ ? EncodableValue(*mime_type_) : EncodableValue());
+  list.push_back(size_bytes_ ? EncodableValue(*size_bytes_) : EncodableValue());
+  list.push_back(original_size_bytes_ ? EncodableValue(*original_size_bytes_) : EncodableValue());
+  list.push_back(width_ ? EncodableValue(*width_) : EncodableValue());
+  list.push_back(height_ ? EncodableValue(*height_) : EncodableValue());
+  list.push_back(EncodableValue(changed_));
+  list.push_back(target_met_ ? EncodableValue(*target_met_) : EncodableValue());
+  return list;
+}
+
+NativeProcessedMedia NativeProcessedMedia::FromEncodableList(const EncodableList& list) {
+  NativeProcessedMedia decoded(
+    std::get<std::string>(list[0]),
+    std::get<std::string>(list[1]),
+    std::get<bool>(list[7]));
+  auto& encodable_mime_type = list[2];
+  if (!encodable_mime_type.IsNull()) {
+    decoded.set_mime_type(std::get<std::string>(encodable_mime_type));
+  }
+  auto& encodable_size_bytes = list[3];
+  if (!encodable_size_bytes.IsNull()) {
+    decoded.set_size_bytes(std::get<int64_t>(encodable_size_bytes));
+  }
+  auto& encodable_original_size_bytes = list[4];
+  if (!encodable_original_size_bytes.IsNull()) {
+    decoded.set_original_size_bytes(std::get<int64_t>(encodable_original_size_bytes));
+  }
+  auto& encodable_width = list[5];
+  if (!encodable_width.IsNull()) {
+    decoded.set_width(std::get<int64_t>(encodable_width));
+  }
+  auto& encodable_height = list[6];
+  if (!encodable_height.IsNull()) {
+    decoded.set_height(std::get<int64_t>(encodable_height));
+  }
+  auto& encodable_target_met = list[8];
+  if (!encodable_target_met.IsNull()) {
+    decoded.set_target_met(std::get<bool>(encodable_target_met));
+  }
+  return decoded;
+}
+
+bool NativeProcessedMedia::operator==(const NativeProcessedMedia& other) const {
+  return PigeonInternalDeepEquals(path_, other.path_) && PigeonInternalDeepEquals(original_path_, other.original_path_) && PigeonInternalDeepEquals(mime_type_, other.mime_type_) && PigeonInternalDeepEquals(size_bytes_, other.size_bytes_) && PigeonInternalDeepEquals(original_size_bytes_, other.original_size_bytes_) && PigeonInternalDeepEquals(width_, other.width_) && PigeonInternalDeepEquals(height_, other.height_) && PigeonInternalDeepEquals(changed_, other.changed_) && PigeonInternalDeepEquals(target_met_, other.target_met_);
+}
+
+bool NativeProcessedMedia::operator!=(const NativeProcessedMedia& other) const {
+  return !(*this == other);
+}
+
+size_t NativeProcessedMedia::Hash() const {
+  size_t result = 1;
+  result = result * 31 + PigeonInternalDeepHash(path_);
+  result = result * 31 + PigeonInternalDeepHash(original_path_);
+  result = result * 31 + PigeonInternalDeepHash(mime_type_);
+  result = result * 31 + PigeonInternalDeepHash(size_bytes_);
+  result = result * 31 + PigeonInternalDeepHash(original_size_bytes_);
+  result = result * 31 + PigeonInternalDeepHash(width_);
+  result = result * 31 + PigeonInternalDeepHash(height_);
+  result = result * 31 + PigeonInternalDeepHash(changed_);
+  result = result * 31 + PigeonInternalDeepHash(target_met_);
+  return result;
+}
+
+std::ostream& operator<<(
+  std::ostream& os,
+  const NativeProcessedMedia& obj) {
+  os << "NativeProcessedMedia(";
+  os << "path: ";
+  os << PigeonInternalToString(obj.path_);
+  os << ", original_path: ";
+  os << PigeonInternalToString(obj.original_path_);
+  os << ", mime_type: ";
+  if (obj.mime_type_) {
+    os << PigeonInternalToString(*obj.mime_type_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", size_bytes: ";
+  if (obj.size_bytes_) {
+    os << PigeonInternalToString(*obj.size_bytes_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", original_size_bytes: ";
+  if (obj.original_size_bytes_) {
+    os << PigeonInternalToString(*obj.original_size_bytes_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", width: ";
+  if (obj.width_) {
+    os << PigeonInternalToString(*obj.width_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", height: ";
+  if (obj.height_) {
+    os << PigeonInternalToString(*obj.height_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", changed: ";
+  os << PigeonInternalToString(obj.changed_);
+  os << ", target_met: ";
+  if (obj.target_met_) {
+    os << PigeonInternalToString(*obj.target_met_);
+  }
+  else {
+    os << "null";
+  }
+  os << ")";
+  return os;
+}
+
+size_t PigeonInternalDeepHash(const NativeProcessedMedia& v) {
+  return v.Hash();
+}
+
+// NativeVideoMetadata
+
+NativeVideoMetadata::NativeVideoMetadata(const std::string& path)
+ : path_(path) {}
+
+NativeVideoMetadata::NativeVideoMetadata(
+  const std::string& path,
+  const std::string* mime_type,
+  const int64_t* size_bytes,
+  const int64_t* width,
+  const int64_t* height,
+  const int64_t* duration_ms,
+  const int64_t* rotation_degrees)
+ : path_(path),
+    mime_type_(mime_type ? std::optional<std::string>(*mime_type) : std::nullopt),
+    size_bytes_(size_bytes ? std::optional<int64_t>(*size_bytes) : std::nullopt),
+    width_(width ? std::optional<int64_t>(*width) : std::nullopt),
+    height_(height ? std::optional<int64_t>(*height) : std::nullopt),
+    duration_ms_(duration_ms ? std::optional<int64_t>(*duration_ms) : std::nullopt),
+    rotation_degrees_(rotation_degrees ? std::optional<int64_t>(*rotation_degrees) : std::nullopt) {}
+
+const std::string& NativeVideoMetadata::path() const {
+  return path_;
+}
+
+void NativeVideoMetadata::set_path(std::string_view value_arg) {
+  path_ = value_arg;
+}
+
+
+const std::string* NativeVideoMetadata::mime_type() const {
+  return mime_type_ ? &(*mime_type_) : nullptr;
+}
+
+void NativeVideoMetadata::set_mime_type(const std::string_view* value_arg) {
+  mime_type_ = value_arg ? std::optional<std::string>(*value_arg) : std::nullopt;
+}
+
+void NativeVideoMetadata::set_mime_type(std::string_view value_arg) {
+  mime_type_ = value_arg;
+}
+
+
+const int64_t* NativeVideoMetadata::size_bytes() const {
+  return size_bytes_ ? &(*size_bytes_) : nullptr;
+}
+
+void NativeVideoMetadata::set_size_bytes(const int64_t* value_arg) {
+  size_bytes_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeVideoMetadata::set_size_bytes(int64_t value_arg) {
+  size_bytes_ = value_arg;
+}
+
+
+const int64_t* NativeVideoMetadata::width() const {
+  return width_ ? &(*width_) : nullptr;
+}
+
+void NativeVideoMetadata::set_width(const int64_t* value_arg) {
+  width_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeVideoMetadata::set_width(int64_t value_arg) {
+  width_ = value_arg;
+}
+
+
+const int64_t* NativeVideoMetadata::height() const {
+  return height_ ? &(*height_) : nullptr;
+}
+
+void NativeVideoMetadata::set_height(const int64_t* value_arg) {
+  height_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeVideoMetadata::set_height(int64_t value_arg) {
+  height_ = value_arg;
+}
+
+
+const int64_t* NativeVideoMetadata::duration_ms() const {
+  return duration_ms_ ? &(*duration_ms_) : nullptr;
+}
+
+void NativeVideoMetadata::set_duration_ms(const int64_t* value_arg) {
+  duration_ms_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeVideoMetadata::set_duration_ms(int64_t value_arg) {
+  duration_ms_ = value_arg;
+}
+
+
+const int64_t* NativeVideoMetadata::rotation_degrees() const {
+  return rotation_degrees_ ? &(*rotation_degrees_) : nullptr;
+}
+
+void NativeVideoMetadata::set_rotation_degrees(const int64_t* value_arg) {
+  rotation_degrees_ = value_arg ? std::optional<int64_t>(*value_arg) : std::nullopt;
+}
+
+void NativeVideoMetadata::set_rotation_degrees(int64_t value_arg) {
+  rotation_degrees_ = value_arg;
+}
+
+
+EncodableList NativeVideoMetadata::ToEncodableList() const {
+  EncodableList list;
+  list.reserve(7);
+  list.push_back(EncodableValue(path_));
+  list.push_back(mime_type_ ? EncodableValue(*mime_type_) : EncodableValue());
+  list.push_back(size_bytes_ ? EncodableValue(*size_bytes_) : EncodableValue());
+  list.push_back(width_ ? EncodableValue(*width_) : EncodableValue());
+  list.push_back(height_ ? EncodableValue(*height_) : EncodableValue());
+  list.push_back(duration_ms_ ? EncodableValue(*duration_ms_) : EncodableValue());
+  list.push_back(rotation_degrees_ ? EncodableValue(*rotation_degrees_) : EncodableValue());
+  return list;
+}
+
+NativeVideoMetadata NativeVideoMetadata::FromEncodableList(const EncodableList& list) {
+  NativeVideoMetadata decoded(
+    std::get<std::string>(list[0]));
+  auto& encodable_mime_type = list[1];
+  if (!encodable_mime_type.IsNull()) {
+    decoded.set_mime_type(std::get<std::string>(encodable_mime_type));
+  }
+  auto& encodable_size_bytes = list[2];
+  if (!encodable_size_bytes.IsNull()) {
+    decoded.set_size_bytes(std::get<int64_t>(encodable_size_bytes));
+  }
+  auto& encodable_width = list[3];
+  if (!encodable_width.IsNull()) {
+    decoded.set_width(std::get<int64_t>(encodable_width));
+  }
+  auto& encodable_height = list[4];
+  if (!encodable_height.IsNull()) {
+    decoded.set_height(std::get<int64_t>(encodable_height));
+  }
+  auto& encodable_duration_ms = list[5];
+  if (!encodable_duration_ms.IsNull()) {
+    decoded.set_duration_ms(std::get<int64_t>(encodable_duration_ms));
+  }
+  auto& encodable_rotation_degrees = list[6];
+  if (!encodable_rotation_degrees.IsNull()) {
+    decoded.set_rotation_degrees(std::get<int64_t>(encodable_rotation_degrees));
+  }
+  return decoded;
+}
+
+bool NativeVideoMetadata::operator==(const NativeVideoMetadata& other) const {
+  return PigeonInternalDeepEquals(path_, other.path_) && PigeonInternalDeepEquals(mime_type_, other.mime_type_) && PigeonInternalDeepEquals(size_bytes_, other.size_bytes_) && PigeonInternalDeepEquals(width_, other.width_) && PigeonInternalDeepEquals(height_, other.height_) && PigeonInternalDeepEquals(duration_ms_, other.duration_ms_) && PigeonInternalDeepEquals(rotation_degrees_, other.rotation_degrees_);
+}
+
+bool NativeVideoMetadata::operator!=(const NativeVideoMetadata& other) const {
+  return !(*this == other);
+}
+
+size_t NativeVideoMetadata::Hash() const {
+  size_t result = 1;
+  result = result * 31 + PigeonInternalDeepHash(path_);
+  result = result * 31 + PigeonInternalDeepHash(mime_type_);
+  result = result * 31 + PigeonInternalDeepHash(size_bytes_);
+  result = result * 31 + PigeonInternalDeepHash(width_);
+  result = result * 31 + PigeonInternalDeepHash(height_);
+  result = result * 31 + PigeonInternalDeepHash(duration_ms_);
+  result = result * 31 + PigeonInternalDeepHash(rotation_degrees_);
+  return result;
+}
+
+std::ostream& operator<<(
+  std::ostream& os,
+  const NativeVideoMetadata& obj) {
+  os << "NativeVideoMetadata(";
+  os << "path: ";
+  os << PigeonInternalToString(obj.path_);
+  os << ", mime_type: ";
+  if (obj.mime_type_) {
+    os << PigeonInternalToString(*obj.mime_type_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", size_bytes: ";
+  if (obj.size_bytes_) {
+    os << PigeonInternalToString(*obj.size_bytes_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", width: ";
+  if (obj.width_) {
+    os << PigeonInternalToString(*obj.width_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", height: ";
+  if (obj.height_) {
+    os << PigeonInternalToString(*obj.height_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", duration_ms: ";
+  if (obj.duration_ms_) {
+    os << PigeonInternalToString(*obj.duration_ms_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", rotation_degrees: ";
+  if (obj.rotation_degrees_) {
+    os << PigeonInternalToString(*obj.rotation_degrees_);
+  }
+  else {
+    os << "null";
+  }
+  os << ")";
+  return os;
+}
+
+size_t PigeonInternalDeepHash(const NativeVideoMetadata& v) {
+  return v.Hash();
+}
+
 
 PigeonInternalCodecSerializer::PigeonInternalCodecSerializer() {}
 
 EncodableValue PigeonInternalCodecSerializer::ReadValueOfType(
   uint8_t type,
   ::flutter::ByteStreamReader* stream) const {
-  return ::flutter::StandardCodecSerializer::ReadValueOfType(type, stream);
+  switch (type) {
+    case 129: {
+        const auto& encodable_enum_arg = ReadValue(stream);
+        const int64_t enum_arg_value = encodable_enum_arg.IsNull() ? 0 : encodable_enum_arg.LongValue();
+        return encodable_enum_arg.IsNull() ? EncodableValue() : CustomEncodableValue(static_cast<NativeMediaType>(enum_arg_value));
+      }
+    case 130: {
+        const auto& encodable_enum_arg = ReadValue(stream);
+        const int64_t enum_arg_value = encodable_enum_arg.IsNull() ? 0 : encodable_enum_arg.LongValue();
+        return encodable_enum_arg.IsNull() ? EncodableValue() : CustomEncodableValue(static_cast<NativeMediaSource>(enum_arg_value));
+      }
+    case 131: {
+        const auto& encodable_enum_arg = ReadValue(stream);
+        const int64_t enum_arg_value = encodable_enum_arg.IsNull() ? 0 : encodable_enum_arg.LongValue();
+        return encodable_enum_arg.IsNull() ? EncodableValue() : CustomEncodableValue(static_cast<NativeCameraDevice>(enum_arg_value));
+      }
+    case 132: {
+        return CustomEncodableValue(NativePickerOptions::FromEncodableList(std::get<EncodableList>(ReadValue(stream))));
+      }
+    case 133: {
+        return CustomEncodableValue(NativePickedMedia::FromEncodableList(std::get<EncodableList>(ReadValue(stream))));
+      }
+    case 134: {
+        return CustomEncodableValue(NativeLostDataResponse::FromEncodableList(std::get<EncodableList>(ReadValue(stream))));
+      }
+    case 135: {
+        return CustomEncodableValue(NativeImageProcessOptions::FromEncodableList(std::get<EncodableList>(ReadValue(stream))));
+      }
+    case 136: {
+        return CustomEncodableValue(NativeProcessedMedia::FromEncodableList(std::get<EncodableList>(ReadValue(stream))));
+      }
+    case 137: {
+        return CustomEncodableValue(NativeVideoMetadata::FromEncodableList(std::get<EncodableList>(ReadValue(stream))));
+      }
+    default:
+      return ::flutter::StandardCodecSerializer::ReadValueOfType(type, stream);
+    }
 }
 
 void PigeonInternalCodecSerializer::WriteValue(
   const EncodableValue& value,
   ::flutter::ByteStreamWriter* stream) const {
+  if (const CustomEncodableValue* custom_value = std::get_if<CustomEncodableValue>(&value)) {
+    if (custom_value->type() == typeid(NativeMediaType)) {
+      stream->WriteByte(129);
+      WriteValue(EncodableValue(static_cast<int>(std::any_cast<NativeMediaType>(*custom_value))), stream);
+      return;
+    }
+    if (custom_value->type() == typeid(NativeMediaSource)) {
+      stream->WriteByte(130);
+      WriteValue(EncodableValue(static_cast<int>(std::any_cast<NativeMediaSource>(*custom_value))), stream);
+      return;
+    }
+    if (custom_value->type() == typeid(NativeCameraDevice)) {
+      stream->WriteByte(131);
+      WriteValue(EncodableValue(static_cast<int>(std::any_cast<NativeCameraDevice>(*custom_value))), stream);
+      return;
+    }
+    if (custom_value->type() == typeid(NativePickerOptions)) {
+      stream->WriteByte(132);
+      WriteValue(EncodableValue(std::any_cast<NativePickerOptions>(*custom_value).ToEncodableList()), stream);
+      return;
+    }
+    if (custom_value->type() == typeid(NativePickedMedia)) {
+      stream->WriteByte(133);
+      WriteValue(EncodableValue(std::any_cast<NativePickedMedia>(*custom_value).ToEncodableList()), stream);
+      return;
+    }
+    if (custom_value->type() == typeid(NativeLostDataResponse)) {
+      stream->WriteByte(134);
+      WriteValue(EncodableValue(std::any_cast<NativeLostDataResponse>(*custom_value).ToEncodableList()), stream);
+      return;
+    }
+    if (custom_value->type() == typeid(NativeImageProcessOptions)) {
+      stream->WriteByte(135);
+      WriteValue(EncodableValue(std::any_cast<NativeImageProcessOptions>(*custom_value).ToEncodableList()), stream);
+      return;
+    }
+    if (custom_value->type() == typeid(NativeProcessedMedia)) {
+      stream->WriteByte(136);
+      WriteValue(EncodableValue(std::any_cast<NativeProcessedMedia>(*custom_value).ToEncodableList()), stream);
+      return;
+    }
+    if (custom_value->type() == typeid(NativeVideoMetadata)) {
+      stream->WriteByte(137);
+      WriteValue(EncodableValue(std::any_cast<NativeVideoMetadata>(*custom_value).ToEncodableList()), stream);
+      return;
+    }
+  }
   ::flutter::StandardCodecSerializer::WriteValue(value, stream);
 }
 
@@ -383,6 +1654,326 @@ EncodableValue MediaForgePluginApi::WrapError(std::string_view error_message) {
 }
 
 EncodableValue MediaForgePluginApi::WrapError(const FlutterError& error) {
+  return EncodableValue(EncodableList{
+    EncodableValue(error.code()),
+    EncodableValue(error.message()),
+    error.details()
+  });
+}
+
+/// The codec used by MediaForgePickerApi.
+const ::flutter::StandardMessageCodec& MediaForgePickerApi::GetCodec() {
+  return ::flutter::StandardMessageCodec::GetInstance(&PigeonInternalCodecSerializer::GetInstance());
+}
+
+// Sets up an instance of `MediaForgePickerApi` to handle messages through the `binary_messenger`.
+void MediaForgePickerApi::SetUp(
+  ::flutter::BinaryMessenger* binary_messenger,
+  MediaForgePickerApi* api) {
+  MediaForgePickerApi::SetUp(binary_messenger, api, "");
+}
+
+void MediaForgePickerApi::SetUp(
+  ::flutter::BinaryMessenger* binary_messenger,
+  MediaForgePickerApi* api,
+  const std::string& message_channel_suffix) {
+  const std::string prepended_suffix = message_channel_suffix.length() > 0 ? std::string(".") + message_channel_suffix : "";
+  {
+    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickImage" + prepended_suffix, &GetCodec());
+    if (api != nullptr) {
+      channel.SetMessageHandler([api](const EncodableValue& message, const ::flutter::MessageReply<EncodableValue>& reply) {
+        try {
+          const auto& args = std::get<EncodableList>(message);
+          const auto& encodable_source_arg = args.at(0);
+          if (encodable_source_arg.IsNull()) {
+            reply(WrapError("source_arg unexpectedly null."));
+            return;
+          }
+          const auto& source_arg = std::any_cast<const NativeMediaSource&>(std::get<CustomEncodableValue>(encodable_source_arg));
+          const auto& encodable_options_arg = args.at(1);
+          const auto* options_arg = encodable_options_arg.IsNull() ? nullptr : &(std::any_cast<const NativePickerOptions&>(std::get<CustomEncodableValue>(encodable_options_arg)));
+          api->PickImage(source_arg, options_arg, [reply](ErrorOr<std::optional<NativePickedMedia>>&& output) {
+            if (output.has_error()) {
+              reply(WrapError(output.error()));
+              return;
+            }
+            EncodableList wrapped;
+            auto output_optional = std::move(output).TakeValue();
+            if (output_optional) {
+              wrapped.push_back(CustomEncodableValue(std::move(output_optional).value()));
+            } else {
+              wrapped.push_back(EncodableValue());
+            }
+            reply(EncodableValue(std::move(wrapped)));
+          });
+        } catch (const std::exception& exception) {
+          reply(WrapError(exception.what()));
+        }
+      });
+    } else {
+      channel.SetMessageHandler(nullptr);
+    }
+  }
+  {
+    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickVideo" + prepended_suffix, &GetCodec());
+    if (api != nullptr) {
+      channel.SetMessageHandler([api](const EncodableValue& message, const ::flutter::MessageReply<EncodableValue>& reply) {
+        try {
+          const auto& args = std::get<EncodableList>(message);
+          const auto& encodable_source_arg = args.at(0);
+          if (encodable_source_arg.IsNull()) {
+            reply(WrapError("source_arg unexpectedly null."));
+            return;
+          }
+          const auto& source_arg = std::any_cast<const NativeMediaSource&>(std::get<CustomEncodableValue>(encodable_source_arg));
+          const auto& encodable_options_arg = args.at(1);
+          const auto* options_arg = encodable_options_arg.IsNull() ? nullptr : &(std::any_cast<const NativePickerOptions&>(std::get<CustomEncodableValue>(encodable_options_arg)));
+          api->PickVideo(source_arg, options_arg, [reply](ErrorOr<std::optional<NativePickedMedia>>&& output) {
+            if (output.has_error()) {
+              reply(WrapError(output.error()));
+              return;
+            }
+            EncodableList wrapped;
+            auto output_optional = std::move(output).TakeValue();
+            if (output_optional) {
+              wrapped.push_back(CustomEncodableValue(std::move(output_optional).value()));
+            } else {
+              wrapped.push_back(EncodableValue());
+            }
+            reply(EncodableValue(std::move(wrapped)));
+          });
+        } catch (const std::exception& exception) {
+          reply(WrapError(exception.what()));
+        }
+      });
+    } else {
+      channel.SetMessageHandler(nullptr);
+    }
+  }
+  {
+    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickMultiple" + prepended_suffix, &GetCodec());
+    if (api != nullptr) {
+      channel.SetMessageHandler([api](const EncodableValue& message, const ::flutter::MessageReply<EncodableValue>& reply) {
+        try {
+          const auto& args = std::get<EncodableList>(message);
+          const auto& encodable_type_arg = args.at(0);
+          if (encodable_type_arg.IsNull()) {
+            reply(WrapError("type_arg unexpectedly null."));
+            return;
+          }
+          const auto& type_arg = std::any_cast<const NativeMediaType&>(std::get<CustomEncodableValue>(encodable_type_arg));
+          const auto& encodable_options_arg = args.at(1);
+          const auto* options_arg = encodable_options_arg.IsNull() ? nullptr : &(std::any_cast<const NativePickerOptions&>(std::get<CustomEncodableValue>(encodable_options_arg)));
+          api->PickMultiple(type_arg, options_arg, [reply](ErrorOr<EncodableList>&& output) {
+            if (output.has_error()) {
+              reply(WrapError(output.error()));
+              return;
+            }
+            EncodableList wrapped;
+            wrapped.push_back(EncodableValue(std::move(output).TakeValue()));
+            reply(EncodableValue(std::move(wrapped)));
+          });
+        } catch (const std::exception& exception) {
+          reply(WrapError(exception.what()));
+        }
+      });
+    } else {
+      channel.SetMessageHandler(nullptr);
+    }
+  }
+  {
+    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.media_forge.MediaForgePickerApi.retrieveLostData" + prepended_suffix, &GetCodec());
+    if (api != nullptr) {
+      channel.SetMessageHandler([api](const EncodableValue& message, const ::flutter::MessageReply<EncodableValue>& reply) {
+        try {
+          api->RetrieveLostData([reply](ErrorOr<NativeLostDataResponse>&& output) {
+            if (output.has_error()) {
+              reply(WrapError(output.error()));
+              return;
+            }
+            EncodableList wrapped;
+            wrapped.push_back(CustomEncodableValue(std::move(output).TakeValue()));
+            reply(EncodableValue(std::move(wrapped)));
+          });
+        } catch (const std::exception& exception) {
+          reply(WrapError(exception.what()));
+        }
+      });
+    } else {
+      channel.SetMessageHandler(nullptr);
+    }
+  }
+}
+
+EncodableValue MediaForgePickerApi::WrapError(std::string_view error_message) {
+  return EncodableValue(EncodableList{
+    EncodableValue(std::string(error_message)),
+    EncodableValue("Error"),
+    EncodableValue()
+  });
+}
+
+EncodableValue MediaForgePickerApi::WrapError(const FlutterError& error) {
+  return EncodableValue(EncodableList{
+    EncodableValue(error.code()),
+    EncodableValue(error.message()),
+    error.details()
+  });
+}
+
+/// The codec used by MediaForgeProcessorApi.
+const ::flutter::StandardMessageCodec& MediaForgeProcessorApi::GetCodec() {
+  return ::flutter::StandardMessageCodec::GetInstance(&PigeonInternalCodecSerializer::GetInstance());
+}
+
+// Sets up an instance of `MediaForgeProcessorApi` to handle messages through the `binary_messenger`.
+void MediaForgeProcessorApi::SetUp(
+  ::flutter::BinaryMessenger* binary_messenger,
+  MediaForgeProcessorApi* api) {
+  MediaForgeProcessorApi::SetUp(binary_messenger, api, "");
+}
+
+void MediaForgeProcessorApi::SetUp(
+  ::flutter::BinaryMessenger* binary_messenger,
+  MediaForgeProcessorApi* api,
+  const std::string& message_channel_suffix) {
+  const std::string prepended_suffix = message_channel_suffix.length() > 0 ? std::string(".") + message_channel_suffix : "";
+  {
+    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.processImage" + prepended_suffix, &GetCodec());
+    if (api != nullptr) {
+      channel.SetMessageHandler([api](const EncodableValue& message, const ::flutter::MessageReply<EncodableValue>& reply) {
+        try {
+          const auto& args = std::get<EncodableList>(message);
+          const auto& encodable_path_arg = args.at(0);
+          if (encodable_path_arg.IsNull()) {
+            reply(WrapError("path_arg unexpectedly null."));
+            return;
+          }
+          const auto& path_arg = std::get<std::string>(encodable_path_arg);
+          const auto& encodable_options_arg = args.at(1);
+          if (encodable_options_arg.IsNull()) {
+            reply(WrapError("options_arg unexpectedly null."));
+            return;
+          }
+          const auto& options_arg = std::any_cast<const NativeImageProcessOptions&>(std::get<CustomEncodableValue>(encodable_options_arg));
+          api->ProcessImage(path_arg, options_arg, [reply](ErrorOr<NativeProcessedMedia>&& output) {
+            if (output.has_error()) {
+              reply(WrapError(output.error()));
+              return;
+            }
+            EncodableList wrapped;
+            wrapped.push_back(CustomEncodableValue(std::move(output).TakeValue()));
+            reply(EncodableValue(std::move(wrapped)));
+          });
+        } catch (const std::exception& exception) {
+          reply(WrapError(exception.what()));
+        }
+      });
+    } else {
+      channel.SetMessageHandler(nullptr);
+    }
+  }
+  {
+    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.inspectVideo" + prepended_suffix, &GetCodec());
+    if (api != nullptr) {
+      channel.SetMessageHandler([api](const EncodableValue& message, const ::flutter::MessageReply<EncodableValue>& reply) {
+        try {
+          const auto& args = std::get<EncodableList>(message);
+          const auto& encodable_path_arg = args.at(0);
+          if (encodable_path_arg.IsNull()) {
+            reply(WrapError("path_arg unexpectedly null."));
+            return;
+          }
+          const auto& path_arg = std::get<std::string>(encodable_path_arg);
+          api->InspectVideo(path_arg, [reply](ErrorOr<NativeVideoMetadata>&& output) {
+            if (output.has_error()) {
+              reply(WrapError(output.error()));
+              return;
+            }
+            EncodableList wrapped;
+            wrapped.push_back(CustomEncodableValue(std::move(output).TakeValue()));
+            reply(EncodableValue(std::move(wrapped)));
+          });
+        } catch (const std::exception& exception) {
+          reply(WrapError(exception.what()));
+        }
+      });
+    } else {
+      channel.SetMessageHandler(nullptr);
+    }
+  }
+  {
+    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.createVideoThumbnail" + prepended_suffix, &GetCodec());
+    if (api != nullptr) {
+      channel.SetMessageHandler([api](const EncodableValue& message, const ::flutter::MessageReply<EncodableValue>& reply) {
+        try {
+          const auto& args = std::get<EncodableList>(message);
+          const auto& encodable_video_path_arg = args.at(0);
+          if (encodable_video_path_arg.IsNull()) {
+            reply(WrapError("video_path_arg unexpectedly null."));
+            return;
+          }
+          const auto& video_path_arg = std::get<std::string>(encodable_video_path_arg);
+          const auto& encodable_at_ms_arg = args.at(1);
+          if (encodable_at_ms_arg.IsNull()) {
+            reply(WrapError("at_ms_arg unexpectedly null."));
+            return;
+          }
+          const int64_t at_ms_arg = encodable_at_ms_arg.LongValue();
+          const auto& encodable_max_width_arg = args.at(2);
+          const auto* max_width_arg = std::get_if<int64_t>(&encodable_max_width_arg);
+          const auto& encodable_max_height_arg = args.at(3);
+          const auto* max_height_arg = std::get_if<int64_t>(&encodable_max_height_arg);
+          api->CreateVideoThumbnail(video_path_arg, at_ms_arg, max_width_arg, max_height_arg, [reply](ErrorOr<std::string>&& output) {
+            if (output.has_error()) {
+              reply(WrapError(output.error()));
+              return;
+            }
+            EncodableList wrapped;
+            wrapped.push_back(EncodableValue(std::move(output).TakeValue()));
+            reply(EncodableValue(std::move(wrapped)));
+          });
+        } catch (const std::exception& exception) {
+          reply(WrapError(exception.what()));
+        }
+      });
+    } else {
+      channel.SetMessageHandler(nullptr);
+    }
+  }
+  {
+    BasicMessageChannel<> channel(binary_messenger, "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.clearCache" + prepended_suffix, &GetCodec());
+    if (api != nullptr) {
+      channel.SetMessageHandler([api](const EncodableValue& message, const ::flutter::MessageReply<EncodableValue>& reply) {
+        try {
+          api->ClearCache([reply](ErrorOr<bool>&& output) {
+            if (output.has_error()) {
+              reply(WrapError(output.error()));
+              return;
+            }
+            EncodableList wrapped;
+            wrapped.push_back(EncodableValue(std::move(output).TakeValue()));
+            reply(EncodableValue(std::move(wrapped)));
+          });
+        } catch (const std::exception& exception) {
+          reply(WrapError(exception.what()));
+        }
+      });
+    } else {
+      channel.SetMessageHandler(nullptr);
+    }
+  }
+}
+
+EncodableValue MediaForgeProcessorApi::WrapError(std::string_view error_message) {
+  return EncodableValue(EncodableList{
+    EncodableValue(std::string(error_message)),
+    EncodableValue("Error"),
+    EncodableValue()
+  });
+}
+
+EncodableValue MediaForgeProcessorApi::WrapError(const FlutterError& error) {
   return EncodableValue(EncodableList{
     EncodableValue(error.code()),
     EncodableValue(error.message()),

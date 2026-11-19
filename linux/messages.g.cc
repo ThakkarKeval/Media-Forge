@@ -286,6 +286,1488 @@ static gchar* G_GNUC_UNUSED flpigeon_to_string(FlValue* value) {
 }
 
 
+struct _MediaForgeNativePickerOptions {
+  GObject parent_instance;
+
+  int64_t* max_items;
+  MediaForgeNativeCameraDevice* camera_device;
+  int64_t* max_duration_seconds;
+};
+
+G_DEFINE_TYPE(MediaForgeNativePickerOptions, media_forge_native_picker_options, G_TYPE_OBJECT)
+
+static void media_forge_native_picker_options_dispose(GObject* object) {
+  MediaForgeNativePickerOptions* self = MEDIA_FORGE_NATIVE_PICKER_OPTIONS(object);
+  g_clear_pointer(&self->max_items, g_free);
+  g_clear_pointer(&self->camera_device, g_free);
+  g_clear_pointer(&self->max_duration_seconds, g_free);
+  G_OBJECT_CLASS(media_forge_native_picker_options_parent_class)->dispose(object);
+}
+
+static void media_forge_native_picker_options_init(MediaForgeNativePickerOptions* self) {
+}
+
+static void media_forge_native_picker_options_class_init(MediaForgeNativePickerOptionsClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_native_picker_options_dispose;
+}
+
+MediaForgeNativePickerOptions* media_forge_native_picker_options_new(int64_t* max_items, MediaForgeNativeCameraDevice* camera_device, int64_t* max_duration_seconds) {
+  MediaForgeNativePickerOptions* self = MEDIA_FORGE_NATIVE_PICKER_OPTIONS(g_object_new(media_forge_native_picker_options_get_type(), nullptr));
+  if (max_items != nullptr) {
+    self->max_items = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->max_items = *max_items;
+  }
+  else {
+    self->max_items = nullptr;
+  }
+  if (camera_device != nullptr) {
+    self->camera_device = static_cast<MediaForgeNativeCameraDevice*>(malloc(sizeof(MediaForgeNativeCameraDevice)));
+    *self->camera_device = *camera_device;
+  }
+  else {
+    self->camera_device = nullptr;
+  }
+  if (max_duration_seconds != nullptr) {
+    self->max_duration_seconds = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->max_duration_seconds = *max_duration_seconds;
+  }
+  else {
+    self->max_duration_seconds = nullptr;
+  }
+  return self;
+}
+
+int64_t* media_forge_native_picker_options_get_max_items(MediaForgeNativePickerOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKER_OPTIONS(self), nullptr);
+  return self->max_items;
+}
+
+MediaForgeNativeCameraDevice* media_forge_native_picker_options_get_camera_device(MediaForgeNativePickerOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKER_OPTIONS(self), nullptr);
+  return self->camera_device;
+}
+
+int64_t* media_forge_native_picker_options_get_max_duration_seconds(MediaForgeNativePickerOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKER_OPTIONS(self), nullptr);
+  return self->max_duration_seconds;
+}
+
+static FlValue* media_forge_native_picker_options_to_list(MediaForgeNativePickerOptions* self) {
+  FlValue* values = fl_value_new_list();
+  fl_value_append_take(values, self->max_items != nullptr ? fl_value_new_int(*self->max_items) : fl_value_new_null());
+  fl_value_append_take(values, self->camera_device != nullptr ? fl_value_new_custom(media_forge_native_camera_device_type_id, fl_value_new_int(*self->camera_device), (GDestroyNotify)fl_value_unref) : fl_value_new_null());
+  fl_value_append_take(values, self->max_duration_seconds != nullptr ? fl_value_new_int(*self->max_duration_seconds) : fl_value_new_null());
+  return values;
+}
+
+static MediaForgeNativePickerOptions* media_forge_native_picker_options_new_from_list(FlValue* values) {
+  FlValue* value0 = fl_value_get_list_value(values, 0);
+  int64_t* max_items = nullptr;
+  int64_t max_items_value;
+  if (fl_value_get_type(value0) != FL_VALUE_TYPE_NULL) {
+    max_items_value = fl_value_get_int(value0);
+    max_items = &max_items_value;
+  }
+  FlValue* value1 = fl_value_get_list_value(values, 1);
+  MediaForgeNativeCameraDevice* camera_device = nullptr;
+  MediaForgeNativeCameraDevice camera_device_value;
+  if (fl_value_get_type(value1) != FL_VALUE_TYPE_NULL) {
+    camera_device_value = static_cast<MediaForgeNativeCameraDevice>(fl_value_get_int(reinterpret_cast<FlValue*>(const_cast<gpointer>(fl_value_get_custom_value(value1)))));
+    camera_device = &camera_device_value;
+  }
+  FlValue* value2 = fl_value_get_list_value(values, 2);
+  int64_t* max_duration_seconds = nullptr;
+  int64_t max_duration_seconds_value;
+  if (fl_value_get_type(value2) != FL_VALUE_TYPE_NULL) {
+    max_duration_seconds_value = fl_value_get_int(value2);
+    max_duration_seconds = &max_duration_seconds_value;
+  }
+  return media_forge_native_picker_options_new(max_items, camera_device, max_duration_seconds);
+}
+
+gboolean media_forge_native_picker_options_equals(MediaForgeNativePickerOptions* a, MediaForgeNativePickerOptions* b) {
+  if (a == b) {
+    return TRUE;
+  }
+  if (a == nullptr || b == nullptr) {
+    return FALSE;
+  }
+  if ((a->max_items == nullptr) != (b->max_items == nullptr)) {
+    return FALSE;
+  }
+  if (a->max_items != nullptr && *a->max_items != *b->max_items) {
+    return FALSE;
+  }
+  if ((a->camera_device == nullptr) != (b->camera_device == nullptr)) {
+    return FALSE;
+  }
+  if (a->camera_device != nullptr && *a->camera_device != *b->camera_device) {
+    return FALSE;
+  }
+  if ((a->max_duration_seconds == nullptr) != (b->max_duration_seconds == nullptr)) {
+    return FALSE;
+  }
+  if (a->max_duration_seconds != nullptr && *a->max_duration_seconds != *b->max_duration_seconds) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+guint media_forge_native_picker_options_hash(MediaForgeNativePickerOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKER_OPTIONS(self), 0);
+  guint result = 0;
+  result = result * 31 + (self->max_items != nullptr ? static_cast<guint>(*self->max_items) : 0);
+  result = result * 31 + (self->camera_device != nullptr ? static_cast<guint>(*self->camera_device) : 0);
+  result = result * 31 + (self->max_duration_seconds != nullptr ? static_cast<guint>(*self->max_duration_seconds) : 0);
+  return result;
+}
+
+gchar* media_forge_native_picker_options_to_string(MediaForgeNativePickerOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKER_OPTIONS(self), NULL);
+  GString* str = g_string_new("NativePickerOptions(");
+  g_string_append(str, "max_items: ");
+  if (self->max_items != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->max_items);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", camera_device: ");
+  if (self->camera_device != nullptr) {
+    g_string_append_printf(str, "%d", static_cast<int>(*self->camera_device));
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", max_duration_seconds: ");
+  if (self->max_duration_seconds != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->max_duration_seconds);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ")");
+  return g_string_free(str, FALSE);
+}
+
+struct _MediaForgeNativePickedMedia {
+  GObject parent_instance;
+
+  gchar* path;
+  MediaForgeNativeMediaType type_;
+  gchar* name;
+  gchar* mime_type;
+  int64_t* size_bytes;
+  int64_t* width;
+  int64_t* height;
+  int64_t* duration_ms;
+};
+
+G_DEFINE_TYPE(MediaForgeNativePickedMedia, media_forge_native_picked_media, G_TYPE_OBJECT)
+
+static void media_forge_native_picked_media_dispose(GObject* object) {
+  MediaForgeNativePickedMedia* self = MEDIA_FORGE_NATIVE_PICKED_MEDIA(object);
+  g_clear_pointer(&self->path, g_free);
+  g_clear_pointer(&self->name, g_free);
+  g_clear_pointer(&self->mime_type, g_free);
+  g_clear_pointer(&self->size_bytes, g_free);
+  g_clear_pointer(&self->width, g_free);
+  g_clear_pointer(&self->height, g_free);
+  g_clear_pointer(&self->duration_ms, g_free);
+  G_OBJECT_CLASS(media_forge_native_picked_media_parent_class)->dispose(object);
+}
+
+static void media_forge_native_picked_media_init(MediaForgeNativePickedMedia* self) {
+}
+
+static void media_forge_native_picked_media_class_init(MediaForgeNativePickedMediaClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_native_picked_media_dispose;
+}
+
+MediaForgeNativePickedMedia* media_forge_native_picked_media_new(const gchar* path, MediaForgeNativeMediaType type_, const gchar* name, const gchar* mime_type, int64_t* size_bytes, int64_t* width, int64_t* height, int64_t* duration_ms) {
+  MediaForgeNativePickedMedia* self = MEDIA_FORGE_NATIVE_PICKED_MEDIA(g_object_new(media_forge_native_picked_media_get_type(), nullptr));
+  self->path = g_strdup(path);
+  self->type_ = type_;
+  if (name != nullptr) {
+    self->name = g_strdup(name);
+  }
+  else {
+    self->name = nullptr;
+  }
+  if (mime_type != nullptr) {
+    self->mime_type = g_strdup(mime_type);
+  }
+  else {
+    self->mime_type = nullptr;
+  }
+  if (size_bytes != nullptr) {
+    self->size_bytes = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->size_bytes = *size_bytes;
+  }
+  else {
+    self->size_bytes = nullptr;
+  }
+  if (width != nullptr) {
+    self->width = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->width = *width;
+  }
+  else {
+    self->width = nullptr;
+  }
+  if (height != nullptr) {
+    self->height = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->height = *height;
+  }
+  else {
+    self->height = nullptr;
+  }
+  if (duration_ms != nullptr) {
+    self->duration_ms = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->duration_ms = *duration_ms;
+  }
+  else {
+    self->duration_ms = nullptr;
+  }
+  return self;
+}
+
+const gchar* media_forge_native_picked_media_get_path(MediaForgeNativePickedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKED_MEDIA(self), nullptr);
+  return self->path;
+}
+
+MediaForgeNativeMediaType media_forge_native_picked_media_get_type_(MediaForgeNativePickedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKED_MEDIA(self), static_cast<MediaForgeNativeMediaType>(0));
+  return self->type_;
+}
+
+const gchar* media_forge_native_picked_media_get_name(MediaForgeNativePickedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKED_MEDIA(self), nullptr);
+  return self->name;
+}
+
+const gchar* media_forge_native_picked_media_get_mime_type(MediaForgeNativePickedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKED_MEDIA(self), nullptr);
+  return self->mime_type;
+}
+
+int64_t* media_forge_native_picked_media_get_size_bytes(MediaForgeNativePickedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKED_MEDIA(self), nullptr);
+  return self->size_bytes;
+}
+
+int64_t* media_forge_native_picked_media_get_width(MediaForgeNativePickedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKED_MEDIA(self), nullptr);
+  return self->width;
+}
+
+int64_t* media_forge_native_picked_media_get_height(MediaForgeNativePickedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKED_MEDIA(self), nullptr);
+  return self->height;
+}
+
+int64_t* media_forge_native_picked_media_get_duration_ms(MediaForgeNativePickedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKED_MEDIA(self), nullptr);
+  return self->duration_ms;
+}
+
+static FlValue* media_forge_native_picked_media_to_list(MediaForgeNativePickedMedia* self) {
+  FlValue* values = fl_value_new_list();
+  fl_value_append_take(values, fl_value_new_string(self->path));
+  fl_value_append_take(values, fl_value_new_custom(media_forge_native_media_type_type_id, fl_value_new_int(self->type_), (GDestroyNotify)fl_value_unref));
+  fl_value_append_take(values, self->name != nullptr ? fl_value_new_string(self->name) : fl_value_new_null());
+  fl_value_append_take(values, self->mime_type != nullptr ? fl_value_new_string(self->mime_type) : fl_value_new_null());
+  fl_value_append_take(values, self->size_bytes != nullptr ? fl_value_new_int(*self->size_bytes) : fl_value_new_null());
+  fl_value_append_take(values, self->width != nullptr ? fl_value_new_int(*self->width) : fl_value_new_null());
+  fl_value_append_take(values, self->height != nullptr ? fl_value_new_int(*self->height) : fl_value_new_null());
+  fl_value_append_take(values, self->duration_ms != nullptr ? fl_value_new_int(*self->duration_ms) : fl_value_new_null());
+  return values;
+}
+
+static MediaForgeNativePickedMedia* media_forge_native_picked_media_new_from_list(FlValue* values) {
+  FlValue* value0 = fl_value_get_list_value(values, 0);
+  const gchar* path = fl_value_get_string(value0);
+  FlValue* value1 = fl_value_get_list_value(values, 1);
+  MediaForgeNativeMediaType type_ = static_cast<MediaForgeNativeMediaType>(fl_value_get_int(reinterpret_cast<FlValue*>(const_cast<gpointer>(fl_value_get_custom_value(value1)))));
+  FlValue* value2 = fl_value_get_list_value(values, 2);
+  const gchar* name = nullptr;
+  if (fl_value_get_type(value2) != FL_VALUE_TYPE_NULL) {
+    name = fl_value_get_string(value2);
+  }
+  FlValue* value3 = fl_value_get_list_value(values, 3);
+  const gchar* mime_type = nullptr;
+  if (fl_value_get_type(value3) != FL_VALUE_TYPE_NULL) {
+    mime_type = fl_value_get_string(value3);
+  }
+  FlValue* value4 = fl_value_get_list_value(values, 4);
+  int64_t* size_bytes = nullptr;
+  int64_t size_bytes_value;
+  if (fl_value_get_type(value4) != FL_VALUE_TYPE_NULL) {
+    size_bytes_value = fl_value_get_int(value4);
+    size_bytes = &size_bytes_value;
+  }
+  FlValue* value5 = fl_value_get_list_value(values, 5);
+  int64_t* width = nullptr;
+  int64_t width_value;
+  if (fl_value_get_type(value5) != FL_VALUE_TYPE_NULL) {
+    width_value = fl_value_get_int(value5);
+    width = &width_value;
+  }
+  FlValue* value6 = fl_value_get_list_value(values, 6);
+  int64_t* height = nullptr;
+  int64_t height_value;
+  if (fl_value_get_type(value6) != FL_VALUE_TYPE_NULL) {
+    height_value = fl_value_get_int(value6);
+    height = &height_value;
+  }
+  FlValue* value7 = fl_value_get_list_value(values, 7);
+  int64_t* duration_ms = nullptr;
+  int64_t duration_ms_value;
+  if (fl_value_get_type(value7) != FL_VALUE_TYPE_NULL) {
+    duration_ms_value = fl_value_get_int(value7);
+    duration_ms = &duration_ms_value;
+  }
+  return media_forge_native_picked_media_new(path, type_, name, mime_type, size_bytes, width, height, duration_ms);
+}
+
+gboolean media_forge_native_picked_media_equals(MediaForgeNativePickedMedia* a, MediaForgeNativePickedMedia* b) {
+  if (a == b) {
+    return TRUE;
+  }
+  if (a == nullptr || b == nullptr) {
+    return FALSE;
+  }
+  if (g_strcmp0(a->path, b->path) != 0) {
+    return FALSE;
+  }
+  if (a->type_ != b->type_) {
+    return FALSE;
+  }
+  if (g_strcmp0(a->name, b->name) != 0) {
+    return FALSE;
+  }
+  if (g_strcmp0(a->mime_type, b->mime_type) != 0) {
+    return FALSE;
+  }
+  if ((a->size_bytes == nullptr) != (b->size_bytes == nullptr)) {
+    return FALSE;
+  }
+  if (a->size_bytes != nullptr && *a->size_bytes != *b->size_bytes) {
+    return FALSE;
+  }
+  if ((a->width == nullptr) != (b->width == nullptr)) {
+    return FALSE;
+  }
+  if (a->width != nullptr && *a->width != *b->width) {
+    return FALSE;
+  }
+  if ((a->height == nullptr) != (b->height == nullptr)) {
+    return FALSE;
+  }
+  if (a->height != nullptr && *a->height != *b->height) {
+    return FALSE;
+  }
+  if ((a->duration_ms == nullptr) != (b->duration_ms == nullptr)) {
+    return FALSE;
+  }
+  if (a->duration_ms != nullptr && *a->duration_ms != *b->duration_ms) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+guint media_forge_native_picked_media_hash(MediaForgeNativePickedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKED_MEDIA(self), 0);
+  guint result = 0;
+  result = result * 31 + (self->path != nullptr ? g_str_hash(self->path) : 0);
+  result = result * 31 + static_cast<guint>(self->type_);
+  result = result * 31 + (self->name != nullptr ? g_str_hash(self->name) : 0);
+  result = result * 31 + (self->mime_type != nullptr ? g_str_hash(self->mime_type) : 0);
+  result = result * 31 + (self->size_bytes != nullptr ? static_cast<guint>(*self->size_bytes) : 0);
+  result = result * 31 + (self->width != nullptr ? static_cast<guint>(*self->width) : 0);
+  result = result * 31 + (self->height != nullptr ? static_cast<guint>(*self->height) : 0);
+  result = result * 31 + (self->duration_ms != nullptr ? static_cast<guint>(*self->duration_ms) : 0);
+  return result;
+}
+
+gchar* media_forge_native_picked_media_to_string(MediaForgeNativePickedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PICKED_MEDIA(self), NULL);
+  GString* str = g_string_new("NativePickedMedia(");
+  g_string_append(str, "path: ");
+  if (self->path != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->path);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", type_: ");
+  g_string_append_printf(str, "%d", static_cast<int>(self->type_));
+  g_string_append(str, ", name: ");
+  if (self->name != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->name);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", mime_type: ");
+  if (self->mime_type != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->mime_type);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", size_bytes: ");
+  if (self->size_bytes != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->size_bytes);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", width: ");
+  if (self->width != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->width);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", height: ");
+  if (self->height != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->height);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", duration_ms: ");
+  if (self->duration_ms != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->duration_ms);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ")");
+  return g_string_free(str, FALSE);
+}
+
+struct _MediaForgeNativeLostDataResponse {
+  GObject parent_instance;
+
+  FlValue* items;
+  gchar* error_code;
+  gchar* error_message;
+};
+
+G_DEFINE_TYPE(MediaForgeNativeLostDataResponse, media_forge_native_lost_data_response, G_TYPE_OBJECT)
+
+static void media_forge_native_lost_data_response_dispose(GObject* object) {
+  MediaForgeNativeLostDataResponse* self = MEDIA_FORGE_NATIVE_LOST_DATA_RESPONSE(object);
+  g_clear_pointer(&self->items, fl_value_unref);
+  g_clear_pointer(&self->error_code, g_free);
+  g_clear_pointer(&self->error_message, g_free);
+  G_OBJECT_CLASS(media_forge_native_lost_data_response_parent_class)->dispose(object);
+}
+
+static void media_forge_native_lost_data_response_init(MediaForgeNativeLostDataResponse* self) {
+}
+
+static void media_forge_native_lost_data_response_class_init(MediaForgeNativeLostDataResponseClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_native_lost_data_response_dispose;
+}
+
+MediaForgeNativeLostDataResponse* media_forge_native_lost_data_response_new(FlValue* items, const gchar* error_code, const gchar* error_message) {
+  MediaForgeNativeLostDataResponse* self = MEDIA_FORGE_NATIVE_LOST_DATA_RESPONSE(g_object_new(media_forge_native_lost_data_response_get_type(), nullptr));
+  self->items = fl_value_ref(items);
+  if (error_code != nullptr) {
+    self->error_code = g_strdup(error_code);
+  }
+  else {
+    self->error_code = nullptr;
+  }
+  if (error_message != nullptr) {
+    self->error_message = g_strdup(error_message);
+  }
+  else {
+    self->error_message = nullptr;
+  }
+  return self;
+}
+
+FlValue* media_forge_native_lost_data_response_get_items(MediaForgeNativeLostDataResponse* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_LOST_DATA_RESPONSE(self), nullptr);
+  return self->items;
+}
+
+const gchar* media_forge_native_lost_data_response_get_error_code(MediaForgeNativeLostDataResponse* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_LOST_DATA_RESPONSE(self), nullptr);
+  return self->error_code;
+}
+
+const gchar* media_forge_native_lost_data_response_get_error_message(MediaForgeNativeLostDataResponse* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_LOST_DATA_RESPONSE(self), nullptr);
+  return self->error_message;
+}
+
+static FlValue* media_forge_native_lost_data_response_to_list(MediaForgeNativeLostDataResponse* self) {
+  FlValue* values = fl_value_new_list();
+  fl_value_append_take(values, fl_value_ref(self->items));
+  fl_value_append_take(values, self->error_code != nullptr ? fl_value_new_string(self->error_code) : fl_value_new_null());
+  fl_value_append_take(values, self->error_message != nullptr ? fl_value_new_string(self->error_message) : fl_value_new_null());
+  return values;
+}
+
+static MediaForgeNativeLostDataResponse* media_forge_native_lost_data_response_new_from_list(FlValue* values) {
+  FlValue* value0 = fl_value_get_list_value(values, 0);
+  FlValue* items = value0;
+  FlValue* value1 = fl_value_get_list_value(values, 1);
+  const gchar* error_code = nullptr;
+  if (fl_value_get_type(value1) != FL_VALUE_TYPE_NULL) {
+    error_code = fl_value_get_string(value1);
+  }
+  FlValue* value2 = fl_value_get_list_value(values, 2);
+  const gchar* error_message = nullptr;
+  if (fl_value_get_type(value2) != FL_VALUE_TYPE_NULL) {
+    error_message = fl_value_get_string(value2);
+  }
+  return media_forge_native_lost_data_response_new(items, error_code, error_message);
+}
+
+gboolean media_forge_native_lost_data_response_equals(MediaForgeNativeLostDataResponse* a, MediaForgeNativeLostDataResponse* b) {
+  if (a == b) {
+    return TRUE;
+  }
+  if (a == nullptr || b == nullptr) {
+    return FALSE;
+  }
+  if (!flpigeon_deep_equals(a->items, b->items)) {
+    return FALSE;
+  }
+  if (g_strcmp0(a->error_code, b->error_code) != 0) {
+    return FALSE;
+  }
+  if (g_strcmp0(a->error_message, b->error_message) != 0) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+guint media_forge_native_lost_data_response_hash(MediaForgeNativeLostDataResponse* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_LOST_DATA_RESPONSE(self), 0);
+  guint result = 0;
+  result = result * 31 + flpigeon_deep_hash(self->items);
+  result = result * 31 + (self->error_code != nullptr ? g_str_hash(self->error_code) : 0);
+  result = result * 31 + (self->error_message != nullptr ? g_str_hash(self->error_message) : 0);
+  return result;
+}
+
+gchar* media_forge_native_lost_data_response_to_string(MediaForgeNativeLostDataResponse* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_LOST_DATA_RESPONSE(self), NULL);
+  GString* str = g_string_new("NativeLostDataResponse(");
+  g_string_append(str, "items: ");
+  if (self->items != nullptr) {
+    gchar* val_str = flpigeon_to_string(self->items);
+    g_string_append(str, val_str);
+    g_free(val_str);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", error_code: ");
+  if (self->error_code != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->error_code);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", error_message: ");
+  if (self->error_message != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->error_message);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ")");
+  return g_string_free(str, FALSE);
+}
+
+struct _MediaForgeNativeImageProcessOptions {
+  GObject parent_instance;
+
+  int64_t* max_width;
+  int64_t* max_height;
+  int64_t* quality;
+  int64_t* target_size_bytes;
+  gboolean* strip_gps_metadata;
+  gchar* format;
+};
+
+G_DEFINE_TYPE(MediaForgeNativeImageProcessOptions, media_forge_native_image_process_options, G_TYPE_OBJECT)
+
+static void media_forge_native_image_process_options_dispose(GObject* object) {
+  MediaForgeNativeImageProcessOptions* self = MEDIA_FORGE_NATIVE_IMAGE_PROCESS_OPTIONS(object);
+  g_clear_pointer(&self->max_width, g_free);
+  g_clear_pointer(&self->max_height, g_free);
+  g_clear_pointer(&self->quality, g_free);
+  g_clear_pointer(&self->target_size_bytes, g_free);
+  g_clear_pointer(&self->strip_gps_metadata, g_free);
+  g_clear_pointer(&self->format, g_free);
+  G_OBJECT_CLASS(media_forge_native_image_process_options_parent_class)->dispose(object);
+}
+
+static void media_forge_native_image_process_options_init(MediaForgeNativeImageProcessOptions* self) {
+}
+
+static void media_forge_native_image_process_options_class_init(MediaForgeNativeImageProcessOptionsClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_native_image_process_options_dispose;
+}
+
+MediaForgeNativeImageProcessOptions* media_forge_native_image_process_options_new(int64_t* max_width, int64_t* max_height, int64_t* quality, int64_t* target_size_bytes, gboolean* strip_gps_metadata, const gchar* format) {
+  MediaForgeNativeImageProcessOptions* self = MEDIA_FORGE_NATIVE_IMAGE_PROCESS_OPTIONS(g_object_new(media_forge_native_image_process_options_get_type(), nullptr));
+  if (max_width != nullptr) {
+    self->max_width = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->max_width = *max_width;
+  }
+  else {
+    self->max_width = nullptr;
+  }
+  if (max_height != nullptr) {
+    self->max_height = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->max_height = *max_height;
+  }
+  else {
+    self->max_height = nullptr;
+  }
+  if (quality != nullptr) {
+    self->quality = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->quality = *quality;
+  }
+  else {
+    self->quality = nullptr;
+  }
+  if (target_size_bytes != nullptr) {
+    self->target_size_bytes = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->target_size_bytes = *target_size_bytes;
+  }
+  else {
+    self->target_size_bytes = nullptr;
+  }
+  if (strip_gps_metadata != nullptr) {
+    self->strip_gps_metadata = static_cast<gboolean*>(malloc(sizeof(gboolean)));
+    *self->strip_gps_metadata = *strip_gps_metadata;
+  }
+  else {
+    self->strip_gps_metadata = nullptr;
+  }
+  if (format != nullptr) {
+    self->format = g_strdup(format);
+  }
+  else {
+    self->format = nullptr;
+  }
+  return self;
+}
+
+int64_t* media_forge_native_image_process_options_get_max_width(MediaForgeNativeImageProcessOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_IMAGE_PROCESS_OPTIONS(self), nullptr);
+  return self->max_width;
+}
+
+int64_t* media_forge_native_image_process_options_get_max_height(MediaForgeNativeImageProcessOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_IMAGE_PROCESS_OPTIONS(self), nullptr);
+  return self->max_height;
+}
+
+int64_t* media_forge_native_image_process_options_get_quality(MediaForgeNativeImageProcessOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_IMAGE_PROCESS_OPTIONS(self), nullptr);
+  return self->quality;
+}
+
+int64_t* media_forge_native_image_process_options_get_target_size_bytes(MediaForgeNativeImageProcessOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_IMAGE_PROCESS_OPTIONS(self), nullptr);
+  return self->target_size_bytes;
+}
+
+gboolean* media_forge_native_image_process_options_get_strip_gps_metadata(MediaForgeNativeImageProcessOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_IMAGE_PROCESS_OPTIONS(self), nullptr);
+  return self->strip_gps_metadata;
+}
+
+const gchar* media_forge_native_image_process_options_get_format(MediaForgeNativeImageProcessOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_IMAGE_PROCESS_OPTIONS(self), nullptr);
+  return self->format;
+}
+
+static FlValue* media_forge_native_image_process_options_to_list(MediaForgeNativeImageProcessOptions* self) {
+  FlValue* values = fl_value_new_list();
+  fl_value_append_take(values, self->max_width != nullptr ? fl_value_new_int(*self->max_width) : fl_value_new_null());
+  fl_value_append_take(values, self->max_height != nullptr ? fl_value_new_int(*self->max_height) : fl_value_new_null());
+  fl_value_append_take(values, self->quality != nullptr ? fl_value_new_int(*self->quality) : fl_value_new_null());
+  fl_value_append_take(values, self->target_size_bytes != nullptr ? fl_value_new_int(*self->target_size_bytes) : fl_value_new_null());
+  fl_value_append_take(values, self->strip_gps_metadata != nullptr ? fl_value_new_bool(*self->strip_gps_metadata) : fl_value_new_null());
+  fl_value_append_take(values, self->format != nullptr ? fl_value_new_string(self->format) : fl_value_new_null());
+  return values;
+}
+
+static MediaForgeNativeImageProcessOptions* media_forge_native_image_process_options_new_from_list(FlValue* values) {
+  FlValue* value0 = fl_value_get_list_value(values, 0);
+  int64_t* max_width = nullptr;
+  int64_t max_width_value;
+  if (fl_value_get_type(value0) != FL_VALUE_TYPE_NULL) {
+    max_width_value = fl_value_get_int(value0);
+    max_width = &max_width_value;
+  }
+  FlValue* value1 = fl_value_get_list_value(values, 1);
+  int64_t* max_height = nullptr;
+  int64_t max_height_value;
+  if (fl_value_get_type(value1) != FL_VALUE_TYPE_NULL) {
+    max_height_value = fl_value_get_int(value1);
+    max_height = &max_height_value;
+  }
+  FlValue* value2 = fl_value_get_list_value(values, 2);
+  int64_t* quality = nullptr;
+  int64_t quality_value;
+  if (fl_value_get_type(value2) != FL_VALUE_TYPE_NULL) {
+    quality_value = fl_value_get_int(value2);
+    quality = &quality_value;
+  }
+  FlValue* value3 = fl_value_get_list_value(values, 3);
+  int64_t* target_size_bytes = nullptr;
+  int64_t target_size_bytes_value;
+  if (fl_value_get_type(value3) != FL_VALUE_TYPE_NULL) {
+    target_size_bytes_value = fl_value_get_int(value3);
+    target_size_bytes = &target_size_bytes_value;
+  }
+  FlValue* value4 = fl_value_get_list_value(values, 4);
+  gboolean* strip_gps_metadata = nullptr;
+  gboolean strip_gps_metadata_value;
+  if (fl_value_get_type(value4) != FL_VALUE_TYPE_NULL) {
+    strip_gps_metadata_value = fl_value_get_bool(value4);
+    strip_gps_metadata = &strip_gps_metadata_value;
+  }
+  FlValue* value5 = fl_value_get_list_value(values, 5);
+  const gchar* format = nullptr;
+  if (fl_value_get_type(value5) != FL_VALUE_TYPE_NULL) {
+    format = fl_value_get_string(value5);
+  }
+  return media_forge_native_image_process_options_new(max_width, max_height, quality, target_size_bytes, strip_gps_metadata, format);
+}
+
+gboolean media_forge_native_image_process_options_equals(MediaForgeNativeImageProcessOptions* a, MediaForgeNativeImageProcessOptions* b) {
+  if (a == b) {
+    return TRUE;
+  }
+  if (a == nullptr || b == nullptr) {
+    return FALSE;
+  }
+  if ((a->max_width == nullptr) != (b->max_width == nullptr)) {
+    return FALSE;
+  }
+  if (a->max_width != nullptr && *a->max_width != *b->max_width) {
+    return FALSE;
+  }
+  if ((a->max_height == nullptr) != (b->max_height == nullptr)) {
+    return FALSE;
+  }
+  if (a->max_height != nullptr && *a->max_height != *b->max_height) {
+    return FALSE;
+  }
+  if ((a->quality == nullptr) != (b->quality == nullptr)) {
+    return FALSE;
+  }
+  if (a->quality != nullptr && *a->quality != *b->quality) {
+    return FALSE;
+  }
+  if ((a->target_size_bytes == nullptr) != (b->target_size_bytes == nullptr)) {
+    return FALSE;
+  }
+  if (a->target_size_bytes != nullptr && *a->target_size_bytes != *b->target_size_bytes) {
+    return FALSE;
+  }
+  if ((a->strip_gps_metadata == nullptr) != (b->strip_gps_metadata == nullptr)) {
+    return FALSE;
+  }
+  if (a->strip_gps_metadata != nullptr && *a->strip_gps_metadata != *b->strip_gps_metadata) {
+    return FALSE;
+  }
+  if (g_strcmp0(a->format, b->format) != 0) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+guint media_forge_native_image_process_options_hash(MediaForgeNativeImageProcessOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_IMAGE_PROCESS_OPTIONS(self), 0);
+  guint result = 0;
+  result = result * 31 + (self->max_width != nullptr ? static_cast<guint>(*self->max_width) : 0);
+  result = result * 31 + (self->max_height != nullptr ? static_cast<guint>(*self->max_height) : 0);
+  result = result * 31 + (self->quality != nullptr ? static_cast<guint>(*self->quality) : 0);
+  result = result * 31 + (self->target_size_bytes != nullptr ? static_cast<guint>(*self->target_size_bytes) : 0);
+  result = result * 31 + (self->strip_gps_metadata != nullptr ? static_cast<guint>(*self->strip_gps_metadata) : 0);
+  result = result * 31 + (self->format != nullptr ? g_str_hash(self->format) : 0);
+  return result;
+}
+
+gchar* media_forge_native_image_process_options_to_string(MediaForgeNativeImageProcessOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_IMAGE_PROCESS_OPTIONS(self), NULL);
+  GString* str = g_string_new("NativeImageProcessOptions(");
+  g_string_append(str, "max_width: ");
+  if (self->max_width != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->max_width);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", max_height: ");
+  if (self->max_height != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->max_height);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", quality: ");
+  if (self->quality != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->quality);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", target_size_bytes: ");
+  if (self->target_size_bytes != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->target_size_bytes);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", strip_gps_metadata: ");
+  if (self->strip_gps_metadata != nullptr) {
+    g_string_append(str, *self->strip_gps_metadata ? "true" : "false");
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", format: ");
+  if (self->format != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->format);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ")");
+  return g_string_free(str, FALSE);
+}
+
+struct _MediaForgeNativeProcessedMedia {
+  GObject parent_instance;
+
+  gchar* path;
+  gchar* original_path;
+  gchar* mime_type;
+  int64_t* size_bytes;
+  int64_t* original_size_bytes;
+  int64_t* width;
+  int64_t* height;
+  gboolean changed;
+  gboolean* target_met;
+};
+
+G_DEFINE_TYPE(MediaForgeNativeProcessedMedia, media_forge_native_processed_media, G_TYPE_OBJECT)
+
+static void media_forge_native_processed_media_dispose(GObject* object) {
+  MediaForgeNativeProcessedMedia* self = MEDIA_FORGE_NATIVE_PROCESSED_MEDIA(object);
+  g_clear_pointer(&self->path, g_free);
+  g_clear_pointer(&self->original_path, g_free);
+  g_clear_pointer(&self->mime_type, g_free);
+  g_clear_pointer(&self->size_bytes, g_free);
+  g_clear_pointer(&self->original_size_bytes, g_free);
+  g_clear_pointer(&self->width, g_free);
+  g_clear_pointer(&self->height, g_free);
+  g_clear_pointer(&self->target_met, g_free);
+  G_OBJECT_CLASS(media_forge_native_processed_media_parent_class)->dispose(object);
+}
+
+static void media_forge_native_processed_media_init(MediaForgeNativeProcessedMedia* self) {
+}
+
+static void media_forge_native_processed_media_class_init(MediaForgeNativeProcessedMediaClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_native_processed_media_dispose;
+}
+
+MediaForgeNativeProcessedMedia* media_forge_native_processed_media_new(const gchar* path, const gchar* original_path, const gchar* mime_type, int64_t* size_bytes, int64_t* original_size_bytes, int64_t* width, int64_t* height, gboolean changed, gboolean* target_met) {
+  MediaForgeNativeProcessedMedia* self = MEDIA_FORGE_NATIVE_PROCESSED_MEDIA(g_object_new(media_forge_native_processed_media_get_type(), nullptr));
+  self->path = g_strdup(path);
+  self->original_path = g_strdup(original_path);
+  if (mime_type != nullptr) {
+    self->mime_type = g_strdup(mime_type);
+  }
+  else {
+    self->mime_type = nullptr;
+  }
+  if (size_bytes != nullptr) {
+    self->size_bytes = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->size_bytes = *size_bytes;
+  }
+  else {
+    self->size_bytes = nullptr;
+  }
+  if (original_size_bytes != nullptr) {
+    self->original_size_bytes = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->original_size_bytes = *original_size_bytes;
+  }
+  else {
+    self->original_size_bytes = nullptr;
+  }
+  if (width != nullptr) {
+    self->width = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->width = *width;
+  }
+  else {
+    self->width = nullptr;
+  }
+  if (height != nullptr) {
+    self->height = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->height = *height;
+  }
+  else {
+    self->height = nullptr;
+  }
+  self->changed = changed;
+  if (target_met != nullptr) {
+    self->target_met = static_cast<gboolean*>(malloc(sizeof(gboolean)));
+    *self->target_met = *target_met;
+  }
+  else {
+    self->target_met = nullptr;
+  }
+  return self;
+}
+
+const gchar* media_forge_native_processed_media_get_path(MediaForgeNativeProcessedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PROCESSED_MEDIA(self), nullptr);
+  return self->path;
+}
+
+const gchar* media_forge_native_processed_media_get_original_path(MediaForgeNativeProcessedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PROCESSED_MEDIA(self), nullptr);
+  return self->original_path;
+}
+
+const gchar* media_forge_native_processed_media_get_mime_type(MediaForgeNativeProcessedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PROCESSED_MEDIA(self), nullptr);
+  return self->mime_type;
+}
+
+int64_t* media_forge_native_processed_media_get_size_bytes(MediaForgeNativeProcessedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PROCESSED_MEDIA(self), nullptr);
+  return self->size_bytes;
+}
+
+int64_t* media_forge_native_processed_media_get_original_size_bytes(MediaForgeNativeProcessedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PROCESSED_MEDIA(self), nullptr);
+  return self->original_size_bytes;
+}
+
+int64_t* media_forge_native_processed_media_get_width(MediaForgeNativeProcessedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PROCESSED_MEDIA(self), nullptr);
+  return self->width;
+}
+
+int64_t* media_forge_native_processed_media_get_height(MediaForgeNativeProcessedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PROCESSED_MEDIA(self), nullptr);
+  return self->height;
+}
+
+gboolean media_forge_native_processed_media_get_changed(MediaForgeNativeProcessedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PROCESSED_MEDIA(self), FALSE);
+  return self->changed;
+}
+
+gboolean* media_forge_native_processed_media_get_target_met(MediaForgeNativeProcessedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PROCESSED_MEDIA(self), nullptr);
+  return self->target_met;
+}
+
+static FlValue* media_forge_native_processed_media_to_list(MediaForgeNativeProcessedMedia* self) {
+  FlValue* values = fl_value_new_list();
+  fl_value_append_take(values, fl_value_new_string(self->path));
+  fl_value_append_take(values, fl_value_new_string(self->original_path));
+  fl_value_append_take(values, self->mime_type != nullptr ? fl_value_new_string(self->mime_type) : fl_value_new_null());
+  fl_value_append_take(values, self->size_bytes != nullptr ? fl_value_new_int(*self->size_bytes) : fl_value_new_null());
+  fl_value_append_take(values, self->original_size_bytes != nullptr ? fl_value_new_int(*self->original_size_bytes) : fl_value_new_null());
+  fl_value_append_take(values, self->width != nullptr ? fl_value_new_int(*self->width) : fl_value_new_null());
+  fl_value_append_take(values, self->height != nullptr ? fl_value_new_int(*self->height) : fl_value_new_null());
+  fl_value_append_take(values, fl_value_new_bool(self->changed));
+  fl_value_append_take(values, self->target_met != nullptr ? fl_value_new_bool(*self->target_met) : fl_value_new_null());
+  return values;
+}
+
+static MediaForgeNativeProcessedMedia* media_forge_native_processed_media_new_from_list(FlValue* values) {
+  FlValue* value0 = fl_value_get_list_value(values, 0);
+  const gchar* path = fl_value_get_string(value0);
+  FlValue* value1 = fl_value_get_list_value(values, 1);
+  const gchar* original_path = fl_value_get_string(value1);
+  FlValue* value2 = fl_value_get_list_value(values, 2);
+  const gchar* mime_type = nullptr;
+  if (fl_value_get_type(value2) != FL_VALUE_TYPE_NULL) {
+    mime_type = fl_value_get_string(value2);
+  }
+  FlValue* value3 = fl_value_get_list_value(values, 3);
+  int64_t* size_bytes = nullptr;
+  int64_t size_bytes_value;
+  if (fl_value_get_type(value3) != FL_VALUE_TYPE_NULL) {
+    size_bytes_value = fl_value_get_int(value3);
+    size_bytes = &size_bytes_value;
+  }
+  FlValue* value4 = fl_value_get_list_value(values, 4);
+  int64_t* original_size_bytes = nullptr;
+  int64_t original_size_bytes_value;
+  if (fl_value_get_type(value4) != FL_VALUE_TYPE_NULL) {
+    original_size_bytes_value = fl_value_get_int(value4);
+    original_size_bytes = &original_size_bytes_value;
+  }
+  FlValue* value5 = fl_value_get_list_value(values, 5);
+  int64_t* width = nullptr;
+  int64_t width_value;
+  if (fl_value_get_type(value5) != FL_VALUE_TYPE_NULL) {
+    width_value = fl_value_get_int(value5);
+    width = &width_value;
+  }
+  FlValue* value6 = fl_value_get_list_value(values, 6);
+  int64_t* height = nullptr;
+  int64_t height_value;
+  if (fl_value_get_type(value6) != FL_VALUE_TYPE_NULL) {
+    height_value = fl_value_get_int(value6);
+    height = &height_value;
+  }
+  FlValue* value7 = fl_value_get_list_value(values, 7);
+  gboolean changed = fl_value_get_bool(value7);
+  FlValue* value8 = fl_value_get_list_value(values, 8);
+  gboolean* target_met = nullptr;
+  gboolean target_met_value;
+  if (fl_value_get_type(value8) != FL_VALUE_TYPE_NULL) {
+    target_met_value = fl_value_get_bool(value8);
+    target_met = &target_met_value;
+  }
+  return media_forge_native_processed_media_new(path, original_path, mime_type, size_bytes, original_size_bytes, width, height, changed, target_met);
+}
+
+gboolean media_forge_native_processed_media_equals(MediaForgeNativeProcessedMedia* a, MediaForgeNativeProcessedMedia* b) {
+  if (a == b) {
+    return TRUE;
+  }
+  if (a == nullptr || b == nullptr) {
+    return FALSE;
+  }
+  if (g_strcmp0(a->path, b->path) != 0) {
+    return FALSE;
+  }
+  if (g_strcmp0(a->original_path, b->original_path) != 0) {
+    return FALSE;
+  }
+  if (g_strcmp0(a->mime_type, b->mime_type) != 0) {
+    return FALSE;
+  }
+  if ((a->size_bytes == nullptr) != (b->size_bytes == nullptr)) {
+    return FALSE;
+  }
+  if (a->size_bytes != nullptr && *a->size_bytes != *b->size_bytes) {
+    return FALSE;
+  }
+  if ((a->original_size_bytes == nullptr) != (b->original_size_bytes == nullptr)) {
+    return FALSE;
+  }
+  if (a->original_size_bytes != nullptr && *a->original_size_bytes != *b->original_size_bytes) {
+    return FALSE;
+  }
+  if ((a->width == nullptr) != (b->width == nullptr)) {
+    return FALSE;
+  }
+  if (a->width != nullptr && *a->width != *b->width) {
+    return FALSE;
+  }
+  if ((a->height == nullptr) != (b->height == nullptr)) {
+    return FALSE;
+  }
+  if (a->height != nullptr && *a->height != *b->height) {
+    return FALSE;
+  }
+  if (a->changed != b->changed) {
+    return FALSE;
+  }
+  if ((a->target_met == nullptr) != (b->target_met == nullptr)) {
+    return FALSE;
+  }
+  if (a->target_met != nullptr && *a->target_met != *b->target_met) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+guint media_forge_native_processed_media_hash(MediaForgeNativeProcessedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PROCESSED_MEDIA(self), 0);
+  guint result = 0;
+  result = result * 31 + (self->path != nullptr ? g_str_hash(self->path) : 0);
+  result = result * 31 + (self->original_path != nullptr ? g_str_hash(self->original_path) : 0);
+  result = result * 31 + (self->mime_type != nullptr ? g_str_hash(self->mime_type) : 0);
+  result = result * 31 + (self->size_bytes != nullptr ? static_cast<guint>(*self->size_bytes) : 0);
+  result = result * 31 + (self->original_size_bytes != nullptr ? static_cast<guint>(*self->original_size_bytes) : 0);
+  result = result * 31 + (self->width != nullptr ? static_cast<guint>(*self->width) : 0);
+  result = result * 31 + (self->height != nullptr ? static_cast<guint>(*self->height) : 0);
+  result = result * 31 + static_cast<guint>(self->changed);
+  result = result * 31 + (self->target_met != nullptr ? static_cast<guint>(*self->target_met) : 0);
+  return result;
+}
+
+gchar* media_forge_native_processed_media_to_string(MediaForgeNativeProcessedMedia* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_PROCESSED_MEDIA(self), NULL);
+  GString* str = g_string_new("NativeProcessedMedia(");
+  g_string_append(str, "path: ");
+  if (self->path != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->path);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", original_path: ");
+  if (self->original_path != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->original_path);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", mime_type: ");
+  if (self->mime_type != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->mime_type);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", size_bytes: ");
+  if (self->size_bytes != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->size_bytes);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", original_size_bytes: ");
+  if (self->original_size_bytes != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->original_size_bytes);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", width: ");
+  if (self->width != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->width);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", height: ");
+  if (self->height != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->height);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", changed: ");
+  g_string_append(str, self->changed ? "true" : "false");
+  g_string_append(str, ", target_met: ");
+  if (self->target_met != nullptr) {
+    g_string_append(str, *self->target_met ? "true" : "false");
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ")");
+  return g_string_free(str, FALSE);
+}
+
+struct _MediaForgeNativeVideoMetadata {
+  GObject parent_instance;
+
+  gchar* path;
+  gchar* mime_type;
+  int64_t* size_bytes;
+  int64_t* width;
+  int64_t* height;
+  int64_t* duration_ms;
+  int64_t* rotation_degrees;
+};
+
+G_DEFINE_TYPE(MediaForgeNativeVideoMetadata, media_forge_native_video_metadata, G_TYPE_OBJECT)
+
+static void media_forge_native_video_metadata_dispose(GObject* object) {
+  MediaForgeNativeVideoMetadata* self = MEDIA_FORGE_NATIVE_VIDEO_METADATA(object);
+  g_clear_pointer(&self->path, g_free);
+  g_clear_pointer(&self->mime_type, g_free);
+  g_clear_pointer(&self->size_bytes, g_free);
+  g_clear_pointer(&self->width, g_free);
+  g_clear_pointer(&self->height, g_free);
+  g_clear_pointer(&self->duration_ms, g_free);
+  g_clear_pointer(&self->rotation_degrees, g_free);
+  G_OBJECT_CLASS(media_forge_native_video_metadata_parent_class)->dispose(object);
+}
+
+static void media_forge_native_video_metadata_init(MediaForgeNativeVideoMetadata* self) {
+}
+
+static void media_forge_native_video_metadata_class_init(MediaForgeNativeVideoMetadataClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_native_video_metadata_dispose;
+}
+
+MediaForgeNativeVideoMetadata* media_forge_native_video_metadata_new(const gchar* path, const gchar* mime_type, int64_t* size_bytes, int64_t* width, int64_t* height, int64_t* duration_ms, int64_t* rotation_degrees) {
+  MediaForgeNativeVideoMetadata* self = MEDIA_FORGE_NATIVE_VIDEO_METADATA(g_object_new(media_forge_native_video_metadata_get_type(), nullptr));
+  self->path = g_strdup(path);
+  if (mime_type != nullptr) {
+    self->mime_type = g_strdup(mime_type);
+  }
+  else {
+    self->mime_type = nullptr;
+  }
+  if (size_bytes != nullptr) {
+    self->size_bytes = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->size_bytes = *size_bytes;
+  }
+  else {
+    self->size_bytes = nullptr;
+  }
+  if (width != nullptr) {
+    self->width = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->width = *width;
+  }
+  else {
+    self->width = nullptr;
+  }
+  if (height != nullptr) {
+    self->height = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->height = *height;
+  }
+  else {
+    self->height = nullptr;
+  }
+  if (duration_ms != nullptr) {
+    self->duration_ms = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->duration_ms = *duration_ms;
+  }
+  else {
+    self->duration_ms = nullptr;
+  }
+  if (rotation_degrees != nullptr) {
+    self->rotation_degrees = static_cast<int64_t*>(malloc(sizeof(int64_t)));
+    *self->rotation_degrees = *rotation_degrees;
+  }
+  else {
+    self->rotation_degrees = nullptr;
+  }
+  return self;
+}
+
+const gchar* media_forge_native_video_metadata_get_path(MediaForgeNativeVideoMetadata* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_VIDEO_METADATA(self), nullptr);
+  return self->path;
+}
+
+const gchar* media_forge_native_video_metadata_get_mime_type(MediaForgeNativeVideoMetadata* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_VIDEO_METADATA(self), nullptr);
+  return self->mime_type;
+}
+
+int64_t* media_forge_native_video_metadata_get_size_bytes(MediaForgeNativeVideoMetadata* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_VIDEO_METADATA(self), nullptr);
+  return self->size_bytes;
+}
+
+int64_t* media_forge_native_video_metadata_get_width(MediaForgeNativeVideoMetadata* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_VIDEO_METADATA(self), nullptr);
+  return self->width;
+}
+
+int64_t* media_forge_native_video_metadata_get_height(MediaForgeNativeVideoMetadata* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_VIDEO_METADATA(self), nullptr);
+  return self->height;
+}
+
+int64_t* media_forge_native_video_metadata_get_duration_ms(MediaForgeNativeVideoMetadata* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_VIDEO_METADATA(self), nullptr);
+  return self->duration_ms;
+}
+
+int64_t* media_forge_native_video_metadata_get_rotation_degrees(MediaForgeNativeVideoMetadata* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_VIDEO_METADATA(self), nullptr);
+  return self->rotation_degrees;
+}
+
+static FlValue* media_forge_native_video_metadata_to_list(MediaForgeNativeVideoMetadata* self) {
+  FlValue* values = fl_value_new_list();
+  fl_value_append_take(values, fl_value_new_string(self->path));
+  fl_value_append_take(values, self->mime_type != nullptr ? fl_value_new_string(self->mime_type) : fl_value_new_null());
+  fl_value_append_take(values, self->size_bytes != nullptr ? fl_value_new_int(*self->size_bytes) : fl_value_new_null());
+  fl_value_append_take(values, self->width != nullptr ? fl_value_new_int(*self->width) : fl_value_new_null());
+  fl_value_append_take(values, self->height != nullptr ? fl_value_new_int(*self->height) : fl_value_new_null());
+  fl_value_append_take(values, self->duration_ms != nullptr ? fl_value_new_int(*self->duration_ms) : fl_value_new_null());
+  fl_value_append_take(values, self->rotation_degrees != nullptr ? fl_value_new_int(*self->rotation_degrees) : fl_value_new_null());
+  return values;
+}
+
+static MediaForgeNativeVideoMetadata* media_forge_native_video_metadata_new_from_list(FlValue* values) {
+  FlValue* value0 = fl_value_get_list_value(values, 0);
+  const gchar* path = fl_value_get_string(value0);
+  FlValue* value1 = fl_value_get_list_value(values, 1);
+  const gchar* mime_type = nullptr;
+  if (fl_value_get_type(value1) != FL_VALUE_TYPE_NULL) {
+    mime_type = fl_value_get_string(value1);
+  }
+  FlValue* value2 = fl_value_get_list_value(values, 2);
+  int64_t* size_bytes = nullptr;
+  int64_t size_bytes_value;
+  if (fl_value_get_type(value2) != FL_VALUE_TYPE_NULL) {
+    size_bytes_value = fl_value_get_int(value2);
+    size_bytes = &size_bytes_value;
+  }
+  FlValue* value3 = fl_value_get_list_value(values, 3);
+  int64_t* width = nullptr;
+  int64_t width_value;
+  if (fl_value_get_type(value3) != FL_VALUE_TYPE_NULL) {
+    width_value = fl_value_get_int(value3);
+    width = &width_value;
+  }
+  FlValue* value4 = fl_value_get_list_value(values, 4);
+  int64_t* height = nullptr;
+  int64_t height_value;
+  if (fl_value_get_type(value4) != FL_VALUE_TYPE_NULL) {
+    height_value = fl_value_get_int(value4);
+    height = &height_value;
+  }
+  FlValue* value5 = fl_value_get_list_value(values, 5);
+  int64_t* duration_ms = nullptr;
+  int64_t duration_ms_value;
+  if (fl_value_get_type(value5) != FL_VALUE_TYPE_NULL) {
+    duration_ms_value = fl_value_get_int(value5);
+    duration_ms = &duration_ms_value;
+  }
+  FlValue* value6 = fl_value_get_list_value(values, 6);
+  int64_t* rotation_degrees = nullptr;
+  int64_t rotation_degrees_value;
+  if (fl_value_get_type(value6) != FL_VALUE_TYPE_NULL) {
+    rotation_degrees_value = fl_value_get_int(value6);
+    rotation_degrees = &rotation_degrees_value;
+  }
+  return media_forge_native_video_metadata_new(path, mime_type, size_bytes, width, height, duration_ms, rotation_degrees);
+}
+
+gboolean media_forge_native_video_metadata_equals(MediaForgeNativeVideoMetadata* a, MediaForgeNativeVideoMetadata* b) {
+  if (a == b) {
+    return TRUE;
+  }
+  if (a == nullptr || b == nullptr) {
+    return FALSE;
+  }
+  if (g_strcmp0(a->path, b->path) != 0) {
+    return FALSE;
+  }
+  if (g_strcmp0(a->mime_type, b->mime_type) != 0) {
+    return FALSE;
+  }
+  if ((a->size_bytes == nullptr) != (b->size_bytes == nullptr)) {
+    return FALSE;
+  }
+  if (a->size_bytes != nullptr && *a->size_bytes != *b->size_bytes) {
+    return FALSE;
+  }
+  if ((a->width == nullptr) != (b->width == nullptr)) {
+    return FALSE;
+  }
+  if (a->width != nullptr && *a->width != *b->width) {
+    return FALSE;
+  }
+  if ((a->height == nullptr) != (b->height == nullptr)) {
+    return FALSE;
+  }
+  if (a->height != nullptr && *a->height != *b->height) {
+    return FALSE;
+  }
+  if ((a->duration_ms == nullptr) != (b->duration_ms == nullptr)) {
+    return FALSE;
+  }
+  if (a->duration_ms != nullptr && *a->duration_ms != *b->duration_ms) {
+    return FALSE;
+  }
+  if ((a->rotation_degrees == nullptr) != (b->rotation_degrees == nullptr)) {
+    return FALSE;
+  }
+  if (a->rotation_degrees != nullptr && *a->rotation_degrees != *b->rotation_degrees) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+guint media_forge_native_video_metadata_hash(MediaForgeNativeVideoMetadata* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_VIDEO_METADATA(self), 0);
+  guint result = 0;
+  result = result * 31 + (self->path != nullptr ? g_str_hash(self->path) : 0);
+  result = result * 31 + (self->mime_type != nullptr ? g_str_hash(self->mime_type) : 0);
+  result = result * 31 + (self->size_bytes != nullptr ? static_cast<guint>(*self->size_bytes) : 0);
+  result = result * 31 + (self->width != nullptr ? static_cast<guint>(*self->width) : 0);
+  result = result * 31 + (self->height != nullptr ? static_cast<guint>(*self->height) : 0);
+  result = result * 31 + (self->duration_ms != nullptr ? static_cast<guint>(*self->duration_ms) : 0);
+  result = result * 31 + (self->rotation_degrees != nullptr ? static_cast<guint>(*self->rotation_degrees) : 0);
+  return result;
+}
+
+gchar* media_forge_native_video_metadata_to_string(MediaForgeNativeVideoMetadata* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_VIDEO_METADATA(self), NULL);
+  GString* str = g_string_new("NativeVideoMetadata(");
+  g_string_append(str, "path: ");
+  if (self->path != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->path);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", mime_type: ");
+  if (self->mime_type != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->mime_type);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", size_bytes: ");
+  if (self->size_bytes != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->size_bytes);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", width: ");
+  if (self->width != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->width);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", height: ");
+  if (self->height != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->height);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", duration_ms: ");
+  if (self->duration_ms != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->duration_ms);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", rotation_degrees: ");
+  if (self->rotation_degrees != nullptr) {
+    g_string_append_printf(str, "%" G_GINT64_FORMAT, *self->rotation_degrees);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ")");
+  return g_string_free(str, FALSE);
+}
+
 struct _MediaForgeMessageCodec {
   FlStandardMessageCodec parent_instance;
 
@@ -293,18 +1775,225 @@ struct _MediaForgeMessageCodec {
 
 G_DEFINE_TYPE(MediaForgeMessageCodec, media_forge_message_codec, fl_standard_message_codec_get_type())
 
+const int media_forge_native_media_type_type_id = 129;
+const int media_forge_native_media_source_type_id = 130;
+const int media_forge_native_camera_device_type_id = 131;
+const int media_forge_native_picker_options_type_id = 132;
+const int media_forge_native_picked_media_type_id = 133;
+const int media_forge_native_lost_data_response_type_id = 134;
+const int media_forge_native_image_process_options_type_id = 135;
+const int media_forge_native_processed_media_type_id = 136;
+const int media_forge_native_video_metadata_type_id = 137;
+
+static gboolean media_forge_message_codec_write_media_forge_native_media_type(FlStandardMessageCodec* codec, GByteArray* buffer, FlValue* value, GError** error) {
+  uint8_t type = media_forge_native_media_type_type_id;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  return fl_standard_message_codec_write_value(codec, buffer, value, error);
+}
+
+static gboolean media_forge_message_codec_write_media_forge_native_media_source(FlStandardMessageCodec* codec, GByteArray* buffer, FlValue* value, GError** error) {
+  uint8_t type = media_forge_native_media_source_type_id;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  return fl_standard_message_codec_write_value(codec, buffer, value, error);
+}
+
+static gboolean media_forge_message_codec_write_media_forge_native_camera_device(FlStandardMessageCodec* codec, GByteArray* buffer, FlValue* value, GError** error) {
+  uint8_t type = media_forge_native_camera_device_type_id;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  return fl_standard_message_codec_write_value(codec, buffer, value, error);
+}
+
+static gboolean media_forge_message_codec_write_media_forge_native_picker_options(FlStandardMessageCodec* codec, GByteArray* buffer, MediaForgeNativePickerOptions* value, GError** error) {
+  uint8_t type = media_forge_native_picker_options_type_id;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  g_autoptr(FlValue) values = media_forge_native_picker_options_to_list(value);
+  return fl_standard_message_codec_write_value(codec, buffer, values, error);
+}
+
+static gboolean media_forge_message_codec_write_media_forge_native_picked_media(FlStandardMessageCodec* codec, GByteArray* buffer, MediaForgeNativePickedMedia* value, GError** error) {
+  uint8_t type = media_forge_native_picked_media_type_id;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  g_autoptr(FlValue) values = media_forge_native_picked_media_to_list(value);
+  return fl_standard_message_codec_write_value(codec, buffer, values, error);
+}
+
+static gboolean media_forge_message_codec_write_media_forge_native_lost_data_response(FlStandardMessageCodec* codec, GByteArray* buffer, MediaForgeNativeLostDataResponse* value, GError** error) {
+  uint8_t type = media_forge_native_lost_data_response_type_id;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  g_autoptr(FlValue) values = media_forge_native_lost_data_response_to_list(value);
+  return fl_standard_message_codec_write_value(codec, buffer, values, error);
+}
+
+static gboolean media_forge_message_codec_write_media_forge_native_image_process_options(FlStandardMessageCodec* codec, GByteArray* buffer, MediaForgeNativeImageProcessOptions* value, GError** error) {
+  uint8_t type = media_forge_native_image_process_options_type_id;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  g_autoptr(FlValue) values = media_forge_native_image_process_options_to_list(value);
+  return fl_standard_message_codec_write_value(codec, buffer, values, error);
+}
+
+static gboolean media_forge_message_codec_write_media_forge_native_processed_media(FlStandardMessageCodec* codec, GByteArray* buffer, MediaForgeNativeProcessedMedia* value, GError** error) {
+  uint8_t type = media_forge_native_processed_media_type_id;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  g_autoptr(FlValue) values = media_forge_native_processed_media_to_list(value);
+  return fl_standard_message_codec_write_value(codec, buffer, values, error);
+}
+
+static gboolean media_forge_message_codec_write_media_forge_native_video_metadata(FlStandardMessageCodec* codec, GByteArray* buffer, MediaForgeNativeVideoMetadata* value, GError** error) {
+  uint8_t type = media_forge_native_video_metadata_type_id;
+  g_byte_array_append(buffer, &type, sizeof(uint8_t));
+  g_autoptr(FlValue) values = media_forge_native_video_metadata_to_list(value);
+  return fl_standard_message_codec_write_value(codec, buffer, values, error);
+}
 
 static gboolean media_forge_message_codec_write_value(FlStandardMessageCodec* codec, GByteArray* buffer, FlValue* value, GError** error) {
   if (fl_value_get_type(value) == FL_VALUE_TYPE_CUSTOM) {
     switch (fl_value_get_custom_type(value)) {
+      case media_forge_native_media_type_type_id:
+        return media_forge_message_codec_write_media_forge_native_media_type(codec, buffer, reinterpret_cast<FlValue*>(const_cast<gpointer>(fl_value_get_custom_value(value))), error);
+      case media_forge_native_media_source_type_id:
+        return media_forge_message_codec_write_media_forge_native_media_source(codec, buffer, reinterpret_cast<FlValue*>(const_cast<gpointer>(fl_value_get_custom_value(value))), error);
+      case media_forge_native_camera_device_type_id:
+        return media_forge_message_codec_write_media_forge_native_camera_device(codec, buffer, reinterpret_cast<FlValue*>(const_cast<gpointer>(fl_value_get_custom_value(value))), error);
+      case media_forge_native_picker_options_type_id:
+        return media_forge_message_codec_write_media_forge_native_picker_options(codec, buffer, MEDIA_FORGE_NATIVE_PICKER_OPTIONS(fl_value_get_custom_value_object(value)), error);
+      case media_forge_native_picked_media_type_id:
+        return media_forge_message_codec_write_media_forge_native_picked_media(codec, buffer, MEDIA_FORGE_NATIVE_PICKED_MEDIA(fl_value_get_custom_value_object(value)), error);
+      case media_forge_native_lost_data_response_type_id:
+        return media_forge_message_codec_write_media_forge_native_lost_data_response(codec, buffer, MEDIA_FORGE_NATIVE_LOST_DATA_RESPONSE(fl_value_get_custom_value_object(value)), error);
+      case media_forge_native_image_process_options_type_id:
+        return media_forge_message_codec_write_media_forge_native_image_process_options(codec, buffer, MEDIA_FORGE_NATIVE_IMAGE_PROCESS_OPTIONS(fl_value_get_custom_value_object(value)), error);
+      case media_forge_native_processed_media_type_id:
+        return media_forge_message_codec_write_media_forge_native_processed_media(codec, buffer, MEDIA_FORGE_NATIVE_PROCESSED_MEDIA(fl_value_get_custom_value_object(value)), error);
+      case media_forge_native_video_metadata_type_id:
+        return media_forge_message_codec_write_media_forge_native_video_metadata(codec, buffer, MEDIA_FORGE_NATIVE_VIDEO_METADATA(fl_value_get_custom_value_object(value)), error);
     }
   }
 
   return FL_STANDARD_MESSAGE_CODEC_CLASS(media_forge_message_codec_parent_class)->write_value(codec, buffer, value, error);
 }
 
+static FlValue* media_forge_message_codec_read_media_forge_native_media_type(FlStandardMessageCodec* codec, GBytes* buffer, size_t* offset, GError** error) {
+  return fl_value_new_custom(media_forge_native_media_type_type_id, fl_standard_message_codec_read_value(codec, buffer, offset, error), (GDestroyNotify)fl_value_unref);
+}
+
+static FlValue* media_forge_message_codec_read_media_forge_native_media_source(FlStandardMessageCodec* codec, GBytes* buffer, size_t* offset, GError** error) {
+  return fl_value_new_custom(media_forge_native_media_source_type_id, fl_standard_message_codec_read_value(codec, buffer, offset, error), (GDestroyNotify)fl_value_unref);
+}
+
+static FlValue* media_forge_message_codec_read_media_forge_native_camera_device(FlStandardMessageCodec* codec, GBytes* buffer, size_t* offset, GError** error) {
+  return fl_value_new_custom(media_forge_native_camera_device_type_id, fl_standard_message_codec_read_value(codec, buffer, offset, error), (GDestroyNotify)fl_value_unref);
+}
+
+static FlValue* media_forge_message_codec_read_media_forge_native_picker_options(FlStandardMessageCodec* codec, GBytes* buffer, size_t* offset, GError** error) {
+  g_autoptr(FlValue) values = fl_standard_message_codec_read_value(codec, buffer, offset, error);
+  if (values == nullptr) {
+    return nullptr;
+  }
+
+  g_autoptr(MediaForgeNativePickerOptions) value = media_forge_native_picker_options_new_from_list(values);
+  if (value == nullptr) {
+    g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED, "Invalid data received for MessageData");
+    return nullptr;
+  }
+
+  return fl_value_new_custom_object(media_forge_native_picker_options_type_id, G_OBJECT(value));
+}
+
+static FlValue* media_forge_message_codec_read_media_forge_native_picked_media(FlStandardMessageCodec* codec, GBytes* buffer, size_t* offset, GError** error) {
+  g_autoptr(FlValue) values = fl_standard_message_codec_read_value(codec, buffer, offset, error);
+  if (values == nullptr) {
+    return nullptr;
+  }
+
+  g_autoptr(MediaForgeNativePickedMedia) value = media_forge_native_picked_media_new_from_list(values);
+  if (value == nullptr) {
+    g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED, "Invalid data received for MessageData");
+    return nullptr;
+  }
+
+  return fl_value_new_custom_object(media_forge_native_picked_media_type_id, G_OBJECT(value));
+}
+
+static FlValue* media_forge_message_codec_read_media_forge_native_lost_data_response(FlStandardMessageCodec* codec, GBytes* buffer, size_t* offset, GError** error) {
+  g_autoptr(FlValue) values = fl_standard_message_codec_read_value(codec, buffer, offset, error);
+  if (values == nullptr) {
+    return nullptr;
+  }
+
+  g_autoptr(MediaForgeNativeLostDataResponse) value = media_forge_native_lost_data_response_new_from_list(values);
+  if (value == nullptr) {
+    g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED, "Invalid data received for MessageData");
+    return nullptr;
+  }
+
+  return fl_value_new_custom_object(media_forge_native_lost_data_response_type_id, G_OBJECT(value));
+}
+
+static FlValue* media_forge_message_codec_read_media_forge_native_image_process_options(FlStandardMessageCodec* codec, GBytes* buffer, size_t* offset, GError** error) {
+  g_autoptr(FlValue) values = fl_standard_message_codec_read_value(codec, buffer, offset, error);
+  if (values == nullptr) {
+    return nullptr;
+  }
+
+  g_autoptr(MediaForgeNativeImageProcessOptions) value = media_forge_native_image_process_options_new_from_list(values);
+  if (value == nullptr) {
+    g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED, "Invalid data received for MessageData");
+    return nullptr;
+  }
+
+  return fl_value_new_custom_object(media_forge_native_image_process_options_type_id, G_OBJECT(value));
+}
+
+static FlValue* media_forge_message_codec_read_media_forge_native_processed_media(FlStandardMessageCodec* codec, GBytes* buffer, size_t* offset, GError** error) {
+  g_autoptr(FlValue) values = fl_standard_message_codec_read_value(codec, buffer, offset, error);
+  if (values == nullptr) {
+    return nullptr;
+  }
+
+  g_autoptr(MediaForgeNativeProcessedMedia) value = media_forge_native_processed_media_new_from_list(values);
+  if (value == nullptr) {
+    g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED, "Invalid data received for MessageData");
+    return nullptr;
+  }
+
+  return fl_value_new_custom_object(media_forge_native_processed_media_type_id, G_OBJECT(value));
+}
+
+static FlValue* media_forge_message_codec_read_media_forge_native_video_metadata(FlStandardMessageCodec* codec, GBytes* buffer, size_t* offset, GError** error) {
+  g_autoptr(FlValue) values = fl_standard_message_codec_read_value(codec, buffer, offset, error);
+  if (values == nullptr) {
+    return nullptr;
+  }
+
+  g_autoptr(MediaForgeNativeVideoMetadata) value = media_forge_native_video_metadata_new_from_list(values);
+  if (value == nullptr) {
+    g_set_error(error, FL_MESSAGE_CODEC_ERROR, FL_MESSAGE_CODEC_ERROR_FAILED, "Invalid data received for MessageData");
+    return nullptr;
+  }
+
+  return fl_value_new_custom_object(media_forge_native_video_metadata_type_id, G_OBJECT(value));
+}
+
 static FlValue* media_forge_message_codec_read_value_of_type(FlStandardMessageCodec* codec, GBytes* buffer, size_t* offset, int type, GError** error) {
   switch (type) {
+    case media_forge_native_media_type_type_id:
+      return media_forge_message_codec_read_media_forge_native_media_type(codec, buffer, offset, error);
+    case media_forge_native_media_source_type_id:
+      return media_forge_message_codec_read_media_forge_native_media_source(codec, buffer, offset, error);
+    case media_forge_native_camera_device_type_id:
+      return media_forge_message_codec_read_media_forge_native_camera_device(codec, buffer, offset, error);
+    case media_forge_native_picker_options_type_id:
+      return media_forge_message_codec_read_media_forge_native_picker_options(codec, buffer, offset, error);
+    case media_forge_native_picked_media_type_id:
+      return media_forge_message_codec_read_media_forge_native_picked_media(codec, buffer, offset, error);
+    case media_forge_native_lost_data_response_type_id:
+      return media_forge_message_codec_read_media_forge_native_lost_data_response(codec, buffer, offset, error);
+    case media_forge_native_image_process_options_type_id:
+      return media_forge_message_codec_read_media_forge_native_image_process_options(codec, buffer, offset, error);
+    case media_forge_native_processed_media_type_id:
+      return media_forge_message_codec_read_media_forge_native_processed_media(codec, buffer, offset, error);
+    case media_forge_native_video_metadata_type_id:
+      return media_forge_message_codec_read_media_forge_native_video_metadata(codec, buffer, offset, error);
     default:
       return FL_STANDARD_MESSAGE_CODEC_CLASS(media_forge_message_codec_parent_class)->read_value_of_type(codec, buffer, offset, type, error);
   }
@@ -430,4 +2119,770 @@ void media_forge_media_forge_plugin_api_clear_method_handlers(FlBinaryMessenger*
   g_autofree gchar* get_platform_version_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgePluginApi.getPlatformVersion%s", dot_suffix);
   g_autoptr(FlBasicMessageChannel) get_platform_version_channel = fl_basic_message_channel_new(messenger, get_platform_version_channel_name, FL_MESSAGE_CODEC(codec));
   fl_basic_message_channel_set_message_handler(get_platform_version_channel, nullptr, nullptr, nullptr);
+}
+
+struct _MediaForgeMediaForgePickerApiResponseHandle {
+  GObject parent_instance;
+
+  FlBasicMessageChannel* channel;
+  FlBasicMessageChannelResponseHandle* response_handle;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgePickerApiResponseHandle, media_forge_media_forge_picker_api_response_handle, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_picker_api_response_handle_dispose(GObject* object) {
+  MediaForgeMediaForgePickerApiResponseHandle* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_RESPONSE_HANDLE(object);
+  g_clear_object(&self->channel);
+  g_clear_object(&self->response_handle);
+  G_OBJECT_CLASS(media_forge_media_forge_picker_api_response_handle_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_picker_api_response_handle_init(MediaForgeMediaForgePickerApiResponseHandle* self) {
+}
+
+static void media_forge_media_forge_picker_api_response_handle_class_init(MediaForgeMediaForgePickerApiResponseHandleClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_picker_api_response_handle_dispose;
+}
+
+static MediaForgeMediaForgePickerApiResponseHandle* media_forge_media_forge_picker_api_response_handle_new(FlBasicMessageChannel* channel, FlBasicMessageChannelResponseHandle* response_handle) {
+  MediaForgeMediaForgePickerApiResponseHandle* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_RESPONSE_HANDLE(g_object_new(media_forge_media_forge_picker_api_response_handle_get_type(), nullptr));
+  self->channel = FL_BASIC_MESSAGE_CHANNEL(g_object_ref(channel));
+  self->response_handle = FL_BASIC_MESSAGE_CHANNEL_RESPONSE_HANDLE(g_object_ref(response_handle));
+  return self;
+}
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgePickerApiPickImageResponse, media_forge_media_forge_picker_api_pick_image_response, MEDIA_FORGE, MEDIA_FORGE_PICKER_API_PICK_IMAGE_RESPONSE, GObject)
+
+struct _MediaForgeMediaForgePickerApiPickImageResponse {
+  GObject parent_instance;
+
+  FlValue* value;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgePickerApiPickImageResponse, media_forge_media_forge_picker_api_pick_image_response, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_picker_api_pick_image_response_dispose(GObject* object) {
+  MediaForgeMediaForgePickerApiPickImageResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_PICK_IMAGE_RESPONSE(object);
+  g_clear_pointer(&self->value, fl_value_unref);
+  G_OBJECT_CLASS(media_forge_media_forge_picker_api_pick_image_response_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_picker_api_pick_image_response_init(MediaForgeMediaForgePickerApiPickImageResponse* self) {
+}
+
+static void media_forge_media_forge_picker_api_pick_image_response_class_init(MediaForgeMediaForgePickerApiPickImageResponseClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_picker_api_pick_image_response_dispose;
+}
+
+static MediaForgeMediaForgePickerApiPickImageResponse* media_forge_media_forge_picker_api_pick_image_response_new(MediaForgeNativePickedMedia* return_value) {
+  MediaForgeMediaForgePickerApiPickImageResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_PICK_IMAGE_RESPONSE(g_object_new(media_forge_media_forge_picker_api_pick_image_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, return_value != nullptr ? fl_value_new_custom_object(media_forge_native_picked_media_type_id, G_OBJECT(return_value)) : fl_value_new_null());
+  return self;
+}
+
+static MediaForgeMediaForgePickerApiPickImageResponse* media_forge_media_forge_picker_api_pick_image_response_new_error(const gchar* code, const gchar* message, FlValue* details) {
+  MediaForgeMediaForgePickerApiPickImageResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_PICK_IMAGE_RESPONSE(g_object_new(media_forge_media_forge_picker_api_pick_image_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_string(code));
+  fl_value_append_take(self->value, fl_value_new_string(message != nullptr ? message : ""));
+  fl_value_append_take(self->value, details != nullptr ? fl_value_ref(details) : fl_value_new_null());
+  return self;
+}
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgePickerApiPickVideoResponse, media_forge_media_forge_picker_api_pick_video_response, MEDIA_FORGE, MEDIA_FORGE_PICKER_API_PICK_VIDEO_RESPONSE, GObject)
+
+struct _MediaForgeMediaForgePickerApiPickVideoResponse {
+  GObject parent_instance;
+
+  FlValue* value;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgePickerApiPickVideoResponse, media_forge_media_forge_picker_api_pick_video_response, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_picker_api_pick_video_response_dispose(GObject* object) {
+  MediaForgeMediaForgePickerApiPickVideoResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_PICK_VIDEO_RESPONSE(object);
+  g_clear_pointer(&self->value, fl_value_unref);
+  G_OBJECT_CLASS(media_forge_media_forge_picker_api_pick_video_response_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_picker_api_pick_video_response_init(MediaForgeMediaForgePickerApiPickVideoResponse* self) {
+}
+
+static void media_forge_media_forge_picker_api_pick_video_response_class_init(MediaForgeMediaForgePickerApiPickVideoResponseClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_picker_api_pick_video_response_dispose;
+}
+
+static MediaForgeMediaForgePickerApiPickVideoResponse* media_forge_media_forge_picker_api_pick_video_response_new(MediaForgeNativePickedMedia* return_value) {
+  MediaForgeMediaForgePickerApiPickVideoResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_PICK_VIDEO_RESPONSE(g_object_new(media_forge_media_forge_picker_api_pick_video_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, return_value != nullptr ? fl_value_new_custom_object(media_forge_native_picked_media_type_id, G_OBJECT(return_value)) : fl_value_new_null());
+  return self;
+}
+
+static MediaForgeMediaForgePickerApiPickVideoResponse* media_forge_media_forge_picker_api_pick_video_response_new_error(const gchar* code, const gchar* message, FlValue* details) {
+  MediaForgeMediaForgePickerApiPickVideoResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_PICK_VIDEO_RESPONSE(g_object_new(media_forge_media_forge_picker_api_pick_video_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_string(code));
+  fl_value_append_take(self->value, fl_value_new_string(message != nullptr ? message : ""));
+  fl_value_append_take(self->value, details != nullptr ? fl_value_ref(details) : fl_value_new_null());
+  return self;
+}
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgePickerApiPickMultipleResponse, media_forge_media_forge_picker_api_pick_multiple_response, MEDIA_FORGE, MEDIA_FORGE_PICKER_API_PICK_MULTIPLE_RESPONSE, GObject)
+
+struct _MediaForgeMediaForgePickerApiPickMultipleResponse {
+  GObject parent_instance;
+
+  FlValue* value;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgePickerApiPickMultipleResponse, media_forge_media_forge_picker_api_pick_multiple_response, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_picker_api_pick_multiple_response_dispose(GObject* object) {
+  MediaForgeMediaForgePickerApiPickMultipleResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_PICK_MULTIPLE_RESPONSE(object);
+  g_clear_pointer(&self->value, fl_value_unref);
+  G_OBJECT_CLASS(media_forge_media_forge_picker_api_pick_multiple_response_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_picker_api_pick_multiple_response_init(MediaForgeMediaForgePickerApiPickMultipleResponse* self) {
+}
+
+static void media_forge_media_forge_picker_api_pick_multiple_response_class_init(MediaForgeMediaForgePickerApiPickMultipleResponseClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_picker_api_pick_multiple_response_dispose;
+}
+
+static MediaForgeMediaForgePickerApiPickMultipleResponse* media_forge_media_forge_picker_api_pick_multiple_response_new(FlValue* return_value) {
+  MediaForgeMediaForgePickerApiPickMultipleResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_PICK_MULTIPLE_RESPONSE(g_object_new(media_forge_media_forge_picker_api_pick_multiple_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_ref(return_value));
+  return self;
+}
+
+static MediaForgeMediaForgePickerApiPickMultipleResponse* media_forge_media_forge_picker_api_pick_multiple_response_new_error(const gchar* code, const gchar* message, FlValue* details) {
+  MediaForgeMediaForgePickerApiPickMultipleResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_PICK_MULTIPLE_RESPONSE(g_object_new(media_forge_media_forge_picker_api_pick_multiple_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_string(code));
+  fl_value_append_take(self->value, fl_value_new_string(message != nullptr ? message : ""));
+  fl_value_append_take(self->value, details != nullptr ? fl_value_ref(details) : fl_value_new_null());
+  return self;
+}
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgePickerApiRetrieveLostDataResponse, media_forge_media_forge_picker_api_retrieve_lost_data_response, MEDIA_FORGE, MEDIA_FORGE_PICKER_API_RETRIEVE_LOST_DATA_RESPONSE, GObject)
+
+struct _MediaForgeMediaForgePickerApiRetrieveLostDataResponse {
+  GObject parent_instance;
+
+  FlValue* value;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgePickerApiRetrieveLostDataResponse, media_forge_media_forge_picker_api_retrieve_lost_data_response, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_picker_api_retrieve_lost_data_response_dispose(GObject* object) {
+  MediaForgeMediaForgePickerApiRetrieveLostDataResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_RETRIEVE_LOST_DATA_RESPONSE(object);
+  g_clear_pointer(&self->value, fl_value_unref);
+  G_OBJECT_CLASS(media_forge_media_forge_picker_api_retrieve_lost_data_response_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_picker_api_retrieve_lost_data_response_init(MediaForgeMediaForgePickerApiRetrieveLostDataResponse* self) {
+}
+
+static void media_forge_media_forge_picker_api_retrieve_lost_data_response_class_init(MediaForgeMediaForgePickerApiRetrieveLostDataResponseClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_picker_api_retrieve_lost_data_response_dispose;
+}
+
+static MediaForgeMediaForgePickerApiRetrieveLostDataResponse* media_forge_media_forge_picker_api_retrieve_lost_data_response_new(MediaForgeNativeLostDataResponse* return_value) {
+  MediaForgeMediaForgePickerApiRetrieveLostDataResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_RETRIEVE_LOST_DATA_RESPONSE(g_object_new(media_forge_media_forge_picker_api_retrieve_lost_data_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_custom_object(media_forge_native_lost_data_response_type_id, G_OBJECT(return_value)));
+  return self;
+}
+
+static MediaForgeMediaForgePickerApiRetrieveLostDataResponse* media_forge_media_forge_picker_api_retrieve_lost_data_response_new_error(const gchar* code, const gchar* message, FlValue* details) {
+  MediaForgeMediaForgePickerApiRetrieveLostDataResponse* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API_RETRIEVE_LOST_DATA_RESPONSE(g_object_new(media_forge_media_forge_picker_api_retrieve_lost_data_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_string(code));
+  fl_value_append_take(self->value, fl_value_new_string(message != nullptr ? message : ""));
+  fl_value_append_take(self->value, details != nullptr ? fl_value_ref(details) : fl_value_new_null());
+  return self;
+}
+
+struct _MediaForgeMediaForgePickerApi {
+  GObject parent_instance;
+
+  const MediaForgeMediaForgePickerApiVTable* vtable;
+  gpointer user_data;
+  GDestroyNotify user_data_free_func;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgePickerApi, media_forge_media_forge_picker_api, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_picker_api_dispose(GObject* object) {
+  MediaForgeMediaForgePickerApi* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API(object);
+  if (self->user_data != nullptr) {
+    self->user_data_free_func(self->user_data);
+  }
+  self->user_data = nullptr;
+  G_OBJECT_CLASS(media_forge_media_forge_picker_api_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_picker_api_init(MediaForgeMediaForgePickerApi* self) {
+}
+
+static void media_forge_media_forge_picker_api_class_init(MediaForgeMediaForgePickerApiClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_picker_api_dispose;
+}
+
+static MediaForgeMediaForgePickerApi* media_forge_media_forge_picker_api_new(const MediaForgeMediaForgePickerApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func) {
+  MediaForgeMediaForgePickerApi* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API(g_object_new(media_forge_media_forge_picker_api_get_type(), nullptr));
+  self->vtable = vtable;
+  self->user_data = user_data;
+  self->user_data_free_func = user_data_free_func;
+  return self;
+}
+
+static void media_forge_media_forge_picker_api_pick_image_cb(FlBasicMessageChannel* channel, FlValue* message_, FlBasicMessageChannelResponseHandle* response_handle, gpointer user_data) {
+  MediaForgeMediaForgePickerApi* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API(user_data);
+
+  if (self->vtable == nullptr || self->vtable->pick_image == nullptr) {
+    return;
+  }
+
+  FlValue* value0 = fl_value_get_list_value(message_, 0);
+  MediaForgeNativeMediaSource source = static_cast<MediaForgeNativeMediaSource>(fl_value_get_int(reinterpret_cast<FlValue*>(const_cast<gpointer>(fl_value_get_custom_value(value0)))));
+  FlValue* value1 = fl_value_get_list_value(message_, 1);
+  MediaForgeNativePickerOptions* options = MEDIA_FORGE_NATIVE_PICKER_OPTIONS(fl_value_get_custom_value_object(value1));
+  g_autoptr(MediaForgeMediaForgePickerApiResponseHandle) handle = media_forge_media_forge_picker_api_response_handle_new(channel, response_handle);
+  self->vtable->pick_image(source, options, handle, self->user_data);
+}
+
+static void media_forge_media_forge_picker_api_pick_video_cb(FlBasicMessageChannel* channel, FlValue* message_, FlBasicMessageChannelResponseHandle* response_handle, gpointer user_data) {
+  MediaForgeMediaForgePickerApi* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API(user_data);
+
+  if (self->vtable == nullptr || self->vtable->pick_video == nullptr) {
+    return;
+  }
+
+  FlValue* value0 = fl_value_get_list_value(message_, 0);
+  MediaForgeNativeMediaSource source = static_cast<MediaForgeNativeMediaSource>(fl_value_get_int(reinterpret_cast<FlValue*>(const_cast<gpointer>(fl_value_get_custom_value(value0)))));
+  FlValue* value1 = fl_value_get_list_value(message_, 1);
+  MediaForgeNativePickerOptions* options = MEDIA_FORGE_NATIVE_PICKER_OPTIONS(fl_value_get_custom_value_object(value1));
+  g_autoptr(MediaForgeMediaForgePickerApiResponseHandle) handle = media_forge_media_forge_picker_api_response_handle_new(channel, response_handle);
+  self->vtable->pick_video(source, options, handle, self->user_data);
+}
+
+static void media_forge_media_forge_picker_api_pick_multiple_cb(FlBasicMessageChannel* channel, FlValue* message_, FlBasicMessageChannelResponseHandle* response_handle, gpointer user_data) {
+  MediaForgeMediaForgePickerApi* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API(user_data);
+
+  if (self->vtable == nullptr || self->vtable->pick_multiple == nullptr) {
+    return;
+  }
+
+  FlValue* value0 = fl_value_get_list_value(message_, 0);
+  MediaForgeNativeMediaType type = static_cast<MediaForgeNativeMediaType>(fl_value_get_int(reinterpret_cast<FlValue*>(const_cast<gpointer>(fl_value_get_custom_value(value0)))));
+  FlValue* value1 = fl_value_get_list_value(message_, 1);
+  MediaForgeNativePickerOptions* options = MEDIA_FORGE_NATIVE_PICKER_OPTIONS(fl_value_get_custom_value_object(value1));
+  g_autoptr(MediaForgeMediaForgePickerApiResponseHandle) handle = media_forge_media_forge_picker_api_response_handle_new(channel, response_handle);
+  self->vtable->pick_multiple(type, options, handle, self->user_data);
+}
+
+static void media_forge_media_forge_picker_api_retrieve_lost_data_cb(FlBasicMessageChannel* channel, FlValue* message_, FlBasicMessageChannelResponseHandle* response_handle, gpointer user_data) {
+  MediaForgeMediaForgePickerApi* self = MEDIA_FORGE_MEDIA_FORGE_PICKER_API(user_data);
+
+  if (self->vtable == nullptr || self->vtable->retrieve_lost_data == nullptr) {
+    return;
+  }
+
+  g_autoptr(MediaForgeMediaForgePickerApiResponseHandle) handle = media_forge_media_forge_picker_api_response_handle_new(channel, response_handle);
+  self->vtable->retrieve_lost_data(handle, self->user_data);
+}
+
+void media_forge_media_forge_picker_api_set_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix, const MediaForgeMediaForgePickerApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func) {
+  g_autofree gchar* dot_suffix = suffix != nullptr ? g_strdup_printf(".%s", suffix) : g_strdup("");
+  g_autoptr(MediaForgeMediaForgePickerApi) api_data = media_forge_media_forge_picker_api_new(vtable, user_data, user_data_free_func);
+
+  g_autoptr(MediaForgeMessageCodec) codec = media_forge_message_codec_new();
+  g_autofree gchar* pick_image_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickImage%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) pick_image_channel = fl_basic_message_channel_new(messenger, pick_image_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(pick_image_channel, media_forge_media_forge_picker_api_pick_image_cb, g_object_ref(api_data), g_object_unref);
+  g_autofree gchar* pick_video_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickVideo%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) pick_video_channel = fl_basic_message_channel_new(messenger, pick_video_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(pick_video_channel, media_forge_media_forge_picker_api_pick_video_cb, g_object_ref(api_data), g_object_unref);
+  g_autofree gchar* pick_multiple_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickMultiple%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) pick_multiple_channel = fl_basic_message_channel_new(messenger, pick_multiple_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(pick_multiple_channel, media_forge_media_forge_picker_api_pick_multiple_cb, g_object_ref(api_data), g_object_unref);
+  g_autofree gchar* retrieve_lost_data_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgePickerApi.retrieveLostData%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) retrieve_lost_data_channel = fl_basic_message_channel_new(messenger, retrieve_lost_data_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(retrieve_lost_data_channel, media_forge_media_forge_picker_api_retrieve_lost_data_cb, g_object_ref(api_data), g_object_unref);
+}
+
+void media_forge_media_forge_picker_api_clear_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix) {
+  g_autofree gchar* dot_suffix = suffix != nullptr ? g_strdup_printf(".%s", suffix) : g_strdup("");
+
+  g_autoptr(MediaForgeMessageCodec) codec = media_forge_message_codec_new();
+  g_autofree gchar* pick_image_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickImage%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) pick_image_channel = fl_basic_message_channel_new(messenger, pick_image_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(pick_image_channel, nullptr, nullptr, nullptr);
+  g_autofree gchar* pick_video_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickVideo%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) pick_video_channel = fl_basic_message_channel_new(messenger, pick_video_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(pick_video_channel, nullptr, nullptr, nullptr);
+  g_autofree gchar* pick_multiple_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickMultiple%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) pick_multiple_channel = fl_basic_message_channel_new(messenger, pick_multiple_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(pick_multiple_channel, nullptr, nullptr, nullptr);
+  g_autofree gchar* retrieve_lost_data_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgePickerApi.retrieveLostData%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) retrieve_lost_data_channel = fl_basic_message_channel_new(messenger, retrieve_lost_data_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(retrieve_lost_data_channel, nullptr, nullptr, nullptr);
+}
+
+void media_forge_media_forge_picker_api_respond_pick_image(MediaForgeMediaForgePickerApiResponseHandle* response_handle, MediaForgeNativePickedMedia* return_value) {
+  g_autoptr(MediaForgeMediaForgePickerApiPickImageResponse) response = media_forge_media_forge_picker_api_pick_image_response_new(return_value);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgePickerApi", "pickImage", error->message);
+  }
+}
+
+void media_forge_media_forge_picker_api_respond_error_pick_image(MediaForgeMediaForgePickerApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details) {
+  g_autoptr(MediaForgeMediaForgePickerApiPickImageResponse) response = media_forge_media_forge_picker_api_pick_image_response_new_error(code, message, details);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgePickerApi", "pickImage", error->message);
+  }
+}
+
+void media_forge_media_forge_picker_api_respond_pick_video(MediaForgeMediaForgePickerApiResponseHandle* response_handle, MediaForgeNativePickedMedia* return_value) {
+  g_autoptr(MediaForgeMediaForgePickerApiPickVideoResponse) response = media_forge_media_forge_picker_api_pick_video_response_new(return_value);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgePickerApi", "pickVideo", error->message);
+  }
+}
+
+void media_forge_media_forge_picker_api_respond_error_pick_video(MediaForgeMediaForgePickerApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details) {
+  g_autoptr(MediaForgeMediaForgePickerApiPickVideoResponse) response = media_forge_media_forge_picker_api_pick_video_response_new_error(code, message, details);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgePickerApi", "pickVideo", error->message);
+  }
+}
+
+void media_forge_media_forge_picker_api_respond_pick_multiple(MediaForgeMediaForgePickerApiResponseHandle* response_handle, FlValue* return_value) {
+  g_autoptr(MediaForgeMediaForgePickerApiPickMultipleResponse) response = media_forge_media_forge_picker_api_pick_multiple_response_new(return_value);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgePickerApi", "pickMultiple", error->message);
+  }
+}
+
+void media_forge_media_forge_picker_api_respond_error_pick_multiple(MediaForgeMediaForgePickerApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details) {
+  g_autoptr(MediaForgeMediaForgePickerApiPickMultipleResponse) response = media_forge_media_forge_picker_api_pick_multiple_response_new_error(code, message, details);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgePickerApi", "pickMultiple", error->message);
+  }
+}
+
+void media_forge_media_forge_picker_api_respond_retrieve_lost_data(MediaForgeMediaForgePickerApiResponseHandle* response_handle, MediaForgeNativeLostDataResponse* return_value) {
+  g_autoptr(MediaForgeMediaForgePickerApiRetrieveLostDataResponse) response = media_forge_media_forge_picker_api_retrieve_lost_data_response_new(return_value);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgePickerApi", "retrieveLostData", error->message);
+  }
+}
+
+void media_forge_media_forge_picker_api_respond_error_retrieve_lost_data(MediaForgeMediaForgePickerApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details) {
+  g_autoptr(MediaForgeMediaForgePickerApiRetrieveLostDataResponse) response = media_forge_media_forge_picker_api_retrieve_lost_data_response_new_error(code, message, details);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgePickerApi", "retrieveLostData", error->message);
+  }
+}
+
+struct _MediaForgeMediaForgeProcessorApiResponseHandle {
+  GObject parent_instance;
+
+  FlBasicMessageChannel* channel;
+  FlBasicMessageChannelResponseHandle* response_handle;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgeProcessorApiResponseHandle, media_forge_media_forge_processor_api_response_handle, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_processor_api_response_handle_dispose(GObject* object) {
+  MediaForgeMediaForgeProcessorApiResponseHandle* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_RESPONSE_HANDLE(object);
+  g_clear_object(&self->channel);
+  g_clear_object(&self->response_handle);
+  G_OBJECT_CLASS(media_forge_media_forge_processor_api_response_handle_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_processor_api_response_handle_init(MediaForgeMediaForgeProcessorApiResponseHandle* self) {
+}
+
+static void media_forge_media_forge_processor_api_response_handle_class_init(MediaForgeMediaForgeProcessorApiResponseHandleClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_processor_api_response_handle_dispose;
+}
+
+static MediaForgeMediaForgeProcessorApiResponseHandle* media_forge_media_forge_processor_api_response_handle_new(FlBasicMessageChannel* channel, FlBasicMessageChannelResponseHandle* response_handle) {
+  MediaForgeMediaForgeProcessorApiResponseHandle* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_RESPONSE_HANDLE(g_object_new(media_forge_media_forge_processor_api_response_handle_get_type(), nullptr));
+  self->channel = FL_BASIC_MESSAGE_CHANNEL(g_object_ref(channel));
+  self->response_handle = FL_BASIC_MESSAGE_CHANNEL_RESPONSE_HANDLE(g_object_ref(response_handle));
+  return self;
+}
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgeProcessorApiProcessImageResponse, media_forge_media_forge_processor_api_process_image_response, MEDIA_FORGE, MEDIA_FORGE_PROCESSOR_API_PROCESS_IMAGE_RESPONSE, GObject)
+
+struct _MediaForgeMediaForgeProcessorApiProcessImageResponse {
+  GObject parent_instance;
+
+  FlValue* value;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgeProcessorApiProcessImageResponse, media_forge_media_forge_processor_api_process_image_response, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_processor_api_process_image_response_dispose(GObject* object) {
+  MediaForgeMediaForgeProcessorApiProcessImageResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_PROCESS_IMAGE_RESPONSE(object);
+  g_clear_pointer(&self->value, fl_value_unref);
+  G_OBJECT_CLASS(media_forge_media_forge_processor_api_process_image_response_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_processor_api_process_image_response_init(MediaForgeMediaForgeProcessorApiProcessImageResponse* self) {
+}
+
+static void media_forge_media_forge_processor_api_process_image_response_class_init(MediaForgeMediaForgeProcessorApiProcessImageResponseClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_processor_api_process_image_response_dispose;
+}
+
+static MediaForgeMediaForgeProcessorApiProcessImageResponse* media_forge_media_forge_processor_api_process_image_response_new(MediaForgeNativeProcessedMedia* return_value) {
+  MediaForgeMediaForgeProcessorApiProcessImageResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_PROCESS_IMAGE_RESPONSE(g_object_new(media_forge_media_forge_processor_api_process_image_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_custom_object(media_forge_native_processed_media_type_id, G_OBJECT(return_value)));
+  return self;
+}
+
+static MediaForgeMediaForgeProcessorApiProcessImageResponse* media_forge_media_forge_processor_api_process_image_response_new_error(const gchar* code, const gchar* message, FlValue* details) {
+  MediaForgeMediaForgeProcessorApiProcessImageResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_PROCESS_IMAGE_RESPONSE(g_object_new(media_forge_media_forge_processor_api_process_image_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_string(code));
+  fl_value_append_take(self->value, fl_value_new_string(message != nullptr ? message : ""));
+  fl_value_append_take(self->value, details != nullptr ? fl_value_ref(details) : fl_value_new_null());
+  return self;
+}
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgeProcessorApiInspectVideoResponse, media_forge_media_forge_processor_api_inspect_video_response, MEDIA_FORGE, MEDIA_FORGE_PROCESSOR_API_INSPECT_VIDEO_RESPONSE, GObject)
+
+struct _MediaForgeMediaForgeProcessorApiInspectVideoResponse {
+  GObject parent_instance;
+
+  FlValue* value;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgeProcessorApiInspectVideoResponse, media_forge_media_forge_processor_api_inspect_video_response, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_processor_api_inspect_video_response_dispose(GObject* object) {
+  MediaForgeMediaForgeProcessorApiInspectVideoResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_INSPECT_VIDEO_RESPONSE(object);
+  g_clear_pointer(&self->value, fl_value_unref);
+  G_OBJECT_CLASS(media_forge_media_forge_processor_api_inspect_video_response_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_processor_api_inspect_video_response_init(MediaForgeMediaForgeProcessorApiInspectVideoResponse* self) {
+}
+
+static void media_forge_media_forge_processor_api_inspect_video_response_class_init(MediaForgeMediaForgeProcessorApiInspectVideoResponseClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_processor_api_inspect_video_response_dispose;
+}
+
+static MediaForgeMediaForgeProcessorApiInspectVideoResponse* media_forge_media_forge_processor_api_inspect_video_response_new(MediaForgeNativeVideoMetadata* return_value) {
+  MediaForgeMediaForgeProcessorApiInspectVideoResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_INSPECT_VIDEO_RESPONSE(g_object_new(media_forge_media_forge_processor_api_inspect_video_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_custom_object(media_forge_native_video_metadata_type_id, G_OBJECT(return_value)));
+  return self;
+}
+
+static MediaForgeMediaForgeProcessorApiInspectVideoResponse* media_forge_media_forge_processor_api_inspect_video_response_new_error(const gchar* code, const gchar* message, FlValue* details) {
+  MediaForgeMediaForgeProcessorApiInspectVideoResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_INSPECT_VIDEO_RESPONSE(g_object_new(media_forge_media_forge_processor_api_inspect_video_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_string(code));
+  fl_value_append_take(self->value, fl_value_new_string(message != nullptr ? message : ""));
+  fl_value_append_take(self->value, details != nullptr ? fl_value_ref(details) : fl_value_new_null());
+  return self;
+}
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponse, media_forge_media_forge_processor_api_create_video_thumbnail_response, MEDIA_FORGE, MEDIA_FORGE_PROCESSOR_API_CREATE_VIDEO_THUMBNAIL_RESPONSE, GObject)
+
+struct _MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponse {
+  GObject parent_instance;
+
+  FlValue* value;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponse, media_forge_media_forge_processor_api_create_video_thumbnail_response, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_processor_api_create_video_thumbnail_response_dispose(GObject* object) {
+  MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_CREATE_VIDEO_THUMBNAIL_RESPONSE(object);
+  g_clear_pointer(&self->value, fl_value_unref);
+  G_OBJECT_CLASS(media_forge_media_forge_processor_api_create_video_thumbnail_response_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_processor_api_create_video_thumbnail_response_init(MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponse* self) {
+}
+
+static void media_forge_media_forge_processor_api_create_video_thumbnail_response_class_init(MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponseClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_processor_api_create_video_thumbnail_response_dispose;
+}
+
+static MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponse* media_forge_media_forge_processor_api_create_video_thumbnail_response_new(const gchar* return_value) {
+  MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_CREATE_VIDEO_THUMBNAIL_RESPONSE(g_object_new(media_forge_media_forge_processor_api_create_video_thumbnail_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_string(return_value));
+  return self;
+}
+
+static MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponse* media_forge_media_forge_processor_api_create_video_thumbnail_response_new_error(const gchar* code, const gchar* message, FlValue* details) {
+  MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_CREATE_VIDEO_THUMBNAIL_RESPONSE(g_object_new(media_forge_media_forge_processor_api_create_video_thumbnail_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_string(code));
+  fl_value_append_take(self->value, fl_value_new_string(message != nullptr ? message : ""));
+  fl_value_append_take(self->value, details != nullptr ? fl_value_ref(details) : fl_value_new_null());
+  return self;
+}
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgeProcessorApiClearCacheResponse, media_forge_media_forge_processor_api_clear_cache_response, MEDIA_FORGE, MEDIA_FORGE_PROCESSOR_API_CLEAR_CACHE_RESPONSE, GObject)
+
+struct _MediaForgeMediaForgeProcessorApiClearCacheResponse {
+  GObject parent_instance;
+
+  FlValue* value;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgeProcessorApiClearCacheResponse, media_forge_media_forge_processor_api_clear_cache_response, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_processor_api_clear_cache_response_dispose(GObject* object) {
+  MediaForgeMediaForgeProcessorApiClearCacheResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_CLEAR_CACHE_RESPONSE(object);
+  g_clear_pointer(&self->value, fl_value_unref);
+  G_OBJECT_CLASS(media_forge_media_forge_processor_api_clear_cache_response_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_processor_api_clear_cache_response_init(MediaForgeMediaForgeProcessorApiClearCacheResponse* self) {
+}
+
+static void media_forge_media_forge_processor_api_clear_cache_response_class_init(MediaForgeMediaForgeProcessorApiClearCacheResponseClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_processor_api_clear_cache_response_dispose;
+}
+
+static MediaForgeMediaForgeProcessorApiClearCacheResponse* media_forge_media_forge_processor_api_clear_cache_response_new(gboolean return_value) {
+  MediaForgeMediaForgeProcessorApiClearCacheResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_CLEAR_CACHE_RESPONSE(g_object_new(media_forge_media_forge_processor_api_clear_cache_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_bool(return_value));
+  return self;
+}
+
+static MediaForgeMediaForgeProcessorApiClearCacheResponse* media_forge_media_forge_processor_api_clear_cache_response_new_error(const gchar* code, const gchar* message, FlValue* details) {
+  MediaForgeMediaForgeProcessorApiClearCacheResponse* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API_CLEAR_CACHE_RESPONSE(g_object_new(media_forge_media_forge_processor_api_clear_cache_response_get_type(), nullptr));
+  self->value = fl_value_new_list();
+  fl_value_append_take(self->value, fl_value_new_string(code));
+  fl_value_append_take(self->value, fl_value_new_string(message != nullptr ? message : ""));
+  fl_value_append_take(self->value, details != nullptr ? fl_value_ref(details) : fl_value_new_null());
+  return self;
+}
+
+struct _MediaForgeMediaForgeProcessorApi {
+  GObject parent_instance;
+
+  const MediaForgeMediaForgeProcessorApiVTable* vtable;
+  gpointer user_data;
+  GDestroyNotify user_data_free_func;
+};
+
+G_DEFINE_TYPE(MediaForgeMediaForgeProcessorApi, media_forge_media_forge_processor_api, G_TYPE_OBJECT)
+
+static void media_forge_media_forge_processor_api_dispose(GObject* object) {
+  MediaForgeMediaForgeProcessorApi* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API(object);
+  if (self->user_data != nullptr) {
+    self->user_data_free_func(self->user_data);
+  }
+  self->user_data = nullptr;
+  G_OBJECT_CLASS(media_forge_media_forge_processor_api_parent_class)->dispose(object);
+}
+
+static void media_forge_media_forge_processor_api_init(MediaForgeMediaForgeProcessorApi* self) {
+}
+
+static void media_forge_media_forge_processor_api_class_init(MediaForgeMediaForgeProcessorApiClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = media_forge_media_forge_processor_api_dispose;
+}
+
+static MediaForgeMediaForgeProcessorApi* media_forge_media_forge_processor_api_new(const MediaForgeMediaForgeProcessorApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func) {
+  MediaForgeMediaForgeProcessorApi* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API(g_object_new(media_forge_media_forge_processor_api_get_type(), nullptr));
+  self->vtable = vtable;
+  self->user_data = user_data;
+  self->user_data_free_func = user_data_free_func;
+  return self;
+}
+
+static void media_forge_media_forge_processor_api_process_image_cb(FlBasicMessageChannel* channel, FlValue* message_, FlBasicMessageChannelResponseHandle* response_handle, gpointer user_data) {
+  MediaForgeMediaForgeProcessorApi* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API(user_data);
+
+  if (self->vtable == nullptr || self->vtable->process_image == nullptr) {
+    return;
+  }
+
+  FlValue* value0 = fl_value_get_list_value(message_, 0);
+  const gchar* path = fl_value_get_string(value0);
+  FlValue* value1 = fl_value_get_list_value(message_, 1);
+  MediaForgeNativeImageProcessOptions* options = MEDIA_FORGE_NATIVE_IMAGE_PROCESS_OPTIONS(fl_value_get_custom_value_object(value1));
+  g_autoptr(MediaForgeMediaForgeProcessorApiResponseHandle) handle = media_forge_media_forge_processor_api_response_handle_new(channel, response_handle);
+  self->vtable->process_image(path, options, handle, self->user_data);
+}
+
+static void media_forge_media_forge_processor_api_inspect_video_cb(FlBasicMessageChannel* channel, FlValue* message_, FlBasicMessageChannelResponseHandle* response_handle, gpointer user_data) {
+  MediaForgeMediaForgeProcessorApi* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API(user_data);
+
+  if (self->vtable == nullptr || self->vtable->inspect_video == nullptr) {
+    return;
+  }
+
+  FlValue* value0 = fl_value_get_list_value(message_, 0);
+  const gchar* path = fl_value_get_string(value0);
+  g_autoptr(MediaForgeMediaForgeProcessorApiResponseHandle) handle = media_forge_media_forge_processor_api_response_handle_new(channel, response_handle);
+  self->vtable->inspect_video(path, handle, self->user_data);
+}
+
+static void media_forge_media_forge_processor_api_create_video_thumbnail_cb(FlBasicMessageChannel* channel, FlValue* message_, FlBasicMessageChannelResponseHandle* response_handle, gpointer user_data) {
+  MediaForgeMediaForgeProcessorApi* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API(user_data);
+
+  if (self->vtable == nullptr || self->vtable->create_video_thumbnail == nullptr) {
+    return;
+  }
+
+  FlValue* value0 = fl_value_get_list_value(message_, 0);
+  const gchar* video_path = fl_value_get_string(value0);
+  FlValue* value1 = fl_value_get_list_value(message_, 1);
+  int64_t at_ms = fl_value_get_int(value1);
+  FlValue* value2 = fl_value_get_list_value(message_, 2);
+  int64_t* max_width = nullptr;
+  int64_t max_width_value;
+  if (fl_value_get_type(value2) != FL_VALUE_TYPE_NULL) {
+    max_width_value = fl_value_get_int(value2);
+    max_width = &max_width_value;
+  }
+  FlValue* value3 = fl_value_get_list_value(message_, 3);
+  int64_t* max_height = nullptr;
+  int64_t max_height_value;
+  if (fl_value_get_type(value3) != FL_VALUE_TYPE_NULL) {
+    max_height_value = fl_value_get_int(value3);
+    max_height = &max_height_value;
+  }
+  g_autoptr(MediaForgeMediaForgeProcessorApiResponseHandle) handle = media_forge_media_forge_processor_api_response_handle_new(channel, response_handle);
+  self->vtable->create_video_thumbnail(video_path, at_ms, max_width, max_height, handle, self->user_data);
+}
+
+static void media_forge_media_forge_processor_api_clear_cache_cb(FlBasicMessageChannel* channel, FlValue* message_, FlBasicMessageChannelResponseHandle* response_handle, gpointer user_data) {
+  MediaForgeMediaForgeProcessorApi* self = MEDIA_FORGE_MEDIA_FORGE_PROCESSOR_API(user_data);
+
+  if (self->vtable == nullptr || self->vtable->clear_cache == nullptr) {
+    return;
+  }
+
+  g_autoptr(MediaForgeMediaForgeProcessorApiResponseHandle) handle = media_forge_media_forge_processor_api_response_handle_new(channel, response_handle);
+  self->vtable->clear_cache(handle, self->user_data);
+}
+
+void media_forge_media_forge_processor_api_set_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix, const MediaForgeMediaForgeProcessorApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func) {
+  g_autofree gchar* dot_suffix = suffix != nullptr ? g_strdup_printf(".%s", suffix) : g_strdup("");
+  g_autoptr(MediaForgeMediaForgeProcessorApi) api_data = media_forge_media_forge_processor_api_new(vtable, user_data, user_data_free_func);
+
+  g_autoptr(MediaForgeMessageCodec) codec = media_forge_message_codec_new();
+  g_autofree gchar* process_image_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.processImage%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) process_image_channel = fl_basic_message_channel_new(messenger, process_image_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(process_image_channel, media_forge_media_forge_processor_api_process_image_cb, g_object_ref(api_data), g_object_unref);
+  g_autofree gchar* inspect_video_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.inspectVideo%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) inspect_video_channel = fl_basic_message_channel_new(messenger, inspect_video_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(inspect_video_channel, media_forge_media_forge_processor_api_inspect_video_cb, g_object_ref(api_data), g_object_unref);
+  g_autofree gchar* create_video_thumbnail_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.createVideoThumbnail%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) create_video_thumbnail_channel = fl_basic_message_channel_new(messenger, create_video_thumbnail_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(create_video_thumbnail_channel, media_forge_media_forge_processor_api_create_video_thumbnail_cb, g_object_ref(api_data), g_object_unref);
+  g_autofree gchar* clear_cache_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.clearCache%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) clear_cache_channel = fl_basic_message_channel_new(messenger, clear_cache_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(clear_cache_channel, media_forge_media_forge_processor_api_clear_cache_cb, g_object_ref(api_data), g_object_unref);
+}
+
+void media_forge_media_forge_processor_api_clear_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix) {
+  g_autofree gchar* dot_suffix = suffix != nullptr ? g_strdup_printf(".%s", suffix) : g_strdup("");
+
+  g_autoptr(MediaForgeMessageCodec) codec = media_forge_message_codec_new();
+  g_autofree gchar* process_image_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.processImage%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) process_image_channel = fl_basic_message_channel_new(messenger, process_image_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(process_image_channel, nullptr, nullptr, nullptr);
+  g_autofree gchar* inspect_video_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.inspectVideo%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) inspect_video_channel = fl_basic_message_channel_new(messenger, inspect_video_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(inspect_video_channel, nullptr, nullptr, nullptr);
+  g_autofree gchar* create_video_thumbnail_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.createVideoThumbnail%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) create_video_thumbnail_channel = fl_basic_message_channel_new(messenger, create_video_thumbnail_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(create_video_thumbnail_channel, nullptr, nullptr, nullptr);
+  g_autofree gchar* clear_cache_channel_name = g_strdup_printf("dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.clearCache%s", dot_suffix);
+  g_autoptr(FlBasicMessageChannel) clear_cache_channel = fl_basic_message_channel_new(messenger, clear_cache_channel_name, FL_MESSAGE_CODEC(codec));
+  fl_basic_message_channel_set_message_handler(clear_cache_channel, nullptr, nullptr, nullptr);
+}
+
+void media_forge_media_forge_processor_api_respond_process_image(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, MediaForgeNativeProcessedMedia* return_value) {
+  g_autoptr(MediaForgeMediaForgeProcessorApiProcessImageResponse) response = media_forge_media_forge_processor_api_process_image_response_new(return_value);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgeProcessorApi", "processImage", error->message);
+  }
+}
+
+void media_forge_media_forge_processor_api_respond_error_process_image(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details) {
+  g_autoptr(MediaForgeMediaForgeProcessorApiProcessImageResponse) response = media_forge_media_forge_processor_api_process_image_response_new_error(code, message, details);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgeProcessorApi", "processImage", error->message);
+  }
+}
+
+void media_forge_media_forge_processor_api_respond_inspect_video(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, MediaForgeNativeVideoMetadata* return_value) {
+  g_autoptr(MediaForgeMediaForgeProcessorApiInspectVideoResponse) response = media_forge_media_forge_processor_api_inspect_video_response_new(return_value);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgeProcessorApi", "inspectVideo", error->message);
+  }
+}
+
+void media_forge_media_forge_processor_api_respond_error_inspect_video(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details) {
+  g_autoptr(MediaForgeMediaForgeProcessorApiInspectVideoResponse) response = media_forge_media_forge_processor_api_inspect_video_response_new_error(code, message, details);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgeProcessorApi", "inspectVideo", error->message);
+  }
+}
+
+void media_forge_media_forge_processor_api_respond_create_video_thumbnail(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, const gchar* return_value) {
+  g_autoptr(MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponse) response = media_forge_media_forge_processor_api_create_video_thumbnail_response_new(return_value);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgeProcessorApi", "createVideoThumbnail", error->message);
+  }
+}
+
+void media_forge_media_forge_processor_api_respond_error_create_video_thumbnail(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details) {
+  g_autoptr(MediaForgeMediaForgeProcessorApiCreateVideoThumbnailResponse) response = media_forge_media_forge_processor_api_create_video_thumbnail_response_new_error(code, message, details);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgeProcessorApi", "createVideoThumbnail", error->message);
+  }
+}
+
+void media_forge_media_forge_processor_api_respond_clear_cache(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, gboolean return_value) {
+  g_autoptr(MediaForgeMediaForgeProcessorApiClearCacheResponse) response = media_forge_media_forge_processor_api_clear_cache_response_new(return_value);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgeProcessorApi", "clearCache", error->message);
+  }
+}
+
+void media_forge_media_forge_processor_api_respond_error_clear_cache(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details) {
+  g_autoptr(MediaForgeMediaForgeProcessorApiClearCacheResponse) response = media_forge_media_forge_processor_api_clear_cache_response_new_error(code, message, details);
+  g_autoptr(GError) error = nullptr;
+  if (!fl_basic_message_channel_respond(response_handle->channel, response_handle->response_handle, response->value, &error)) {
+    g_warning("Failed to send response to %s.%s: %s", "MediaForgeProcessorApi", "clearCache", error->message);
+  }
 }

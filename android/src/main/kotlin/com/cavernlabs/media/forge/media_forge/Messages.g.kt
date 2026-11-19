@@ -13,6 +13,12 @@ import io.flutter.plugin.common.StandardMethodCodec
 import io.flutter.plugin.common.StandardMessageCodec
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 private object MessagesPigeonUtils {
 
   fun wrapResult(result: Any?): List<Any?> {
@@ -34,6 +40,150 @@ private object MessagesPigeonUtils {
       )
     }
   }
+  fun doubleEquals(a: Double, b: Double): Boolean {
+    // Normalize -0.0 to 0.0 and handle NaN equality.
+    return (if (a == 0.0) 0.0 else a) == (if (b == 0.0) 0.0 else b) || (a.isNaN() && b.isNaN())
+  }
+
+  fun floatEquals(a: Float, b: Float): Boolean {
+    // Normalize -0.0 to 0.0 and handle NaN equality.
+    return (if (a == 0.0f) 0.0f else a) == (if (b == 0.0f) 0.0f else b) || (a.isNaN() && b.isNaN())
+  }
+
+  fun doubleHash(d: Double): Int {
+    // Normalize -0.0 to 0.0 and handle NaN to ensure consistent hash codes.
+    val normalized = if (d == 0.0) 0.0 else d
+    val bits = java.lang.Double.doubleToLongBits(normalized)
+    return (bits xor (bits ushr 32)).toInt()
+  }
+
+  fun floatHash(f: Float): Int {
+    // Normalize -0.0 to 0.0 and handle NaN to ensure consistent hash codes.
+    val normalized = if (f == 0.0f) 0.0f else f
+    return java.lang.Float.floatToIntBits(normalized)
+  }
+
+  fun deepEquals(a: Any?, b: Any?): Boolean {
+    if (a === b) {
+      return true
+    }
+    if (a == null || b == null) {
+      return false
+    }
+    if (a is ByteArray && b is ByteArray) {
+      return a.contentEquals(b)
+    }
+    if (a is IntArray && b is IntArray) {
+      return a.contentEquals(b)
+    }
+    if (a is LongArray && b is LongArray) {
+      return a.contentEquals(b)
+    }
+    if (a is DoubleArray && b is DoubleArray) {
+      if (a.size != b.size) return false
+      for (i in a.indices) {
+        if (!doubleEquals(a[i], b[i])) return false
+      }
+      return true
+    }
+    if (a is FloatArray && b is FloatArray) {
+      if (a.size != b.size) return false
+      for (i in a.indices) {
+        if (!floatEquals(a[i], b[i])) return false
+      }
+      return true
+    }
+    if (a is Array<*> && b is Array<*>) {
+      if (a.size != b.size) return false
+      for (i in a.indices) {
+        if (!deepEquals(a[i], b[i])) return false
+      }
+      return true
+    }
+    if (a is List<*> && b is List<*>) {
+      if (a.size != b.size) return false
+      val iterA = a.iterator()
+      val iterB = b.iterator()
+      while (iterA.hasNext() && iterB.hasNext()) {
+        if (!deepEquals(iterA.next(), iterB.next())) return false
+      }
+      return true
+    }
+    if (a is Map<*, *> && b is Map<*, *>) {
+      if (a.size != b.size) return false
+      for (entry in a) {
+        val key = entry.key
+        var found = false
+        for (bEntry in b) {
+          if (deepEquals(key, bEntry.key)) {
+            if (deepEquals(entry.value, bEntry.value)) {
+              found = true
+              break
+            } else {
+              return false
+            }
+          }
+        }
+        if (!found) return false
+      }
+      return true
+    }
+    if (a is Double && b is Double) {
+      return doubleEquals(a, b)
+    }
+    if (a is Float && b is Float) {
+      return floatEquals(a, b)
+    }
+    return a == b
+  }
+
+  fun deepHash(value: Any?): Int {
+    return when (value) {
+      null -> 0
+      is ByteArray -> value.contentHashCode()
+      is IntArray -> value.contentHashCode()
+      is LongArray -> value.contentHashCode()
+      is DoubleArray -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + doubleHash(item)
+        }
+        result
+      }
+      is FloatArray -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + floatHash(item)
+        }
+        result
+      }
+      is Array<*> -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + deepHash(item)
+        }
+        result
+      }
+      is List<*> -> {
+        var result = 1
+        for (item in value) {
+          result = 31 * result + deepHash(item)
+        }
+        result
+      }
+      is Map<*, *> -> {
+        var result = 0
+        for (entry in value) {
+          result += ((deepHash(entry.key) * 31) xor deepHash(entry.value))
+        }
+        result
+      }
+      is Double -> doubleHash(value)
+      is Float -> floatHash(value)
+      else -> value.hashCode()
+    }
+  }
+
 }
 
 /**
@@ -47,18 +197,485 @@ class FlutterError (
   override val message: String? = null,
   val details: Any? = null
 ) : RuntimeException()
-private open class MessagesPigeonCodec : StandardMessageCodec() {
-  override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
-    return     super.readValueOfType(type, buffer)
-  }
-  override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
-    super.writeValue(stream, value)
+
+enum class NativeMediaType(val raw: Int) {
+  IMAGE(0),
+  VIDEO(1),
+  MIXED(2);
+
+  companion object {
+    private val pigeonValues = values()
+
+    fun ofRaw(raw: Int): NativeMediaType? {
+      return pigeonValues.getOrNull(raw)
+    }
   }
 }
 
+enum class NativeMediaSource(val raw: Int) {
+  GALLERY(0),
+  CAMERA(1);
+
+  companion object {
+    private val pigeonValues = values()
+
+    fun ofRaw(raw: Int): NativeMediaSource? {
+      return pigeonValues.getOrNull(raw)
+    }
+  }
+}
+
+enum class NativeCameraDevice(val raw: Int) {
+  REAR(0),
+  FRONT(1);
+
+  companion object {
+    private val pigeonValues = values()
+
+    fun ofRaw(raw: Int): NativeCameraDevice? {
+      return pigeonValues.getOrNull(raw)
+    }
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class NativePickerOptions (
+  val maxItems: Long? = null,
+  val cameraDevice: NativeCameraDevice? = null,
+  val maxDurationSeconds: Long? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): NativePickerOptions {
+      val maxItems = pigeonVar_list[0] as Long?
+      val cameraDevice = pigeonVar_list[1] as NativeCameraDevice?
+      val maxDurationSeconds = pigeonVar_list[2] as Long?
+      return NativePickerOptions(maxItems, cameraDevice, maxDurationSeconds)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      maxItems,
+      cameraDevice,
+      maxDurationSeconds,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as NativePickerOptions
+    return MessagesPigeonUtils.deepEquals(this.maxItems, other.maxItems) && MessagesPigeonUtils.deepEquals(this.cameraDevice, other.cameraDevice) && MessagesPigeonUtils.deepEquals(this.maxDurationSeconds, other.maxDurationSeconds)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.maxItems)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.cameraDevice)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.maxDurationSeconds)
+    return result
+  }
+  override fun toString(): String {
+    return "NativePickerOptions(maxItems=$maxItems, cameraDevice=$cameraDevice, maxDurationSeconds=$maxDurationSeconds)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class NativePickedMedia (
+  val path: String,
+  val type: NativeMediaType,
+  val name: String? = null,
+  val mimeType: String? = null,
+  val sizeBytes: Long? = null,
+  val width: Long? = null,
+  val height: Long? = null,
+  val durationMs: Long? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): NativePickedMedia {
+      val path = pigeonVar_list[0] as String
+      val type = pigeonVar_list[1] as NativeMediaType
+      val name = pigeonVar_list[2] as String?
+      val mimeType = pigeonVar_list[3] as String?
+      val sizeBytes = pigeonVar_list[4] as Long?
+      val width = pigeonVar_list[5] as Long?
+      val height = pigeonVar_list[6] as Long?
+      val durationMs = pigeonVar_list[7] as Long?
+      return NativePickedMedia(path, type, name, mimeType, sizeBytes, width, height, durationMs)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      path,
+      type,
+      name,
+      mimeType,
+      sizeBytes,
+      width,
+      height,
+      durationMs,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as NativePickedMedia
+    return MessagesPigeonUtils.deepEquals(this.path, other.path) && MessagesPigeonUtils.deepEquals(this.type, other.type) && MessagesPigeonUtils.deepEquals(this.name, other.name) && MessagesPigeonUtils.deepEquals(this.mimeType, other.mimeType) && MessagesPigeonUtils.deepEquals(this.sizeBytes, other.sizeBytes) && MessagesPigeonUtils.deepEquals(this.width, other.width) && MessagesPigeonUtils.deepEquals(this.height, other.height) && MessagesPigeonUtils.deepEquals(this.durationMs, other.durationMs)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.path)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.type)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.name)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.mimeType)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.sizeBytes)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.width)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.height)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.durationMs)
+    return result
+  }
+  override fun toString(): String {
+    return "NativePickedMedia(path=$path, type=$type, name=$name, mimeType=$mimeType, sizeBytes=$sizeBytes, width=$width, height=$height, durationMs=$durationMs)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class NativeLostDataResponse (
+  val items: List<NativePickedMedia>,
+  val errorCode: String? = null,
+  val errorMessage: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): NativeLostDataResponse {
+      val items = pigeonVar_list[0] as List<NativePickedMedia>
+      val errorCode = pigeonVar_list[1] as String?
+      val errorMessage = pigeonVar_list[2] as String?
+      return NativeLostDataResponse(items, errorCode, errorMessage)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      items,
+      errorCode,
+      errorMessage,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as NativeLostDataResponse
+    return MessagesPigeonUtils.deepEquals(this.items, other.items) && MessagesPigeonUtils.deepEquals(this.errorCode, other.errorCode) && MessagesPigeonUtils.deepEquals(this.errorMessage, other.errorMessage)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.items)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.errorCode)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.errorMessage)
+    return result
+  }
+  override fun toString(): String {
+    return "NativeLostDataResponse(items=$items, errorCode=$errorCode, errorMessage=$errorMessage)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class NativeImageProcessOptions (
+  val maxWidth: Long? = null,
+  val maxHeight: Long? = null,
+  val quality: Long? = null,
+  val targetSizeBytes: Long? = null,
+  val stripGpsMetadata: Boolean? = null,
+  val format: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): NativeImageProcessOptions {
+      val maxWidth = pigeonVar_list[0] as Long?
+      val maxHeight = pigeonVar_list[1] as Long?
+      val quality = pigeonVar_list[2] as Long?
+      val targetSizeBytes = pigeonVar_list[3] as Long?
+      val stripGpsMetadata = pigeonVar_list[4] as Boolean?
+      val format = pigeonVar_list[5] as String?
+      return NativeImageProcessOptions(maxWidth, maxHeight, quality, targetSizeBytes, stripGpsMetadata, format)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      maxWidth,
+      maxHeight,
+      quality,
+      targetSizeBytes,
+      stripGpsMetadata,
+      format,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as NativeImageProcessOptions
+    return MessagesPigeonUtils.deepEquals(this.maxWidth, other.maxWidth) && MessagesPigeonUtils.deepEquals(this.maxHeight, other.maxHeight) && MessagesPigeonUtils.deepEquals(this.quality, other.quality) && MessagesPigeonUtils.deepEquals(this.targetSizeBytes, other.targetSizeBytes) && MessagesPigeonUtils.deepEquals(this.stripGpsMetadata, other.stripGpsMetadata) && MessagesPigeonUtils.deepEquals(this.format, other.format)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.maxWidth)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.maxHeight)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.quality)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.targetSizeBytes)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.stripGpsMetadata)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.format)
+    return result
+  }
+  override fun toString(): String {
+    return "NativeImageProcessOptions(maxWidth=$maxWidth, maxHeight=$maxHeight, quality=$quality, targetSizeBytes=$targetSizeBytes, stripGpsMetadata=$stripGpsMetadata, format=$format)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class NativeProcessedMedia (
+  val path: String,
+  val originalPath: String,
+  val mimeType: String? = null,
+  val sizeBytes: Long? = null,
+  val originalSizeBytes: Long? = null,
+  val width: Long? = null,
+  val height: Long? = null,
+  val changed: Boolean,
+  val targetMet: Boolean? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): NativeProcessedMedia {
+      val path = pigeonVar_list[0] as String
+      val originalPath = pigeonVar_list[1] as String
+      val mimeType = pigeonVar_list[2] as String?
+      val sizeBytes = pigeonVar_list[3] as Long?
+      val originalSizeBytes = pigeonVar_list[4] as Long?
+      val width = pigeonVar_list[5] as Long?
+      val height = pigeonVar_list[6] as Long?
+      val changed = pigeonVar_list[7] as Boolean
+      val targetMet = pigeonVar_list[8] as Boolean?
+      return NativeProcessedMedia(path, originalPath, mimeType, sizeBytes, originalSizeBytes, width, height, changed, targetMet)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      path,
+      originalPath,
+      mimeType,
+      sizeBytes,
+      originalSizeBytes,
+      width,
+      height,
+      changed,
+      targetMet,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as NativeProcessedMedia
+    return MessagesPigeonUtils.deepEquals(this.path, other.path) && MessagesPigeonUtils.deepEquals(this.originalPath, other.originalPath) && MessagesPigeonUtils.deepEquals(this.mimeType, other.mimeType) && MessagesPigeonUtils.deepEquals(this.sizeBytes, other.sizeBytes) && MessagesPigeonUtils.deepEquals(this.originalSizeBytes, other.originalSizeBytes) && MessagesPigeonUtils.deepEquals(this.width, other.width) && MessagesPigeonUtils.deepEquals(this.height, other.height) && MessagesPigeonUtils.deepEquals(this.changed, other.changed) && MessagesPigeonUtils.deepEquals(this.targetMet, other.targetMet)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.path)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.originalPath)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.mimeType)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.sizeBytes)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.originalSizeBytes)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.width)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.height)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.changed)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.targetMet)
+    return result
+  }
+  override fun toString(): String {
+    return "NativeProcessedMedia(path=$path, originalPath=$originalPath, mimeType=$mimeType, sizeBytes=$sizeBytes, originalSizeBytes=$originalSizeBytes, width=$width, height=$height, changed=$changed, targetMet=$targetMet)"
+  }
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class NativeVideoMetadata (
+  val path: String,
+  val mimeType: String? = null,
+  val sizeBytes: Long? = null,
+  val width: Long? = null,
+  val height: Long? = null,
+  val durationMs: Long? = null,
+  val rotationDegrees: Long? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): NativeVideoMetadata {
+      val path = pigeonVar_list[0] as String
+      val mimeType = pigeonVar_list[1] as String?
+      val sizeBytes = pigeonVar_list[2] as Long?
+      val width = pigeonVar_list[3] as Long?
+      val height = pigeonVar_list[4] as Long?
+      val durationMs = pigeonVar_list[5] as Long?
+      val rotationDegrees = pigeonVar_list[6] as Long?
+      return NativeVideoMetadata(path, mimeType, sizeBytes, width, height, durationMs, rotationDegrees)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      path,
+      mimeType,
+      sizeBytes,
+      width,
+      height,
+      durationMs,
+      rotationDegrees,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as NativeVideoMetadata
+    return MessagesPigeonUtils.deepEquals(this.path, other.path) && MessagesPigeonUtils.deepEquals(this.mimeType, other.mimeType) && MessagesPigeonUtils.deepEquals(this.sizeBytes, other.sizeBytes) && MessagesPigeonUtils.deepEquals(this.width, other.width) && MessagesPigeonUtils.deepEquals(this.height, other.height) && MessagesPigeonUtils.deepEquals(this.durationMs, other.durationMs) && MessagesPigeonUtils.deepEquals(this.rotationDegrees, other.rotationDegrees)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.path)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.mimeType)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.sizeBytes)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.width)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.height)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.durationMs)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.rotationDegrees)
+    return result
+  }
+  override fun toString(): String {
+    return "NativeVideoMetadata(path=$path, mimeType=$mimeType, sizeBytes=$sizeBytes, width=$width, height=$height, durationMs=$durationMs, rotationDegrees=$rotationDegrees)"
+  }
+}
+private open class MessagesPigeonCodec : StandardMessageCodec() {
+  override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
+    return when (type) {
+      129.toByte() -> {
+        (readValue(buffer) as Long?)?.let {
+          NativeMediaType.ofRaw(it.toInt())
+        }
+      }
+      130.toByte() -> {
+        (readValue(buffer) as Long?)?.let {
+          NativeMediaSource.ofRaw(it.toInt())
+        }
+      }
+      131.toByte() -> {
+        (readValue(buffer) as Long?)?.let {
+          NativeCameraDevice.ofRaw(it.toInt())
+        }
+      }
+      132.toByte() -> {
+        (readValue(buffer) as? List<Any?>)?.let {
+          NativePickerOptions.fromList(it)
+        }
+      }
+      133.toByte() -> {
+        (readValue(buffer) as? List<Any?>)?.let {
+          NativePickedMedia.fromList(it)
+        }
+      }
+      134.toByte() -> {
+        (readValue(buffer) as? List<Any?>)?.let {
+          NativeLostDataResponse.fromList(it)
+        }
+      }
+      135.toByte() -> {
+        (readValue(buffer) as? List<Any?>)?.let {
+          NativeImageProcessOptions.fromList(it)
+        }
+      }
+      136.toByte() -> {
+        (readValue(buffer) as? List<Any?>)?.let {
+          NativeProcessedMedia.fromList(it)
+        }
+      }
+      137.toByte() -> {
+        (readValue(buffer) as? List<Any?>)?.let {
+          NativeVideoMetadata.fromList(it)
+        }
+      }
+      else -> super.readValueOfType(type, buffer)
+    }
+  }
+  override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
+    when (value) {
+      is NativeMediaType -> {
+        stream.write(129)
+        writeValue(stream, value.raw.toLong())
+      }
+      is NativeMediaSource -> {
+        stream.write(130)
+        writeValue(stream, value.raw.toLong())
+      }
+      is NativeCameraDevice -> {
+        stream.write(131)
+        writeValue(stream, value.raw.toLong())
+      }
+      is NativePickerOptions -> {
+        stream.write(132)
+        writeValue(stream, value.toList())
+      }
+      is NativePickedMedia -> {
+        stream.write(133)
+        writeValue(stream, value.toList())
+      }
+      is NativeLostDataResponse -> {
+        stream.write(134)
+        writeValue(stream, value.toList())
+      }
+      is NativeImageProcessOptions -> {
+        stream.write(135)
+        writeValue(stream, value.toList())
+      }
+      is NativeProcessedMedia -> {
+        stream.write(136)
+        writeValue(stream, value.toList())
+      }
+      is NativeVideoMetadata -> {
+        stream.write(137)
+        writeValue(stream, value.toList())
+      }
+      else -> super.writeValue(stream, value)
+    }
+  }
+}
+
+
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface MediaForgePluginApi {
-  /** Returns the system version of the host platform. */
   fun getPlatformVersion(): String
 
   companion object {
@@ -80,6 +697,199 @@ interface MediaForgePluginApi {
               MessagesPigeonUtils.wrapError(exception)
             }
             reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
+interface MediaForgePickerApi {
+  suspend fun pickImage(source: NativeMediaSource, options: NativePickerOptions?): NativePickedMedia?
+  suspend fun pickVideo(source: NativeMediaSource, options: NativePickerOptions?): NativePickedMedia?
+  suspend fun pickMultiple(type: NativeMediaType, options: NativePickerOptions?): List<NativePickedMedia>
+  suspend fun retrieveLostData(): NativeLostDataResponse
+
+  companion object {
+    /** The codec used by MediaForgePickerApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      MessagesPigeonCodec()
+    }
+    /** Sets up an instance of `MediaForgePickerApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: MediaForgePickerApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickImage$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sourceArg = args[0] as NativeMediaSource
+            val optionsArg = args[1] as NativePickerOptions?
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.pickImage(sourceArg, optionsArg))
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickVideo$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sourceArg = args[0] as NativeMediaSource
+            val optionsArg = args[1] as NativePickerOptions?
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.pickVideo(sourceArg, optionsArg))
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickMultiple$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val typeArg = args[0] as NativeMediaType
+            val optionsArg = args[1] as NativePickerOptions?
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.pickMultiple(typeArg, optionsArg))
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_forge.MediaForgePickerApi.retrieveLostData$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.retrieveLostData())
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/** Generated interface from Pigeon that represents a handler of messages from Flutter. */
+interface MediaForgeProcessorApi {
+  suspend fun processImage(path: String, options: NativeImageProcessOptions): NativeProcessedMedia
+  suspend fun inspectVideo(path: String): NativeVideoMetadata
+  suspend fun createVideoThumbnail(videoPath: String, atMs: Long, maxWidth: Long?, maxHeight: Long?): String
+  suspend fun clearCache(): Boolean
+
+  companion object {
+    /** The codec used by MediaForgeProcessorApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      MessagesPigeonCodec()
+    }
+    /** Sets up an instance of `MediaForgeProcessorApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: MediaForgeProcessorApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.processImage$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val pathArg = args[0] as String
+            val optionsArg = args[1] as NativeImageProcessOptions
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.processImage(pathArg, optionsArg))
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.inspectVideo$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val pathArg = args[0] as String
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.inspectVideo(pathArg))
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.createVideoThumbnail$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val videoPathArg = args[0] as String
+            val atMsArg = args[1] as Long
+            val maxWidthArg = args[2] as Long?
+            val maxHeightArg = args[3] as Long?
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.createVideoThumbnail(videoPathArg, atMsArg, maxWidthArg, maxHeightArg))
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.clearCache$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.clearCache())
+              } catch (exception: Throwable) {
+                MessagesPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
           }
         } else {
           channel.setMessageHandler(null)

@@ -1,14 +1,8 @@
 import 'package:pigeon/pigeon.dart';
 
-// This file is where you define the interface between Dart code and host
-// platform code. After editing this file, run
+// This file defines the Pigeon bridge contracts between Dart and native host platforms.
+// To regenerate files, run:
 //   dart run pigeon --input pigeon/messages.dart
-// to re-generate all of the output files.
-//
-// If you add new platforms to your plugin, add the corresponding output
-// options in the PigeonOptions below.
-//
-// To learn more about Pigeon, see https://pub.dev/packages/pigeon.
 
 @ConfigurePigeon(
   PigeonOptions(
@@ -29,8 +23,168 @@ import 'package:pigeon/pigeon.dart';
     ],
   ),
 )
+enum NativeMediaType { image, video, mixed }
+
+enum NativeMediaSource { gallery, camera }
+
+enum NativeCameraDevice { rear, front }
+
+class NativePickerOptions {
+  NativePickerOptions({
+    this.maxItems,
+    this.cameraDevice,
+    this.maxDurationSeconds,
+  });
+
+  int? maxItems;
+  NativeCameraDevice? cameraDevice;
+  int? maxDurationSeconds;
+}
+
+class NativePickedMedia {
+  NativePickedMedia({
+    required this.path,
+    required this.type,
+    this.name,
+    this.mimeType,
+    this.sizeBytes,
+    this.width,
+    this.height,
+    this.durationMs,
+  });
+
+  String path;
+  NativeMediaType type;
+  String? name;
+  String? mimeType;
+  int? sizeBytes;
+  int? width;
+  int? height;
+  int? durationMs;
+}
+
+class NativeLostDataResponse {
+  NativeLostDataResponse({
+    required this.items,
+    this.errorCode,
+    this.errorMessage,
+  });
+
+  List<NativePickedMedia> items;
+  String? errorCode;
+  String? errorMessage;
+}
+
+class NativeImageProcessOptions {
+  NativeImageProcessOptions({
+    this.maxWidth,
+    this.maxHeight,
+    this.quality,
+    this.targetSizeBytes,
+    this.stripGpsMetadata,
+    this.format,
+  });
+
+  int? maxWidth;
+  int? maxHeight;
+  int? quality;
+  int? targetSizeBytes;
+  bool? stripGpsMetadata;
+  String? format;
+}
+
+class NativeProcessedMedia {
+  NativeProcessedMedia({
+    required this.path,
+    required this.originalPath,
+    this.mimeType,
+    this.sizeBytes,
+    this.originalSizeBytes,
+    this.width,
+    this.height,
+    required this.changed,
+    this.targetMet,
+  });
+
+  String path;
+  String originalPath;
+  String? mimeType;
+  int? sizeBytes;
+  int? originalSizeBytes;
+  int? width;
+  int? height;
+  bool changed;
+  bool? targetMet;
+}
+
+class NativeVideoMetadata {
+  NativeVideoMetadata({
+    required this.path,
+    this.mimeType,
+    this.sizeBytes,
+    this.width,
+    this.height,
+    this.durationMs,
+    this.rotationDegrees,
+  });
+
+  String path;
+  String? mimeType;
+  int? sizeBytes;
+  int? width;
+  int? height;
+  int? durationMs;
+  int? rotationDegrees;
+}
+
 @HostApi()
 abstract class MediaForgePluginApi {
-  /// Returns the system version of the host platform.
   String getPlatformVersion();
+}
+
+@HostApi()
+abstract class MediaForgePickerApi {
+  @async
+  NativePickedMedia? pickImage(
+    NativeMediaSource source,
+    NativePickerOptions? options,
+  );
+
+  @async
+  NativePickedMedia? pickVideo(
+    NativeMediaSource source,
+    NativePickerOptions? options,
+  );
+
+  @async
+  List<NativePickedMedia> pickMultiple(
+    NativeMediaType type,
+    NativePickerOptions? options,
+  );
+
+  @async
+  NativeLostDataResponse retrieveLostData();
+}
+
+@HostApi()
+abstract class MediaForgeProcessorApi {
+  @async
+  NativeProcessedMedia processImage(
+    String path,
+    NativeImageProcessOptions options,
+  );
+
+  @async
+  NativeVideoMetadata inspectVideo(String path);
+
+  @async
+  String createVideoThumbnail(
+    String videoPath,
+    int atMs,
+    int? maxWidth,
+    int? maxHeight,
+  );
+
+  @async
+  bool clearCache();
 }

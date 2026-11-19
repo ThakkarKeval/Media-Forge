@@ -8,7 +8,737 @@
 
 G_BEGIN_DECLS
 
+/**
+ * MediaForgeNativeMediaType:
+ * MEDIA_FORGE_NATIVE_MEDIA_TYPE_IMAGE:
+ * MEDIA_FORGE_NATIVE_MEDIA_TYPE_VIDEO:
+ * MEDIA_FORGE_NATIVE_MEDIA_TYPE_MIXED:
+ *
+ */
+typedef enum {
+  MEDIA_FORGE_NATIVE_MEDIA_TYPE_IMAGE = 0,
+  MEDIA_FORGE_NATIVE_MEDIA_TYPE_VIDEO = 1,
+  MEDIA_FORGE_NATIVE_MEDIA_TYPE_MIXED = 2
+} MediaForgeNativeMediaType;
+
+/**
+ * MediaForgeNativeMediaSource:
+ * MEDIA_FORGE_NATIVE_MEDIA_SOURCE_GALLERY:
+ * MEDIA_FORGE_NATIVE_MEDIA_SOURCE_CAMERA:
+ *
+ */
+typedef enum {
+  MEDIA_FORGE_NATIVE_MEDIA_SOURCE_GALLERY = 0,
+  MEDIA_FORGE_NATIVE_MEDIA_SOURCE_CAMERA = 1
+} MediaForgeNativeMediaSource;
+
+/**
+ * MediaForgeNativeCameraDevice:
+ * MEDIA_FORGE_NATIVE_CAMERA_DEVICE_REAR:
+ * MEDIA_FORGE_NATIVE_CAMERA_DEVICE_FRONT:
+ *
+ */
+typedef enum {
+  MEDIA_FORGE_NATIVE_CAMERA_DEVICE_REAR = 0,
+  MEDIA_FORGE_NATIVE_CAMERA_DEVICE_FRONT = 1
+} MediaForgeNativeCameraDevice;
+
+/**
+ * MediaForgeNativePickerOptions:
+ *
+ */
+
+G_DECLARE_FINAL_TYPE(MediaForgeNativePickerOptions, media_forge_native_picker_options, MEDIA_FORGE, NATIVE_PICKER_OPTIONS, GObject)
+
+/**
+ * media_forge_native_picker_options_new:
+ * max_items: field in this object.
+ * camera_device: field in this object.
+ * max_duration_seconds: field in this object.
+ *
+ * Creates a new #NativePickerOptions object.
+ *
+ * Returns: a new #MediaForgeNativePickerOptions
+ */
+MediaForgeNativePickerOptions* media_forge_native_picker_options_new(int64_t* max_items, MediaForgeNativeCameraDevice* camera_device, int64_t* max_duration_seconds);
+
+/**
+ * media_forge_native_picker_options_get_max_items
+ * @object: a #MediaForgeNativePickerOptions.
+ *
+ * Gets the value of the maxItems field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_picker_options_get_max_items(MediaForgeNativePickerOptions* object);
+
+/**
+ * media_forge_native_picker_options_get_camera_device
+ * @object: a #MediaForgeNativePickerOptions.
+ *
+ * Gets the value of the cameraDevice field of @object.
+ *
+ * Returns: the field value.
+ */
+MediaForgeNativeCameraDevice* media_forge_native_picker_options_get_camera_device(MediaForgeNativePickerOptions* object);
+
+/**
+ * media_forge_native_picker_options_get_max_duration_seconds
+ * @object: a #MediaForgeNativePickerOptions.
+ *
+ * Gets the value of the maxDurationSeconds field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_picker_options_get_max_duration_seconds(MediaForgeNativePickerOptions* object);
+
+/**
+ * media_forge_native_picker_options_equals:
+ * @a: a #MediaForgeNativePickerOptions.
+ * @b: another #MediaForgeNativePickerOptions.
+ *
+ * Checks if two #MediaForgeNativePickerOptions objects are equal.
+ *
+ * Returns: TRUE if @a and @b are equal.
+ */
+gboolean media_forge_native_picker_options_equals(MediaForgeNativePickerOptions* a, MediaForgeNativePickerOptions* b);
+
+/**
+ * media_forge_native_picker_options_hash:
+ * @object: a #MediaForgeNativePickerOptions.
+ *
+ * Calculates a hash code for a #MediaForgeNativePickerOptions object.
+ *
+ * Returns: the hash code.
+ */
+guint media_forge_native_picker_options_hash(MediaForgeNativePickerOptions* object);
+
+/**
+ * media_forge_native_picker_options_to_string:
+ * @object: a #MediaForgeNativePickerOptions.
+ *
+ * Returns a string representation of a #MediaForgeNativePickerOptions object.
+ *
+ * Returns: (transfer full): a new string, free with g_free().
+ */
+gchar* media_forge_native_picker_options_to_string(MediaForgeNativePickerOptions* object);
+
+/**
+ * MediaForgeNativePickedMedia:
+ *
+ */
+
+G_DECLARE_FINAL_TYPE(MediaForgeNativePickedMedia, media_forge_native_picked_media, MEDIA_FORGE, NATIVE_PICKED_MEDIA, GObject)
+
+/**
+ * media_forge_native_picked_media_new:
+ * path: field in this object.
+ * type_: field in this object.
+ * name: field in this object.
+ * mime_type: field in this object.
+ * size_bytes: field in this object.
+ * width: field in this object.
+ * height: field in this object.
+ * duration_ms: field in this object.
+ *
+ * Creates a new #NativePickedMedia object.
+ *
+ * Returns: a new #MediaForgeNativePickedMedia
+ */
+MediaForgeNativePickedMedia* media_forge_native_picked_media_new(const gchar* path, MediaForgeNativeMediaType type_, const gchar* name, const gchar* mime_type, int64_t* size_bytes, int64_t* width, int64_t* height, int64_t* duration_ms);
+
+/**
+ * media_forge_native_picked_media_get_path
+ * @object: a #MediaForgeNativePickedMedia.
+ *
+ * Gets the value of the path field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_picked_media_get_path(MediaForgeNativePickedMedia* object);
+
+/**
+ * media_forge_native_picked_media_get_type_
+ * @object: a #MediaForgeNativePickedMedia.
+ *
+ * Gets the value of the type field of @object.
+ *
+ * Returns: the field value.
+ */
+MediaForgeNativeMediaType media_forge_native_picked_media_get_type_(MediaForgeNativePickedMedia* object);
+
+/**
+ * media_forge_native_picked_media_get_name
+ * @object: a #MediaForgeNativePickedMedia.
+ *
+ * Gets the value of the name field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_picked_media_get_name(MediaForgeNativePickedMedia* object);
+
+/**
+ * media_forge_native_picked_media_get_mime_type
+ * @object: a #MediaForgeNativePickedMedia.
+ *
+ * Gets the value of the mimeType field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_picked_media_get_mime_type(MediaForgeNativePickedMedia* object);
+
+/**
+ * media_forge_native_picked_media_get_size_bytes
+ * @object: a #MediaForgeNativePickedMedia.
+ *
+ * Gets the value of the sizeBytes field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_picked_media_get_size_bytes(MediaForgeNativePickedMedia* object);
+
+/**
+ * media_forge_native_picked_media_get_width
+ * @object: a #MediaForgeNativePickedMedia.
+ *
+ * Gets the value of the width field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_picked_media_get_width(MediaForgeNativePickedMedia* object);
+
+/**
+ * media_forge_native_picked_media_get_height
+ * @object: a #MediaForgeNativePickedMedia.
+ *
+ * Gets the value of the height field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_picked_media_get_height(MediaForgeNativePickedMedia* object);
+
+/**
+ * media_forge_native_picked_media_get_duration_ms
+ * @object: a #MediaForgeNativePickedMedia.
+ *
+ * Gets the value of the durationMs field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_picked_media_get_duration_ms(MediaForgeNativePickedMedia* object);
+
+/**
+ * media_forge_native_picked_media_equals:
+ * @a: a #MediaForgeNativePickedMedia.
+ * @b: another #MediaForgeNativePickedMedia.
+ *
+ * Checks if two #MediaForgeNativePickedMedia objects are equal.
+ *
+ * Returns: TRUE if @a and @b are equal.
+ */
+gboolean media_forge_native_picked_media_equals(MediaForgeNativePickedMedia* a, MediaForgeNativePickedMedia* b);
+
+/**
+ * media_forge_native_picked_media_hash:
+ * @object: a #MediaForgeNativePickedMedia.
+ *
+ * Calculates a hash code for a #MediaForgeNativePickedMedia object.
+ *
+ * Returns: the hash code.
+ */
+guint media_forge_native_picked_media_hash(MediaForgeNativePickedMedia* object);
+
+/**
+ * media_forge_native_picked_media_to_string:
+ * @object: a #MediaForgeNativePickedMedia.
+ *
+ * Returns a string representation of a #MediaForgeNativePickedMedia object.
+ *
+ * Returns: (transfer full): a new string, free with g_free().
+ */
+gchar* media_forge_native_picked_media_to_string(MediaForgeNativePickedMedia* object);
+
+/**
+ * MediaForgeNativeLostDataResponse:
+ *
+ */
+
+G_DECLARE_FINAL_TYPE(MediaForgeNativeLostDataResponse, media_forge_native_lost_data_response, MEDIA_FORGE, NATIVE_LOST_DATA_RESPONSE, GObject)
+
+/**
+ * media_forge_native_lost_data_response_new:
+ * items: field in this object.
+ * error_code: field in this object.
+ * error_message: field in this object.
+ *
+ * Creates a new #NativeLostDataResponse object.
+ *
+ * Returns: a new #MediaForgeNativeLostDataResponse
+ */
+MediaForgeNativeLostDataResponse* media_forge_native_lost_data_response_new(FlValue* items, const gchar* error_code, const gchar* error_message);
+
+/**
+ * media_forge_native_lost_data_response_get_items
+ * @object: a #MediaForgeNativeLostDataResponse.
+ *
+ * Gets the value of the items field of @object.
+ *
+ * Returns: the field value.
+ */
+FlValue* media_forge_native_lost_data_response_get_items(MediaForgeNativeLostDataResponse* object);
+
+/**
+ * media_forge_native_lost_data_response_get_error_code
+ * @object: a #MediaForgeNativeLostDataResponse.
+ *
+ * Gets the value of the errorCode field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_lost_data_response_get_error_code(MediaForgeNativeLostDataResponse* object);
+
+/**
+ * media_forge_native_lost_data_response_get_error_message
+ * @object: a #MediaForgeNativeLostDataResponse.
+ *
+ * Gets the value of the errorMessage field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_lost_data_response_get_error_message(MediaForgeNativeLostDataResponse* object);
+
+/**
+ * media_forge_native_lost_data_response_equals:
+ * @a: a #MediaForgeNativeLostDataResponse.
+ * @b: another #MediaForgeNativeLostDataResponse.
+ *
+ * Checks if two #MediaForgeNativeLostDataResponse objects are equal.
+ *
+ * Returns: TRUE if @a and @b are equal.
+ */
+gboolean media_forge_native_lost_data_response_equals(MediaForgeNativeLostDataResponse* a, MediaForgeNativeLostDataResponse* b);
+
+/**
+ * media_forge_native_lost_data_response_hash:
+ * @object: a #MediaForgeNativeLostDataResponse.
+ *
+ * Calculates a hash code for a #MediaForgeNativeLostDataResponse object.
+ *
+ * Returns: the hash code.
+ */
+guint media_forge_native_lost_data_response_hash(MediaForgeNativeLostDataResponse* object);
+
+/**
+ * media_forge_native_lost_data_response_to_string:
+ * @object: a #MediaForgeNativeLostDataResponse.
+ *
+ * Returns a string representation of a #MediaForgeNativeLostDataResponse object.
+ *
+ * Returns: (transfer full): a new string, free with g_free().
+ */
+gchar* media_forge_native_lost_data_response_to_string(MediaForgeNativeLostDataResponse* object);
+
+/**
+ * MediaForgeNativeImageProcessOptions:
+ *
+ */
+
+G_DECLARE_FINAL_TYPE(MediaForgeNativeImageProcessOptions, media_forge_native_image_process_options, MEDIA_FORGE, NATIVE_IMAGE_PROCESS_OPTIONS, GObject)
+
+/**
+ * media_forge_native_image_process_options_new:
+ * max_width: field in this object.
+ * max_height: field in this object.
+ * quality: field in this object.
+ * target_size_bytes: field in this object.
+ * strip_gps_metadata: field in this object.
+ * format: field in this object.
+ *
+ * Creates a new #NativeImageProcessOptions object.
+ *
+ * Returns: a new #MediaForgeNativeImageProcessOptions
+ */
+MediaForgeNativeImageProcessOptions* media_forge_native_image_process_options_new(int64_t* max_width, int64_t* max_height, int64_t* quality, int64_t* target_size_bytes, gboolean* strip_gps_metadata, const gchar* format);
+
+/**
+ * media_forge_native_image_process_options_get_max_width
+ * @object: a #MediaForgeNativeImageProcessOptions.
+ *
+ * Gets the value of the maxWidth field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_image_process_options_get_max_width(MediaForgeNativeImageProcessOptions* object);
+
+/**
+ * media_forge_native_image_process_options_get_max_height
+ * @object: a #MediaForgeNativeImageProcessOptions.
+ *
+ * Gets the value of the maxHeight field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_image_process_options_get_max_height(MediaForgeNativeImageProcessOptions* object);
+
+/**
+ * media_forge_native_image_process_options_get_quality
+ * @object: a #MediaForgeNativeImageProcessOptions.
+ *
+ * Gets the value of the quality field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_image_process_options_get_quality(MediaForgeNativeImageProcessOptions* object);
+
+/**
+ * media_forge_native_image_process_options_get_target_size_bytes
+ * @object: a #MediaForgeNativeImageProcessOptions.
+ *
+ * Gets the value of the targetSizeBytes field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_image_process_options_get_target_size_bytes(MediaForgeNativeImageProcessOptions* object);
+
+/**
+ * media_forge_native_image_process_options_get_strip_gps_metadata
+ * @object: a #MediaForgeNativeImageProcessOptions.
+ *
+ * Gets the value of the stripGpsMetadata field of @object.
+ *
+ * Returns: the field value.
+ */
+gboolean* media_forge_native_image_process_options_get_strip_gps_metadata(MediaForgeNativeImageProcessOptions* object);
+
+/**
+ * media_forge_native_image_process_options_get_format
+ * @object: a #MediaForgeNativeImageProcessOptions.
+ *
+ * Gets the value of the format field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_image_process_options_get_format(MediaForgeNativeImageProcessOptions* object);
+
+/**
+ * media_forge_native_image_process_options_equals:
+ * @a: a #MediaForgeNativeImageProcessOptions.
+ * @b: another #MediaForgeNativeImageProcessOptions.
+ *
+ * Checks if two #MediaForgeNativeImageProcessOptions objects are equal.
+ *
+ * Returns: TRUE if @a and @b are equal.
+ */
+gboolean media_forge_native_image_process_options_equals(MediaForgeNativeImageProcessOptions* a, MediaForgeNativeImageProcessOptions* b);
+
+/**
+ * media_forge_native_image_process_options_hash:
+ * @object: a #MediaForgeNativeImageProcessOptions.
+ *
+ * Calculates a hash code for a #MediaForgeNativeImageProcessOptions object.
+ *
+ * Returns: the hash code.
+ */
+guint media_forge_native_image_process_options_hash(MediaForgeNativeImageProcessOptions* object);
+
+/**
+ * media_forge_native_image_process_options_to_string:
+ * @object: a #MediaForgeNativeImageProcessOptions.
+ *
+ * Returns a string representation of a #MediaForgeNativeImageProcessOptions object.
+ *
+ * Returns: (transfer full): a new string, free with g_free().
+ */
+gchar* media_forge_native_image_process_options_to_string(MediaForgeNativeImageProcessOptions* object);
+
+/**
+ * MediaForgeNativeProcessedMedia:
+ *
+ */
+
+G_DECLARE_FINAL_TYPE(MediaForgeNativeProcessedMedia, media_forge_native_processed_media, MEDIA_FORGE, NATIVE_PROCESSED_MEDIA, GObject)
+
+/**
+ * media_forge_native_processed_media_new:
+ * path: field in this object.
+ * original_path: field in this object.
+ * mime_type: field in this object.
+ * size_bytes: field in this object.
+ * original_size_bytes: field in this object.
+ * width: field in this object.
+ * height: field in this object.
+ * changed: field in this object.
+ * target_met: field in this object.
+ *
+ * Creates a new #NativeProcessedMedia object.
+ *
+ * Returns: a new #MediaForgeNativeProcessedMedia
+ */
+MediaForgeNativeProcessedMedia* media_forge_native_processed_media_new(const gchar* path, const gchar* original_path, const gchar* mime_type, int64_t* size_bytes, int64_t* original_size_bytes, int64_t* width, int64_t* height, gboolean changed, gboolean* target_met);
+
+/**
+ * media_forge_native_processed_media_get_path
+ * @object: a #MediaForgeNativeProcessedMedia.
+ *
+ * Gets the value of the path field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_processed_media_get_path(MediaForgeNativeProcessedMedia* object);
+
+/**
+ * media_forge_native_processed_media_get_original_path
+ * @object: a #MediaForgeNativeProcessedMedia.
+ *
+ * Gets the value of the originalPath field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_processed_media_get_original_path(MediaForgeNativeProcessedMedia* object);
+
+/**
+ * media_forge_native_processed_media_get_mime_type
+ * @object: a #MediaForgeNativeProcessedMedia.
+ *
+ * Gets the value of the mimeType field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_processed_media_get_mime_type(MediaForgeNativeProcessedMedia* object);
+
+/**
+ * media_forge_native_processed_media_get_size_bytes
+ * @object: a #MediaForgeNativeProcessedMedia.
+ *
+ * Gets the value of the sizeBytes field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_processed_media_get_size_bytes(MediaForgeNativeProcessedMedia* object);
+
+/**
+ * media_forge_native_processed_media_get_original_size_bytes
+ * @object: a #MediaForgeNativeProcessedMedia.
+ *
+ * Gets the value of the originalSizeBytes field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_processed_media_get_original_size_bytes(MediaForgeNativeProcessedMedia* object);
+
+/**
+ * media_forge_native_processed_media_get_width
+ * @object: a #MediaForgeNativeProcessedMedia.
+ *
+ * Gets the value of the width field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_processed_media_get_width(MediaForgeNativeProcessedMedia* object);
+
+/**
+ * media_forge_native_processed_media_get_height
+ * @object: a #MediaForgeNativeProcessedMedia.
+ *
+ * Gets the value of the height field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_processed_media_get_height(MediaForgeNativeProcessedMedia* object);
+
+/**
+ * media_forge_native_processed_media_get_changed
+ * @object: a #MediaForgeNativeProcessedMedia.
+ *
+ * Gets the value of the changed field of @object.
+ *
+ * Returns: the field value.
+ */
+gboolean media_forge_native_processed_media_get_changed(MediaForgeNativeProcessedMedia* object);
+
+/**
+ * media_forge_native_processed_media_get_target_met
+ * @object: a #MediaForgeNativeProcessedMedia.
+ *
+ * Gets the value of the targetMet field of @object.
+ *
+ * Returns: the field value.
+ */
+gboolean* media_forge_native_processed_media_get_target_met(MediaForgeNativeProcessedMedia* object);
+
+/**
+ * media_forge_native_processed_media_equals:
+ * @a: a #MediaForgeNativeProcessedMedia.
+ * @b: another #MediaForgeNativeProcessedMedia.
+ *
+ * Checks if two #MediaForgeNativeProcessedMedia objects are equal.
+ *
+ * Returns: TRUE if @a and @b are equal.
+ */
+gboolean media_forge_native_processed_media_equals(MediaForgeNativeProcessedMedia* a, MediaForgeNativeProcessedMedia* b);
+
+/**
+ * media_forge_native_processed_media_hash:
+ * @object: a #MediaForgeNativeProcessedMedia.
+ *
+ * Calculates a hash code for a #MediaForgeNativeProcessedMedia object.
+ *
+ * Returns: the hash code.
+ */
+guint media_forge_native_processed_media_hash(MediaForgeNativeProcessedMedia* object);
+
+/**
+ * media_forge_native_processed_media_to_string:
+ * @object: a #MediaForgeNativeProcessedMedia.
+ *
+ * Returns a string representation of a #MediaForgeNativeProcessedMedia object.
+ *
+ * Returns: (transfer full): a new string, free with g_free().
+ */
+gchar* media_forge_native_processed_media_to_string(MediaForgeNativeProcessedMedia* object);
+
+/**
+ * MediaForgeNativeVideoMetadata:
+ *
+ */
+
+G_DECLARE_FINAL_TYPE(MediaForgeNativeVideoMetadata, media_forge_native_video_metadata, MEDIA_FORGE, NATIVE_VIDEO_METADATA, GObject)
+
+/**
+ * media_forge_native_video_metadata_new:
+ * path: field in this object.
+ * mime_type: field in this object.
+ * size_bytes: field in this object.
+ * width: field in this object.
+ * height: field in this object.
+ * duration_ms: field in this object.
+ * rotation_degrees: field in this object.
+ *
+ * Creates a new #NativeVideoMetadata object.
+ *
+ * Returns: a new #MediaForgeNativeVideoMetadata
+ */
+MediaForgeNativeVideoMetadata* media_forge_native_video_metadata_new(const gchar* path, const gchar* mime_type, int64_t* size_bytes, int64_t* width, int64_t* height, int64_t* duration_ms, int64_t* rotation_degrees);
+
+/**
+ * media_forge_native_video_metadata_get_path
+ * @object: a #MediaForgeNativeVideoMetadata.
+ *
+ * Gets the value of the path field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_video_metadata_get_path(MediaForgeNativeVideoMetadata* object);
+
+/**
+ * media_forge_native_video_metadata_get_mime_type
+ * @object: a #MediaForgeNativeVideoMetadata.
+ *
+ * Gets the value of the mimeType field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_video_metadata_get_mime_type(MediaForgeNativeVideoMetadata* object);
+
+/**
+ * media_forge_native_video_metadata_get_size_bytes
+ * @object: a #MediaForgeNativeVideoMetadata.
+ *
+ * Gets the value of the sizeBytes field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_video_metadata_get_size_bytes(MediaForgeNativeVideoMetadata* object);
+
+/**
+ * media_forge_native_video_metadata_get_width
+ * @object: a #MediaForgeNativeVideoMetadata.
+ *
+ * Gets the value of the width field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_video_metadata_get_width(MediaForgeNativeVideoMetadata* object);
+
+/**
+ * media_forge_native_video_metadata_get_height
+ * @object: a #MediaForgeNativeVideoMetadata.
+ *
+ * Gets the value of the height field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_video_metadata_get_height(MediaForgeNativeVideoMetadata* object);
+
+/**
+ * media_forge_native_video_metadata_get_duration_ms
+ * @object: a #MediaForgeNativeVideoMetadata.
+ *
+ * Gets the value of the durationMs field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_video_metadata_get_duration_ms(MediaForgeNativeVideoMetadata* object);
+
+/**
+ * media_forge_native_video_metadata_get_rotation_degrees
+ * @object: a #MediaForgeNativeVideoMetadata.
+ *
+ * Gets the value of the rotationDegrees field of @object.
+ *
+ * Returns: the field value.
+ */
+int64_t* media_forge_native_video_metadata_get_rotation_degrees(MediaForgeNativeVideoMetadata* object);
+
+/**
+ * media_forge_native_video_metadata_equals:
+ * @a: a #MediaForgeNativeVideoMetadata.
+ * @b: another #MediaForgeNativeVideoMetadata.
+ *
+ * Checks if two #MediaForgeNativeVideoMetadata objects are equal.
+ *
+ * Returns: TRUE if @a and @b are equal.
+ */
+gboolean media_forge_native_video_metadata_equals(MediaForgeNativeVideoMetadata* a, MediaForgeNativeVideoMetadata* b);
+
+/**
+ * media_forge_native_video_metadata_hash:
+ * @object: a #MediaForgeNativeVideoMetadata.
+ *
+ * Calculates a hash code for a #MediaForgeNativeVideoMetadata object.
+ *
+ * Returns: the hash code.
+ */
+guint media_forge_native_video_metadata_hash(MediaForgeNativeVideoMetadata* object);
+
+/**
+ * media_forge_native_video_metadata_to_string:
+ * @object: a #MediaForgeNativeVideoMetadata.
+ *
+ * Returns a string representation of a #MediaForgeNativeVideoMetadata object.
+ *
+ * Returns: (transfer full): a new string, free with g_free().
+ */
+gchar* media_forge_native_video_metadata_to_string(MediaForgeNativeVideoMetadata* object);
+
 G_DECLARE_FINAL_TYPE(MediaForgeMessageCodec, media_forge_message_codec, MEDIA_FORGE, MESSAGE_CODEC, FlStandardMessageCodec)
+
+/**
+ * Custom type ID constants:
+ *
+ * Constants used to identify custom types in the codec.
+ * They are used in the codec to encode and decode custom types.
+ * They may be used in custom object creation functions to identify the type.
+ */
+extern const int media_forge_native_media_type_type_id;
+extern const int media_forge_native_media_source_type_id;
+extern const int media_forge_native_camera_device_type_id;
+extern const int media_forge_native_picker_options_type_id;
+extern const int media_forge_native_picked_media_type_id;
+extern const int media_forge_native_lost_data_response_type_id;
+extern const int media_forge_native_image_process_options_type_id;
+extern const int media_forge_native_processed_media_type_id;
+extern const int media_forge_native_video_metadata_type_id;
 
 G_DECLARE_FINAL_TYPE(MediaForgeMediaForgePluginApi, media_forge_media_forge_plugin_api, MEDIA_FORGE, MEDIA_FORGE_PLUGIN_API, GObject)
 
@@ -66,6 +796,244 @@ void media_forge_media_forge_plugin_api_set_method_handlers(FlBinaryMessenger* m
  * Clears the method handlers in the MediaForgePluginApi API.
  */
 void media_forge_media_forge_plugin_api_clear_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix);
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgePickerApi, media_forge_media_forge_picker_api, MEDIA_FORGE, MEDIA_FORGE_PICKER_API, GObject)
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgePickerApiResponseHandle, media_forge_media_forge_picker_api_response_handle, MEDIA_FORGE, MEDIA_FORGE_PICKER_API_RESPONSE_HANDLE, GObject)
+
+/**
+ * MediaForgeMediaForgePickerApiVTable:
+ *
+ * Table of functions exposed by MediaForgePickerApi to be implemented by the API provider.
+ */
+typedef struct {
+  void (*pick_image)(MediaForgeNativeMediaSource source, MediaForgeNativePickerOptions* options, MediaForgeMediaForgePickerApiResponseHandle* response_handle, gpointer user_data);
+  void (*pick_video)(MediaForgeNativeMediaSource source, MediaForgeNativePickerOptions* options, MediaForgeMediaForgePickerApiResponseHandle* response_handle, gpointer user_data);
+  void (*pick_multiple)(MediaForgeNativeMediaType type, MediaForgeNativePickerOptions* options, MediaForgeMediaForgePickerApiResponseHandle* response_handle, gpointer user_data);
+  void (*retrieve_lost_data)(MediaForgeMediaForgePickerApiResponseHandle* response_handle, gpointer user_data);
+} MediaForgeMediaForgePickerApiVTable;
+
+/**
+ * media_forge_media_forge_picker_api_set_method_handlers:
+ *
+ * @messenger: an #FlBinaryMessenger.
+ * @suffix: (allow-none): a suffix to add to the API or %NULL for none.
+ * @vtable: implementations of the methods in this API.
+ * @user_data: (closure): user data to pass to the functions in @vtable.
+ * @user_data_free_func: (allow-none): a function which gets called to free @user_data, or %NULL.
+ *
+ * Connects the method handlers in the MediaForgePickerApi API.
+ */
+void media_forge_media_forge_picker_api_set_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix, const MediaForgeMediaForgePickerApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func);
+
+/**
+ * media_forge_media_forge_picker_api_clear_method_handlers:
+ *
+ * @messenger: an #FlBinaryMessenger.
+ * @suffix: (allow-none): a suffix to add to the API or %NULL for none.
+ *
+ * Clears the method handlers in the MediaForgePickerApi API.
+ */
+void media_forge_media_forge_picker_api_clear_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix);
+
+/**
+ * media_forge_media_forge_picker_api_respond_pick_image:
+ * @response_handle: a #MediaForgeMediaForgePickerApiResponseHandle.
+ * @return_value: location to write the value returned by this method.
+ *
+ * Responds to MediaForgePickerApi.pickImage. 
+ */
+void media_forge_media_forge_picker_api_respond_pick_image(MediaForgeMediaForgePickerApiResponseHandle* response_handle, MediaForgeNativePickedMedia* return_value);
+
+/**
+ * media_forge_media_forge_picker_api_respond_error_pick_image:
+ * @response_handle: a #MediaForgeMediaForgePickerApiResponseHandle.
+ * @code: error code.
+ * @message: error message.
+ * @details: (allow-none): error details or %NULL.
+ *
+ * Responds with an error to MediaForgePickerApi.pickImage. 
+ */
+void media_forge_media_forge_picker_api_respond_error_pick_image(MediaForgeMediaForgePickerApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details);
+
+/**
+ * media_forge_media_forge_picker_api_respond_pick_video:
+ * @response_handle: a #MediaForgeMediaForgePickerApiResponseHandle.
+ * @return_value: location to write the value returned by this method.
+ *
+ * Responds to MediaForgePickerApi.pickVideo. 
+ */
+void media_forge_media_forge_picker_api_respond_pick_video(MediaForgeMediaForgePickerApiResponseHandle* response_handle, MediaForgeNativePickedMedia* return_value);
+
+/**
+ * media_forge_media_forge_picker_api_respond_error_pick_video:
+ * @response_handle: a #MediaForgeMediaForgePickerApiResponseHandle.
+ * @code: error code.
+ * @message: error message.
+ * @details: (allow-none): error details or %NULL.
+ *
+ * Responds with an error to MediaForgePickerApi.pickVideo. 
+ */
+void media_forge_media_forge_picker_api_respond_error_pick_video(MediaForgeMediaForgePickerApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details);
+
+/**
+ * media_forge_media_forge_picker_api_respond_pick_multiple:
+ * @response_handle: a #MediaForgeMediaForgePickerApiResponseHandle.
+ * @return_value: location to write the value returned by this method.
+ *
+ * Responds to MediaForgePickerApi.pickMultiple. 
+ */
+void media_forge_media_forge_picker_api_respond_pick_multiple(MediaForgeMediaForgePickerApiResponseHandle* response_handle, FlValue* return_value);
+
+/**
+ * media_forge_media_forge_picker_api_respond_error_pick_multiple:
+ * @response_handle: a #MediaForgeMediaForgePickerApiResponseHandle.
+ * @code: error code.
+ * @message: error message.
+ * @details: (allow-none): error details or %NULL.
+ *
+ * Responds with an error to MediaForgePickerApi.pickMultiple. 
+ */
+void media_forge_media_forge_picker_api_respond_error_pick_multiple(MediaForgeMediaForgePickerApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details);
+
+/**
+ * media_forge_media_forge_picker_api_respond_retrieve_lost_data:
+ * @response_handle: a #MediaForgeMediaForgePickerApiResponseHandle.
+ * @return_value: location to write the value returned by this method.
+ *
+ * Responds to MediaForgePickerApi.retrieveLostData. 
+ */
+void media_forge_media_forge_picker_api_respond_retrieve_lost_data(MediaForgeMediaForgePickerApiResponseHandle* response_handle, MediaForgeNativeLostDataResponse* return_value);
+
+/**
+ * media_forge_media_forge_picker_api_respond_error_retrieve_lost_data:
+ * @response_handle: a #MediaForgeMediaForgePickerApiResponseHandle.
+ * @code: error code.
+ * @message: error message.
+ * @details: (allow-none): error details or %NULL.
+ *
+ * Responds with an error to MediaForgePickerApi.retrieveLostData. 
+ */
+void media_forge_media_forge_picker_api_respond_error_retrieve_lost_data(MediaForgeMediaForgePickerApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details);
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgeProcessorApi, media_forge_media_forge_processor_api, MEDIA_FORGE, MEDIA_FORGE_PROCESSOR_API, GObject)
+
+G_DECLARE_FINAL_TYPE(MediaForgeMediaForgeProcessorApiResponseHandle, media_forge_media_forge_processor_api_response_handle, MEDIA_FORGE, MEDIA_FORGE_PROCESSOR_API_RESPONSE_HANDLE, GObject)
+
+/**
+ * MediaForgeMediaForgeProcessorApiVTable:
+ *
+ * Table of functions exposed by MediaForgeProcessorApi to be implemented by the API provider.
+ */
+typedef struct {
+  void (*process_image)(const gchar* path, MediaForgeNativeImageProcessOptions* options, MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, gpointer user_data);
+  void (*inspect_video)(const gchar* path, MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, gpointer user_data);
+  void (*create_video_thumbnail)(const gchar* video_path, int64_t at_ms, int64_t* max_width, int64_t* max_height, MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, gpointer user_data);
+  void (*clear_cache)(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, gpointer user_data);
+} MediaForgeMediaForgeProcessorApiVTable;
+
+/**
+ * media_forge_media_forge_processor_api_set_method_handlers:
+ *
+ * @messenger: an #FlBinaryMessenger.
+ * @suffix: (allow-none): a suffix to add to the API or %NULL for none.
+ * @vtable: implementations of the methods in this API.
+ * @user_data: (closure): user data to pass to the functions in @vtable.
+ * @user_data_free_func: (allow-none): a function which gets called to free @user_data, or %NULL.
+ *
+ * Connects the method handlers in the MediaForgeProcessorApi API.
+ */
+void media_forge_media_forge_processor_api_set_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix, const MediaForgeMediaForgeProcessorApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func);
+
+/**
+ * media_forge_media_forge_processor_api_clear_method_handlers:
+ *
+ * @messenger: an #FlBinaryMessenger.
+ * @suffix: (allow-none): a suffix to add to the API or %NULL for none.
+ *
+ * Clears the method handlers in the MediaForgeProcessorApi API.
+ */
+void media_forge_media_forge_processor_api_clear_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix);
+
+/**
+ * media_forge_media_forge_processor_api_respond_process_image:
+ * @response_handle: a #MediaForgeMediaForgeProcessorApiResponseHandle.
+ * @return_value: location to write the value returned by this method.
+ *
+ * Responds to MediaForgeProcessorApi.processImage. 
+ */
+void media_forge_media_forge_processor_api_respond_process_image(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, MediaForgeNativeProcessedMedia* return_value);
+
+/**
+ * media_forge_media_forge_processor_api_respond_error_process_image:
+ * @response_handle: a #MediaForgeMediaForgeProcessorApiResponseHandle.
+ * @code: error code.
+ * @message: error message.
+ * @details: (allow-none): error details or %NULL.
+ *
+ * Responds with an error to MediaForgeProcessorApi.processImage. 
+ */
+void media_forge_media_forge_processor_api_respond_error_process_image(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details);
+
+/**
+ * media_forge_media_forge_processor_api_respond_inspect_video:
+ * @response_handle: a #MediaForgeMediaForgeProcessorApiResponseHandle.
+ * @return_value: location to write the value returned by this method.
+ *
+ * Responds to MediaForgeProcessorApi.inspectVideo. 
+ */
+void media_forge_media_forge_processor_api_respond_inspect_video(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, MediaForgeNativeVideoMetadata* return_value);
+
+/**
+ * media_forge_media_forge_processor_api_respond_error_inspect_video:
+ * @response_handle: a #MediaForgeMediaForgeProcessorApiResponseHandle.
+ * @code: error code.
+ * @message: error message.
+ * @details: (allow-none): error details or %NULL.
+ *
+ * Responds with an error to MediaForgeProcessorApi.inspectVideo. 
+ */
+void media_forge_media_forge_processor_api_respond_error_inspect_video(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details);
+
+/**
+ * media_forge_media_forge_processor_api_respond_create_video_thumbnail:
+ * @response_handle: a #MediaForgeMediaForgeProcessorApiResponseHandle.
+ * @return_value: location to write the value returned by this method.
+ *
+ * Responds to MediaForgeProcessorApi.createVideoThumbnail. 
+ */
+void media_forge_media_forge_processor_api_respond_create_video_thumbnail(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, const gchar* return_value);
+
+/**
+ * media_forge_media_forge_processor_api_respond_error_create_video_thumbnail:
+ * @response_handle: a #MediaForgeMediaForgeProcessorApiResponseHandle.
+ * @code: error code.
+ * @message: error message.
+ * @details: (allow-none): error details or %NULL.
+ *
+ * Responds with an error to MediaForgeProcessorApi.createVideoThumbnail. 
+ */
+void media_forge_media_forge_processor_api_respond_error_create_video_thumbnail(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details);
+
+/**
+ * media_forge_media_forge_processor_api_respond_clear_cache:
+ * @response_handle: a #MediaForgeMediaForgeProcessorApiResponseHandle.
+ * @return_value: location to write the value returned by this method.
+ *
+ * Responds to MediaForgeProcessorApi.clearCache. 
+ */
+void media_forge_media_forge_processor_api_respond_clear_cache(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, gboolean return_value);
+
+/**
+ * media_forge_media_forge_processor_api_respond_error_clear_cache:
+ * @response_handle: a #MediaForgeMediaForgeProcessorApiResponseHandle.
+ * @code: error code.
+ * @message: error message.
+ * @details: (allow-none): error details or %NULL.
+ *
+ * Responds with an error to MediaForgeProcessorApi.clearCache. 
+ */
+void media_forge_media_forge_processor_api_respond_error_clear_cache(MediaForgeMediaForgeProcessorApiResponseHandle* response_handle, const gchar* code, const gchar* message, FlValue* details);
 
 G_END_DECLS
 

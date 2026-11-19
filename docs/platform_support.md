@@ -1,0 +1,15 @@
+# Platform Support Matrix — Media Forge (v0.1)
+
+| Feature | Android Minimum & Notes | iOS Minimum & Notes | Limitations & Fallback |
+|---|---|---|---|
+| **Single Photo Pick** | Android 7.0+ (API 24+); uses modern Photo Picker on API 33+ and backported to API 19+ via Google Play Services; `ACTION_GET_CONTENT` fallback on others. | iOS 14.0+; uses `PHPickerViewController` (zero-permission). | Requires accessible local copy; copied to app cache if remote/cloud-backed. |
+| **Multiple Photo Pick** | Android 7.0+ (API 24+); supports `PickMultipleVisualMedia`. Maximum item limit enforced natively where supported, and post-selection validated. | iOS 14.0+; supports `selectionLimit` in `PHPickerConfiguration`. | Selection order preserved. Post-selection count validation ensures adherence on all OS versions. |
+| **Single Video Pick** | Android 7.0+ (API 24+); system picker filtered for `video/*`. Returns metadata (duration, width, height) via `MediaMetadataRetriever`. | iOS 14.0+; `PHPickerFilter.videos`. Metadata extracted via `AVURLAsset`. | No compression performed in v0.1. |
+| **Multiple Video Pick** | Android 7.0+ (API 24+); system picker filtered for `video/*`. | iOS 14.0+; `PHPickerConfiguration`. | Large video transfers from iCloud/cloud may require download time. |
+| **Mixed Photo & Video Pick** | Android 13+ (API 33+) native Photo Picker supports mixed visual media; fallback to `*/*` MIME with post-selection type validation on legacy devices. | iOS 14.0+ (`PHPickerFilter.any(of: [.images, .videos])`). | On older Android devices without Photo Picker, UI may allow selecting non-media; filtered out during post-selection validation. |
+| **Camera Photo Capture** | Android 7.0+; requires `FileProvider` and `android.media.action.IMAGE_CAPTURE`. | iOS 14.0+; requires `NSCameraUsageDescription` in Info.plist. | Cancellation cleanly deletes any empty placeholder files. |
+| **Camera Video Capture** | Android 7.0+; requires `FileProvider` and `android.media.action.VIDEO_CAPTURE`. | iOS 14.0+; requires `NSCameraUsageDescription` and `NSMicrophoneUsageDescription`. | Max duration parameter supported where native camera app honors intent extras. |
+| **Android Activity Recovery** | Supported via `PluginRegistry.ActivityResultListener` and unconsumed result caching. | N/A (iOS does not kill background activities during picker presentation in this manner). | Caller must query `MediaPicker.retrieveLostData()` on app resume if Activity was destroyed. |
+| **Selection Validation** | Validates max items, file size, image dimensions, and video duration. | Same as Android. | Executes locally on Dart layer immediately following platform selection. |
+| **Image Processing (M2)** | Android 7.0+ (API 24+); `BitmapFactory`, `ExifInterface`. | iOS 14.0+; `ImageIO`, `CoreGraphics`. | JPEG, PNG, WebP. Transparency handling preserved for PNG/WebP; background fill or rejection for JPEG. |
+| **Video Inspection (M3)** | Android 7.0+; `MediaMetadataRetriever`. | iOS 14.0+; `AVFoundation` (`AVURLAsset`, `AVAssetImageGenerator`). | Inspection and thumbnail extraction only; no video transcoding or compression in v0.1. |

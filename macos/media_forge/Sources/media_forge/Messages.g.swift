@@ -67,6 +67,115 @@ enum MessagesPigeonInternal {
 
     return innerValue is NSNull
   }
+  static func doubleEquals(_ lhs: Double, _ rhs: Double) -> Bool {
+    return (lhs.isNaN && rhs.isNaN) || lhs == rhs
+  }
+
+  static func doubleHash(_ value: Double, _ hasher: inout Hasher) {
+    if value.isNaN {
+      hasher.combine(0x7FF8000000000000)
+    } else {
+      // Normalize -0.0 to 0.0
+      hasher.combine(value == 0 ? 0 : value)
+    }
+  }
+
+  static func deepEquals(_ lhs: Any?, _ rhs: Any?) -> Bool {
+    let cleanLhs = nilOrValue(lhs) as Any?
+    let cleanRhs = nilOrValue(rhs) as Any?
+    switch (cleanLhs, cleanRhs) {
+    case (nil, nil):
+      return true
+
+    case (nil, _), (_, nil):
+      return false
+
+    case (let lhs as AnyObject, let rhs as AnyObject) where lhs === rhs:
+      return true
+
+    case is (Void, Void):
+      return true
+
+    case (let lhsArray, let rhsArray) as ([Double], [Double]):
+      guard lhsArray.count == rhsArray.count else { return false }
+      for (index, element) in lhsArray.enumerated() {
+        if !doubleEquals(element, rhsArray[index]) {
+          return false
+        }
+      }
+      return true
+
+    case (let lhsArray, let rhsArray) as ([Any?], [Any?]):
+      guard lhsArray.count == rhsArray.count else { return false }
+      for (index, element) in lhsArray.enumerated() {
+        if !deepEquals(element, rhsArray[index]) {
+          return false
+        }
+      }
+      return true
+
+    case (let lhsDictionary, let rhsDictionary) as ([AnyHashable: Any?], [AnyHashable: Any?]):
+      guard lhsDictionary.count == rhsDictionary.count else { return false }
+      for (lhsKey, lhsValue) in lhsDictionary {
+        var found = false
+        for (rhsKey, rhsValue) in rhsDictionary {
+          if deepEquals(lhsKey, rhsKey) {
+            if deepEquals(lhsValue, rhsValue) {
+              found = true
+              break
+            } else {
+              return false
+            }
+          }
+        }
+        if !found { return false }
+      }
+      return true
+
+    case (let lhs as Double, let rhs as Double):
+      return doubleEquals(lhs, rhs)
+
+    case (let lhsHashable, let rhsHashable) as (AnyHashable, AnyHashable):
+      return lhsHashable == rhsHashable
+
+    default:
+      return false
+    }
+  }
+
+  static func deepHash(value: Any?, hasher: inout Hasher) {
+    let cleanValue = nilOrValue(value) as Any?
+    if let cleanValue = cleanValue {
+      if let doubleValue = cleanValue as? Double {
+        doubleHash(doubleValue, &hasher)
+      } else if let valueList = cleanValue as? [Any?] {
+        for item in valueList {
+          deepHash(value: item, hasher: &hasher)
+        }
+      } else if let valueList = cleanValue as? [Double] {
+        for item in valueList {
+          doubleHash(item, &hasher)
+        }
+      } else if let valueDict = cleanValue as? [AnyHashable: Any?] {
+        var result = 0
+        for (key, value) in valueDict {
+          var entryKeyHasher = Hasher()
+          deepHash(value: key, hasher: &entryKeyHasher)
+          var entryValueHasher = Hasher()
+          deepHash(value: value, hasher: &entryValueHasher)
+          result = result &+ ((entryKeyHasher.finalize() &* 31) ^ entryValueHasher.finalize())
+        }
+        hasher.combine(result)
+      } else if let hashableValue = cleanValue as? AnyHashable {
+        hasher.combine(hashableValue)
+      } else {
+        hasher.combine(String(describing: cleanValue))
+      }
+    } else {
+      hasher.combine(0)
+    }
+  }
+
 }
 
 private func nilOrValue<T>(_ value: Any?) -> T? {
@@ -75,10 +184,454 @@ private func nilOrValue<T>(_ value: Any?) -> T? {
 }
 
 
+enum NativeMediaType: Int, CaseIterable {
+  case image = 0
+  case video = 1
+  case mixed = 2
+}
+
+enum NativeMediaSource: Int, CaseIterable {
+  case gallery = 0
+  case camera = 1
+}
+
+enum NativeCameraDevice: Int, CaseIterable {
+  case rear = 0
+  case front = 1
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct NativePickerOptions: Hashable, CustomStringConvertible {
+  var maxItems: Int64? = nil
+  var cameraDevice: NativeCameraDevice? = nil
+  var maxDurationSeconds: Int64? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> NativePickerOptions? {
+    let maxItems: Int64? = nilOrValue(pigeonVar_list[0])
+    let cameraDevice: NativeCameraDevice? = nilOrValue(pigeonVar_list[1])
+    let maxDurationSeconds: Int64? = nilOrValue(pigeonVar_list[2])
+
+    return NativePickerOptions(
+      maxItems: maxItems,
+      cameraDevice: cameraDevice,
+      maxDurationSeconds: maxDurationSeconds
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      maxItems,
+      cameraDevice,
+      maxDurationSeconds,
+    ]
+  }
+  static func == (lhs: NativePickerOptions, rhs: NativePickerOptions) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.maxItems, rhs.maxItems) && MessagesPigeonInternal.deepEquals(lhs.cameraDevice, rhs.cameraDevice) && MessagesPigeonInternal.deepEquals(lhs.maxDurationSeconds, rhs.maxDurationSeconds)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("NativePickerOptions")
+    MessagesPigeonInternal.deepHash(value: maxItems, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: cameraDevice, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: maxDurationSeconds, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "NativePickerOptions(maxItems: \(String(describing: maxItems)), cameraDevice: \(String(describing: cameraDevice)), maxDurationSeconds: \(String(describing: maxDurationSeconds)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct NativePickedMedia: Hashable, CustomStringConvertible {
+  var path: String
+  var type: NativeMediaType
+  var name: String? = nil
+  var mimeType: String? = nil
+  var sizeBytes: Int64? = nil
+  var width: Int64? = nil
+  var height: Int64? = nil
+  var durationMs: Int64? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> NativePickedMedia? {
+    let path = pigeonVar_list[0] as! String
+    let type = pigeonVar_list[1] as! NativeMediaType
+    let name: String? = nilOrValue(pigeonVar_list[2])
+    let mimeType: String? = nilOrValue(pigeonVar_list[3])
+    let sizeBytes: Int64? = nilOrValue(pigeonVar_list[4])
+    let width: Int64? = nilOrValue(pigeonVar_list[5])
+    let height: Int64? = nilOrValue(pigeonVar_list[6])
+    let durationMs: Int64? = nilOrValue(pigeonVar_list[7])
+
+    return NativePickedMedia(
+      path: path,
+      type: type,
+      name: name,
+      mimeType: mimeType,
+      sizeBytes: sizeBytes,
+      width: width,
+      height: height,
+      durationMs: durationMs
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      path,
+      type,
+      name,
+      mimeType,
+      sizeBytes,
+      width,
+      height,
+      durationMs,
+    ]
+  }
+  static func == (lhs: NativePickedMedia, rhs: NativePickedMedia) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.path, rhs.path) && MessagesPigeonInternal.deepEquals(lhs.type, rhs.type) && MessagesPigeonInternal.deepEquals(lhs.name, rhs.name) && MessagesPigeonInternal.deepEquals(lhs.mimeType, rhs.mimeType) && MessagesPigeonInternal.deepEquals(lhs.sizeBytes, rhs.sizeBytes) && MessagesPigeonInternal.deepEquals(lhs.width, rhs.width) && MessagesPigeonInternal.deepEquals(lhs.height, rhs.height) && MessagesPigeonInternal.deepEquals(lhs.durationMs, rhs.durationMs)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("NativePickedMedia")
+    MessagesPigeonInternal.deepHash(value: path, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: type, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: name, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: mimeType, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: sizeBytes, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: width, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: height, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: durationMs, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "NativePickedMedia(path: \(String(describing: path)), type: \(String(describing: type)), name: \(String(describing: name)), mimeType: \(String(describing: mimeType)), sizeBytes: \(String(describing: sizeBytes)), width: \(String(describing: width)), height: \(String(describing: height)), durationMs: \(String(describing: durationMs)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct NativeLostDataResponse: Hashable, CustomStringConvertible {
+  var items: [NativePickedMedia]
+  var errorCode: String? = nil
+  var errorMessage: String? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> NativeLostDataResponse? {
+    let items = pigeonVar_list[0] as! [NativePickedMedia]
+    let errorCode: String? = nilOrValue(pigeonVar_list[1])
+    let errorMessage: String? = nilOrValue(pigeonVar_list[2])
+
+    return NativeLostDataResponse(
+      items: items,
+      errorCode: errorCode,
+      errorMessage: errorMessage
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      items,
+      errorCode,
+      errorMessage,
+    ]
+  }
+  static func == (lhs: NativeLostDataResponse, rhs: NativeLostDataResponse) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.items, rhs.items) && MessagesPigeonInternal.deepEquals(lhs.errorCode, rhs.errorCode) && MessagesPigeonInternal.deepEquals(lhs.errorMessage, rhs.errorMessage)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("NativeLostDataResponse")
+    MessagesPigeonInternal.deepHash(value: items, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: errorCode, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: errorMessage, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "NativeLostDataResponse(items: \(String(describing: items)), errorCode: \(String(describing: errorCode)), errorMessage: \(String(describing: errorMessage)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct NativeImageProcessOptions: Hashable, CustomStringConvertible {
+  var maxWidth: Int64? = nil
+  var maxHeight: Int64? = nil
+  var quality: Int64? = nil
+  var targetSizeBytes: Int64? = nil
+  var stripGpsMetadata: Bool? = nil
+  var format: String? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> NativeImageProcessOptions? {
+    let maxWidth: Int64? = nilOrValue(pigeonVar_list[0])
+    let maxHeight: Int64? = nilOrValue(pigeonVar_list[1])
+    let quality: Int64? = nilOrValue(pigeonVar_list[2])
+    let targetSizeBytes: Int64? = nilOrValue(pigeonVar_list[3])
+    let stripGpsMetadata: Bool? = nilOrValue(pigeonVar_list[4])
+    let format: String? = nilOrValue(pigeonVar_list[5])
+
+    return NativeImageProcessOptions(
+      maxWidth: maxWidth,
+      maxHeight: maxHeight,
+      quality: quality,
+      targetSizeBytes: targetSizeBytes,
+      stripGpsMetadata: stripGpsMetadata,
+      format: format
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      maxWidth,
+      maxHeight,
+      quality,
+      targetSizeBytes,
+      stripGpsMetadata,
+      format,
+    ]
+  }
+  static func == (lhs: NativeImageProcessOptions, rhs: NativeImageProcessOptions) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.maxWidth, rhs.maxWidth) && MessagesPigeonInternal.deepEquals(lhs.maxHeight, rhs.maxHeight) && MessagesPigeonInternal.deepEquals(lhs.quality, rhs.quality) && MessagesPigeonInternal.deepEquals(lhs.targetSizeBytes, rhs.targetSizeBytes) && MessagesPigeonInternal.deepEquals(lhs.stripGpsMetadata, rhs.stripGpsMetadata) && MessagesPigeonInternal.deepEquals(lhs.format, rhs.format)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("NativeImageProcessOptions")
+    MessagesPigeonInternal.deepHash(value: maxWidth, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: maxHeight, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: quality, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: targetSizeBytes, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: stripGpsMetadata, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: format, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "NativeImageProcessOptions(maxWidth: \(String(describing: maxWidth)), maxHeight: \(String(describing: maxHeight)), quality: \(String(describing: quality)), targetSizeBytes: \(String(describing: targetSizeBytes)), stripGpsMetadata: \(String(describing: stripGpsMetadata)), format: \(String(describing: format)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct NativeProcessedMedia: Hashable, CustomStringConvertible {
+  var path: String
+  var originalPath: String
+  var mimeType: String? = nil
+  var sizeBytes: Int64? = nil
+  var originalSizeBytes: Int64? = nil
+  var width: Int64? = nil
+  var height: Int64? = nil
+  var changed: Bool
+  var targetMet: Bool? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> NativeProcessedMedia? {
+    let path = pigeonVar_list[0] as! String
+    let originalPath = pigeonVar_list[1] as! String
+    let mimeType: String? = nilOrValue(pigeonVar_list[2])
+    let sizeBytes: Int64? = nilOrValue(pigeonVar_list[3])
+    let originalSizeBytes: Int64? = nilOrValue(pigeonVar_list[4])
+    let width: Int64? = nilOrValue(pigeonVar_list[5])
+    let height: Int64? = nilOrValue(pigeonVar_list[6])
+    let changed = pigeonVar_list[7] as! Bool
+    let targetMet: Bool? = nilOrValue(pigeonVar_list[8])
+
+    return NativeProcessedMedia(
+      path: path,
+      originalPath: originalPath,
+      mimeType: mimeType,
+      sizeBytes: sizeBytes,
+      originalSizeBytes: originalSizeBytes,
+      width: width,
+      height: height,
+      changed: changed,
+      targetMet: targetMet
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      path,
+      originalPath,
+      mimeType,
+      sizeBytes,
+      originalSizeBytes,
+      width,
+      height,
+      changed,
+      targetMet,
+    ]
+  }
+  static func == (lhs: NativeProcessedMedia, rhs: NativeProcessedMedia) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.path, rhs.path) && MessagesPigeonInternal.deepEquals(lhs.originalPath, rhs.originalPath) && MessagesPigeonInternal.deepEquals(lhs.mimeType, rhs.mimeType) && MessagesPigeonInternal.deepEquals(lhs.sizeBytes, rhs.sizeBytes) && MessagesPigeonInternal.deepEquals(lhs.originalSizeBytes, rhs.originalSizeBytes) && MessagesPigeonInternal.deepEquals(lhs.width, rhs.width) && MessagesPigeonInternal.deepEquals(lhs.height, rhs.height) && MessagesPigeonInternal.deepEquals(lhs.changed, rhs.changed) && MessagesPigeonInternal.deepEquals(lhs.targetMet, rhs.targetMet)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("NativeProcessedMedia")
+    MessagesPigeonInternal.deepHash(value: path, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: originalPath, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: mimeType, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: sizeBytes, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: originalSizeBytes, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: width, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: height, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: changed, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: targetMet, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "NativeProcessedMedia(path: \(String(describing: path)), originalPath: \(String(describing: originalPath)), mimeType: \(String(describing: mimeType)), sizeBytes: \(String(describing: sizeBytes)), originalSizeBytes: \(String(describing: originalSizeBytes)), width: \(String(describing: width)), height: \(String(describing: height)), changed: \(String(describing: changed)), targetMet: \(String(describing: targetMet)))"
+  }
+}
+
+/// Generated class from Pigeon that represents data sent in messages.
+struct NativeVideoMetadata: Hashable, CustomStringConvertible {
+  var path: String
+  var mimeType: String? = nil
+  var sizeBytes: Int64? = nil
+  var width: Int64? = nil
+  var height: Int64? = nil
+  var durationMs: Int64? = nil
+  var rotationDegrees: Int64? = nil
+
+
+  // swift-format-ignore: AlwaysUseLowerCamelCase
+  static func fromList(_ pigeonVar_list: [Any?]) -> NativeVideoMetadata? {
+    let path = pigeonVar_list[0] as! String
+    let mimeType: String? = nilOrValue(pigeonVar_list[1])
+    let sizeBytes: Int64? = nilOrValue(pigeonVar_list[2])
+    let width: Int64? = nilOrValue(pigeonVar_list[3])
+    let height: Int64? = nilOrValue(pigeonVar_list[4])
+    let durationMs: Int64? = nilOrValue(pigeonVar_list[5])
+    let rotationDegrees: Int64? = nilOrValue(pigeonVar_list[6])
+
+    return NativeVideoMetadata(
+      path: path,
+      mimeType: mimeType,
+      sizeBytes: sizeBytes,
+      width: width,
+      height: height,
+      durationMs: durationMs,
+      rotationDegrees: rotationDegrees
+    )
+  }
+  func toList() -> [Any?] {
+    return [
+      path,
+      mimeType,
+      sizeBytes,
+      width,
+      height,
+      durationMs,
+      rotationDegrees,
+    ]
+  }
+  static func == (lhs: NativeVideoMetadata, rhs: NativeVideoMetadata) -> Bool {
+    if Swift.type(of: lhs) != Swift.type(of: rhs) {
+      return false
+    }
+    return MessagesPigeonInternal.deepEquals(lhs.path, rhs.path) && MessagesPigeonInternal.deepEquals(lhs.mimeType, rhs.mimeType) && MessagesPigeonInternal.deepEquals(lhs.sizeBytes, rhs.sizeBytes) && MessagesPigeonInternal.deepEquals(lhs.width, rhs.width) && MessagesPigeonInternal.deepEquals(lhs.height, rhs.height) && MessagesPigeonInternal.deepEquals(lhs.durationMs, rhs.durationMs) && MessagesPigeonInternal.deepEquals(lhs.rotationDegrees, rhs.rotationDegrees)
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine("NativeVideoMetadata")
+    MessagesPigeonInternal.deepHash(value: path, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: mimeType, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: sizeBytes, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: width, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: height, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: durationMs, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: rotationDegrees, hasher: &hasher)
+  }
+
+  public var description: String {
+    return "NativeVideoMetadata(path: \(String(describing: path)), mimeType: \(String(describing: mimeType)), sizeBytes: \(String(describing: sizeBytes)), width: \(String(describing: width)), height: \(String(describing: height)), durationMs: \(String(describing: durationMs)), rotationDegrees: \(String(describing: rotationDegrees)))"
+  }
+}
+
 private class MessagesPigeonCodecReader: FlutterStandardReader {
+  override func readValue(ofType type: UInt8) -> Any? {
+    switch type {
+    case 129:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return NativeMediaType(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 130:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return NativeMediaSource(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 131:
+      let enumResultAsInt: Int? = nilOrValue(self.readValue() as! Int?)
+      if let enumResultAsInt = enumResultAsInt {
+        return NativeCameraDevice(rawValue: enumResultAsInt)
+      }
+      return nil
+    case 132:
+      return NativePickerOptions.fromList(self.readValue() as! [Any?])
+    case 133:
+      return NativePickedMedia.fromList(self.readValue() as! [Any?])
+    case 134:
+      return NativeLostDataResponse.fromList(self.readValue() as! [Any?])
+    case 135:
+      return NativeImageProcessOptions.fromList(self.readValue() as! [Any?])
+    case 136:
+      return NativeProcessedMedia.fromList(self.readValue() as! [Any?])
+    case 137:
+      return NativeVideoMetadata.fromList(self.readValue() as! [Any?])
+    default:
+      return super.readValue(ofType: type)
+    }
+  }
 }
 
 private class MessagesPigeonCodecWriter: FlutterStandardWriter {
+  override func writeValue(_ value: Any) {
+    if let value = value as? NativeMediaType {
+      super.writeByte(129)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? NativeMediaSource {
+      super.writeByte(130)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? NativeCameraDevice {
+      super.writeByte(131)
+      super.writeValue(value.rawValue)
+    } else if let value = value as? NativePickerOptions {
+      super.writeByte(132)
+      super.writeValue(value.toList())
+    } else if let value = value as? NativePickedMedia {
+      super.writeByte(133)
+      super.writeValue(value.toList())
+    } else if let value = value as? NativeLostDataResponse {
+      super.writeByte(134)
+      super.writeValue(value.toList())
+    } else if let value = value as? NativeImageProcessOptions {
+      super.writeByte(135)
+      super.writeValue(value.toList())
+    } else if let value = value as? NativeProcessedMedia {
+      super.writeByte(136)
+      super.writeValue(value.toList())
+    } else if let value = value as? NativeVideoMetadata {
+      super.writeByte(137)
+      super.writeValue(value.toList())
+    } else {
+      super.writeValue(value)
+    }
+  }
 }
 
 private class MessagesPigeonCodecReaderWriter: FlutterStandardReaderWriter {
@@ -95,9 +648,9 @@ class MessagesPigeonCodec: FlutterStandardMessageCodec, @unchecked Sendable {
   static let shared = MessagesPigeonCodec(readerWriter: MessagesPigeonCodecReaderWriter())
 }
 
+
 /// Generated protocol from Pigeon that represents a handler of messages from Flutter.
 protocol MediaForgePluginApi {
-  /// Returns the system version of the host platform.
   func getPlatformVersion() throws -> String
 }
 
@@ -107,7 +660,6 @@ class MediaForgePluginApiSetup {
   /// Sets up an instance of `MediaForgePluginApi` to handle messages through the `binaryMessenger`.
   static func setUp(binaryMessenger: FlutterBinaryMessenger, api: MediaForgePluginApi?, messageChannelSuffix: String = "") {
     let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
-    /// Returns the system version of the host platform.
     let getPlatformVersionChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_forge.MediaForgePluginApi.getPlatformVersion\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       getPlatformVersionChannel.setMessageHandler { _, reply in
@@ -120,6 +672,177 @@ class MediaForgePluginApiSetup {
       }
     } else {
       getPlatformVersionChannel.setMessageHandler(nil)
+    }
+  }
+}
+/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
+protocol MediaForgePickerApi {
+  func pickImage(source: NativeMediaSource, options: NativePickerOptions?) async throws -> NativePickedMedia?
+  func pickVideo(source: NativeMediaSource, options: NativePickerOptions?) async throws -> NativePickedMedia?
+  func pickMultiple(type: NativeMediaType, options: NativePickerOptions?) async throws -> [NativePickedMedia]
+  func retrieveLostData() async throws -> NativeLostDataResponse
+}
+
+/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
+class MediaForgePickerApiSetup {
+  static var codec: FlutterStandardMessageCodec { MessagesPigeonCodec.shared }
+  /// Sets up an instance of `MediaForgePickerApi` to handle messages through the `binaryMessenger`.
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: MediaForgePickerApi?, messageChannelSuffix: String = "") {
+    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    let pickImageChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickImage\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      pickImageChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sourceArg = args[0] as! NativeMediaSource
+        let optionsArg: NativePickerOptions? = nilOrValue(args[1])
+        Task { @MainActor in
+          do {
+            let result = try await api.pickImage(source: sourceArg, options: optionsArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      pickImageChannel.setMessageHandler(nil)
+    }
+    let pickVideoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickVideo\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      pickVideoChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let sourceArg = args[0] as! NativeMediaSource
+        let optionsArg: NativePickerOptions? = nilOrValue(args[1])
+        Task { @MainActor in
+          do {
+            let result = try await api.pickVideo(source: sourceArg, options: optionsArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      pickVideoChannel.setMessageHandler(nil)
+    }
+    let pickMultipleChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickMultiple\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      pickMultipleChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let typeArg = args[0] as! NativeMediaType
+        let optionsArg: NativePickerOptions? = nilOrValue(args[1])
+        Task { @MainActor in
+          do {
+            let result = try await api.pickMultiple(type: typeArg, options: optionsArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      pickMultipleChannel.setMessageHandler(nil)
+    }
+    let retrieveLostDataChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_forge.MediaForgePickerApi.retrieveLostData\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      retrieveLostDataChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            let result = try await api.retrieveLostData()
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      retrieveLostDataChannel.setMessageHandler(nil)
+    }
+  }
+}
+/// Generated protocol from Pigeon that represents a handler of messages from Flutter.
+protocol MediaForgeProcessorApi {
+  func processImage(path: String, options: NativeImageProcessOptions) async throws -> NativeProcessedMedia
+  func inspectVideo(path: String) async throws -> NativeVideoMetadata
+  func createVideoThumbnail(videoPath: String, atMs: Int64, maxWidth: Int64?, maxHeight: Int64?) async throws -> String
+  func clearCache() async throws -> Bool
+}
+
+/// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
+class MediaForgeProcessorApiSetup {
+  static var codec: FlutterStandardMessageCodec { MessagesPigeonCodec.shared }
+  /// Sets up an instance of `MediaForgeProcessorApi` to handle messages through the `binaryMessenger`.
+  static func setUp(binaryMessenger: FlutterBinaryMessenger, api: MediaForgeProcessorApi?, messageChannelSuffix: String = "") {
+    let channelSuffix = messageChannelSuffix.count > 0 ? ".\(messageChannelSuffix)" : ""
+    let processImageChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.processImage\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      processImageChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let pathArg = args[0] as! String
+        let optionsArg = args[1] as! NativeImageProcessOptions
+        Task { @MainActor in
+          do {
+            let result = try await api.processImage(path: pathArg, options: optionsArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      processImageChannel.setMessageHandler(nil)
+    }
+    let inspectVideoChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.inspectVideo\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      inspectVideoChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let pathArg = args[0] as! String
+        Task { @MainActor in
+          do {
+            let result = try await api.inspectVideo(path: pathArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      inspectVideoChannel.setMessageHandler(nil)
+    }
+    let createVideoThumbnailChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.createVideoThumbnail\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      createVideoThumbnailChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let videoPathArg = args[0] as! String
+        let atMsArg = args[1] as! Int64
+        let maxWidthArg: Int64? = nilOrValue(args[2])
+        let maxHeightArg: Int64? = nilOrValue(args[3])
+        Task { @MainActor in
+          do {
+            let result = try await api.createVideoThumbnail(videoPath: videoPathArg, atMs: atMsArg, maxWidth: maxWidthArg, maxHeight: maxHeightArg)
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      createVideoThumbnailChannel.setMessageHandler(nil)
+    }
+    let clearCacheChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.clearCache\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      clearCacheChannel.setMessageHandler { _, reply in
+        Task { @MainActor in
+          do {
+            let result = try await api.clearCache()
+            reply(wrapResult(result))
+          } catch {
+            reply(wrapError(error))
+          }
+        }
+      }
+    } else {
+      clearCacheChannel.setMessageHandler(nil)
     }
   }
 }
