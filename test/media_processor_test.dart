@@ -107,6 +107,7 @@ void main() {
       );
 
       final result = await MediaProcessor.processImage(sampleFile.path);
+      expect(fakeProcessorApi.lastOptions?.outputFileName, 'media_forge_opt');
       expect(result.changed, isFalse);
       expect(result.savingsBytes, 0);
       expect(result.savingsPercentage, 0.0);

@@ -106,7 +106,7 @@ class _ImageStudioHomePageState extends State<ImageStudioHomePage> {
         format: _format,
         outputFileName: _useCustomFileName && _customPrefix.trim().isNotEmpty
             ? _customPrefix.trim()
-            : null,
+            : 'media_forge_opt',
       );
 
   // --- Picker Actions ---

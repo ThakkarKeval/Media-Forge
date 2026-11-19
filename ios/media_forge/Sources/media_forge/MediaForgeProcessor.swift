@@ -315,19 +315,22 @@ final class MediaForgeProcessor: NSObject, MediaForgeProcessorApi {
       try? FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true)
     }
 
+    let baseName: String
     if let custom = customName, !custom.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-      var sanitized = custom.trimmingCharacters(in: .whitespacesAndNewlines)
-        .replacingOccurrences(of: "/", with: "_")
-        .replacingOccurrences(of: "\\", with: "_")
-        .replacingOccurrences(of: ":", with: "_")
-
-      let dotExt = ".\(ext)"
-      if !sanitized.lowercased().hasSuffix(dotExt.lowercased()) {
-        sanitized = "\(sanitized)\(dotExt)"
-      }
-      return cacheDir.appendingPathComponent(sanitized)
+      baseName = custom.trimmingCharacters(in: .whitespacesAndNewlines)
+    } else {
+      baseName = "media_forge_opt_\(Int(Date().timeIntervalSince1970 * 1000))"
     }
 
-    return cacheDir.appendingPathComponent("\(prefix)\(UUID().uuidString).\(ext)")
+    var sanitized = baseName
+      .replacingOccurrences(of: "/", with: "_")
+      .replacingOccurrences(of: "\\", with: "_")
+      .replacingOccurrences(of: ":", with: "_")
+
+    let dotExt = ".\(ext)"
+    if !sanitized.lowercased().hasSuffix(dotExt.lowercased()) {
+      sanitized = "\(sanitized)\(dotExt)"
+    }
+    return cacheDir.appendingPathComponent(sanitized)
   }
 }

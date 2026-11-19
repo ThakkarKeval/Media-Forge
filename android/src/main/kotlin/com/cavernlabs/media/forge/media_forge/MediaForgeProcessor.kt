@@ -466,16 +466,18 @@ class MediaForgeProcessor(
             if (!exists()) mkdirs()
         }
 
-        if (customName != null && customName.trim().isNotEmpty()) {
-            val sanitized = customName.trim().replace(Regex("[/\\\\?%*:|\"<>]"), "_")
-            val fileName = if (sanitized.endsWith(suffix, ignoreCase = true)) {
-                sanitized
-            } else {
-                "$sanitized$suffix"
-            }
-            return File(dir, fileName)
+        val baseName = if (customName != null && customName.trim().isNotEmpty()) {
+            customName.trim()
+        } else {
+            "media_forge_opt_${System.currentTimeMillis()}"
         }
 
-        return File.createTempFile(prefix, suffix, dir)
+        val sanitized = baseName.replace(Regex("[/\\\\?%*:|\"<>]"), "_")
+        val fileName = if (sanitized.endsWith(suffix, ignoreCase = true)) {
+            sanitized
+        } else {
+            "$sanitized$suffix"
+        }
+        return File(dir, fileName)
     }
 }

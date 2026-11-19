@@ -20,7 +20,7 @@ class ImageProcessingOptions {
     this.targetSizeBytes,
     this.stripGpsMetadata = true,
     this.format,
-    this.outputFileName,
+    this.outputFileName = 'media_forge_opt',
     this.preserveAspectRatio = true,
     this.allowUpscaling = false,
   }) : assert(
@@ -52,6 +52,7 @@ class ImageProcessingOptions {
   final ImageFormat? format;
 
   /// Custom destination file name (e.g. `user_avatar` or `custom_photo.jpg`).
+  /// Defaults to `'media_forge_opt'`.
   /// If specified without an extension, the appropriate extension for the
   /// target format will be automatically appended.
   final String? outputFileName;
