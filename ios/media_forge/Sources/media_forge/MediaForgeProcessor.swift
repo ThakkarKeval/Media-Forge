@@ -1,3 +1,4 @@
+import AVFoundation
 import CoreGraphics
 import Foundation
 import ImageIO
@@ -107,11 +108,96 @@ final class MediaForgeProcessor: NSObject, MediaForgeProcessorApi {
   }
 
   func inspectVideo(path: String) async throws -> NativeVideoMetadata {
-    throw PigeonError(code: "unimplemented", message: "inspectVideo is part of Milestone 3", details: nil)
+    let url = URL(fileURLWithPath: path)
+    guard FileManager.default.fileExists(atPath: url.path) else {
+      throw PigeonError(code: "file_not_found", message: "Video file does not exist: \(path)", details: nil)
+    }
+
+    let attributes = try? FileManager.default.attributesOfItem(atPath: url.path)
+    let sizeBytes = attributes?[.size] as? Int64
+
+    let asset = AVURLAsset(url: url)
+    let durationSeconds = CMTimeGetSeconds(asset.duration)
+    let durationMs: Int64? = durationSeconds.isFinite ? Int64(durationSeconds * 1000.0) : nil
+
+    var width: Int64?
+    var height: Int64?
+    var rotationDegrees: Int64 = 0
+
+    if let track = asset.tracks(withMediaType: .video).first {
+      let naturalSize = track.naturalSize
+      let transform = track.preferredTransform
+
+      // Determine rotation from transform matrix
+      if transform.a == 0 && transform.b == 1.0 && transform.c == -1.0 && transform.d == 0 {
+        rotationDegrees = 90
+      } else if transform.a == -1.0 && transform.b == 0 && transform.c == 0 && transform.d == -1.0 {
+        rotationDegrees = 180
+      } else if transform.a == 0 && transform.b == -1.0 && transform.c == 1.0 && transform.d == 0 {
+        rotationDegrees = 270
+      } else {
+        rotationDegrees = 0
+      }
+
+      let isRotated90 = (rotationDegrees == 90 || rotationDegrees == 270)
+      let orientedW = isRotated90 ? naturalSize.height : naturalSize.width
+      let orientedH = isRotated90 ? naturalSize.width : naturalSize.height
+
+      width = Int64(orientedW)
+      height = Int64(orientedH)
+    }
+
+    let ext = url.pathExtension.lowercased()
+    let mimeType = ext == "mov" ? "video/quicktime" : "video/mp4"
+
+    return NativeVideoMetadata(
+      path: url.path,
+      mimeType: mimeType,
+      sizeBytes: sizeBytes,
+      width: width,
+      height: height,
+      durationMs: durationMs,
+      rotationDegrees: rotationDegrees
+    )
   }
 
   func createVideoThumbnail(videoPath: String, atMs: Int64, maxWidth: Int64?, maxHeight: Int64?) async throws -> String {
-    throw PigeonError(code: "unimplemented", message: "createVideoThumbnail is part of Milestone 3", details: nil)
+    let url = URL(fileURLWithPath: videoPath)
+    guard FileManager.default.fileExists(atPath: url.path) else {
+      throw PigeonError(code: "file_not_found", message: "Video file does not exist: \(videoPath)", details: nil)
+    }
+
+    let asset = AVURLAsset(url: url)
+    let generator = AVAssetImageGenerator(asset: asset)
+    generator.appliesPreferredTrackTransform = true
+
+    if let mw = maxWidth, let mh = maxHeight {
+      generator.maximumSize = CGSize(width: CGFloat(mw), height: CGFloat(mh))
+    } else if let mw = maxWidth {
+      generator.maximumSize = CGSize(width: CGFloat(mw), height: CGFloat.greatestFiniteMagnitude)
+    } else if let mh = maxHeight {
+      generator.maximumSize = CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat(mh))
+    }
+
+    let timeSeconds = max(0.0, Double(atMs) / 1000.0)
+    let cmTime = CMTime(seconds: timeSeconds, preferredTimescale: 600)
+
+    let cgImage: CGImage
+    do {
+      cgImage = try generator.copyCGImage(at: cmTime, actualTime: nil)
+    } catch {
+      throw PigeonError(code: "thumbnail_failed", message: "Failed to extract thumbnail: \(error.localizedDescription)", details: nil)
+    }
+
+    let uiImage = UIImage(cgImage: cgImage)
+    guard let jpegData = uiImage.jpegData(compressionQuality: 0.85) else {
+      throw PigeonError(code: "encoding_failed", message: "Failed to encode thumbnail as JPEG", details: nil)
+    }
+
+    let destUrl = createCacheUrl(prefix: "THUMB_", ext: "jpg")
+    try jpegData.write(to: destUrl)
+
+    return destUrl.path
   }
 
   func clearCache() async throws -> Bool {
