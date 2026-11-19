@@ -34,6 +34,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
   String _platformVersion = 'Unknown';
   final _mediaForgePlugin = const MediaForge();
   final List<PickedMedia> _pickedItems = [];
+  final List<ProcessedMedia> _processedItems = [];
   String? _statusMessage;
   String? _errorMessage;
   bool _isLoading = false;
@@ -142,6 +143,86 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
     }
   }
 
+  Future<void> _pickAndOptimizeImage() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _statusMessage = 'Picking and optimizing photo (≤ 300 KB)...';
+    });
+
+    try {
+      final processed = await MediaForge.pickAndProcessImage(
+        source: MediaSource.gallery,
+        processingOptions: const ImageProcessingOptions(
+          maxWidth: 1280,
+          maxHeight: 1280,
+          quality: 75,
+          targetSizeBytes: 300 * 1024, // 300 KB
+          stripGpsMetadata: true,
+        ),
+      );
+      if (!mounted) return;
+      setState(() {
+        if (processed != null) {
+          _processedItems.insert(0, processed);
+          final savings = processed.savingsPercentage != null
+              ? ' (${processed.savingsPercentage!.toStringAsFixed(1)}% saved)'
+              : '';
+          _statusMessage =
+              'Optimization completed: ${_formatBytes(processed.originalSizeBytes)} → ${_formatBytes(processed.sizeBytes)}$savings';
+        } else {
+          _statusMessage = 'Selection cancelled';
+        }
+      });
+    } on MediaForgeException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = '${e.code.name}: ${e.message}';
+        _statusMessage = null;
+      });
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _optimizePickedImage(PickedMedia media) async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _statusMessage = 'Optimizing ${media.name ?? media.path}...';
+    });
+
+    try {
+      final processed = await MediaProcessor.processImage(
+        media.path,
+        options: const ImageProcessingOptions(
+          maxWidth: 1280,
+          maxHeight: 1280,
+          quality: 80,
+          targetSizeBytes: 400 * 1024, // 400 KB
+          stripGpsMetadata: true,
+        ),
+      );
+      if (!mounted) return;
+      setState(() {
+        _processedItems.insert(0, processed);
+        final savings = processed.savingsPercentage != null
+            ? ' (${processed.savingsPercentage!.toStringAsFixed(1)}% saved)'
+            : '';
+        _statusMessage =
+            'Optimized: ${_formatBytes(processed.originalSizeBytes)} → ${_formatBytes(processed.sizeBytes)}$savings';
+      });
+    } on MediaForgeException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = '${e.code.name}: ${e.message}';
+        _statusMessage = null;
+      });
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   Future<void> _testValidationConstraint() async {
     setState(() {
       _isLoading = true;
@@ -203,9 +284,32 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
     }
   }
 
+  Future<void> _clearCache() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final success = await MediaProcessor.clearCache();
+      if (!mounted) return;
+      setState(() {
+        _statusMessage = success
+            ? 'Managed cache cleared successfully'
+            : 'Cache cleanup finished';
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   void _clearResults() {
     setState(() {
       _pickedItems.clear();
+      _processedItems.clear();
       _statusMessage = 'Results cleared';
       _errorMessage = null;
     });
@@ -234,7 +338,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
           ),
         ),
         actions: [
-          if (_pickedItems.isNotEmpty)
+          if (_pickedItems.isNotEmpty || _processedItems.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_outline),
               tooltip: 'Clear Results',
@@ -303,7 +407,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
               ),
             ),
 
-          // --- Actions ---
+          // --- Section 1: Picker Actions ---
           Card(
             elevation: 1,
             child: Padding(
@@ -312,7 +416,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Photo Picking & Capture',
+                    'Photo Picking & Capture (M1)',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
@@ -349,6 +453,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
           ),
           const SizedBox(height: 12),
 
+          // --- Section 2: Video & Mixed Media ---
           Card(
             elevation: 1,
             child: Padding(
@@ -357,7 +462,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Video & Mixed Media',
+                    'Video & Mixed Media (M1)',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
@@ -394,6 +499,58 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
           ),
           const SizedBox(height: 12),
 
+          // --- Section 3: Image Optimization & Processor (M2) ---
+          Card(
+            elevation: 1,
+            color: Theme.of(context).colorScheme.primaryContainer.withAlpha(50),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.tune,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Image Optimization & Processing (M2)',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Preset: Max 1280px, Quality 75, Target ≤ 300 KB, Strip GPS EXIF',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      FilledButton.icon(
+                        icon: const Icon(Icons.auto_fix_high),
+                        label: const Text('Pick & Optimize (≤ 300 KB)'),
+                        onPressed: _isLoading ? null : _pickAndOptimizeImage,
+                      ),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.cleaning_services_outlined),
+                        label: const Text('Clear Managed Cache'),
+                        onPressed: _isLoading ? null : _clearCache,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // --- Section 4: Validation & Recovery Tests ---
           Card(
             elevation: 1,
             child: Padding(
@@ -430,7 +587,21 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
           ),
           const SizedBox(height: 16),
 
-          // --- Picked Media Results ---
+          // --- Optimized Media Results (M2) ---
+          if (_processedItems.isNotEmpty) ...[
+            Text(
+              'Optimized Media (${_processedItems.length})',
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
+            ),
+            const SizedBox(height: 8),
+            ..._processedItems.map(
+              (item) => _buildProcessedCard(context, item),
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          // --- Picked Media Results (M1) ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -442,7 +613,7 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
           ),
           const SizedBox(height: 8),
 
-          if (_pickedItems.isEmpty)
+          if (_pickedItems.isEmpty && _processedItems.isEmpty)
             Card(
               elevation: 0,
               color: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -456,6 +627,98 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
           else
             ..._pickedItems.map((media) => _buildMediaCard(context, media)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProcessedCard(BuildContext context, ProcessedMedia media) {
+    final file = File(media.path);
+    final fileExists = file.existsSync();
+
+    final savings = media.savingsPercentage;
+    final isTargetMet = media.targetMet;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                width: 76,
+                height: 76,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: fileExists
+                    ? Image.file(
+                        file,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) =>
+                            const Icon(Icons.broken_image),
+                      )
+                    : const Icon(Icons.image_outlined, size: 36),
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          media.path.split('/').last,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (savings != null && savings > 0)
+                        _buildBadge(
+                          context,
+                          '-${savings.toStringAsFixed(1)}%',
+                          color: Colors.green,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${_formatBytes(media.originalSizeBytes)} → ${_formatBytes(media.sizeBytes)}',
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      if (media.width != null && media.height != null)
+                        _buildBadge(context, '${media.width}×${media.height}'),
+                      if (isTargetMet != null)
+                        _buildBadge(
+                          context,
+                          isTargetMet ? 'TARGET MET' : 'TARGET UNMET',
+                          color: isTargetMet ? Colors.green : Colors.orange,
+                        ),
+                      if (media.mimeType != null)
+                        _buildBadge(context, media.mimeType!),
+                      _buildBadge(
+                        context,
+                        media.changed ? 'OPTIMIZED' : 'PASSTHROUGH',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -534,6 +797,19 @@ class _MediaForgeHomePageState extends State<MediaForgeHomePage> {
                         _buildBadge(context, media.mimeType!),
                     ],
                   ),
+                  if (media.isImage) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        icon: const Icon(Icons.tune, size: 16),
+                        label: const Text('Optimize (≤ 400 KB)'),
+                        onPressed: _isLoading
+                            ? null
+                            : () => _optimizePickedImage(media),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
