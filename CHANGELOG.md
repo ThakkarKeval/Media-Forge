@@ -11,7 +11,8 @@ Initial release of `media_forge`: a dependable, local-only Flutter plugin for pi
   * Android Activity recreation recovery via `retrieveLostData()`.
 * **Image Processor (`MediaProcessor`)**:
   * Proportional dimension downscaling (`maxWidth`, `maxHeight`).
-  * Lossy image compression (`quality: 1-100`) and format conversion (JPEG, PNG, WebP).
+  * Lossy image compression (`quality: 1-100`) and format conversion (JPEG, PNG, WebP, HEIC).
+  * Output filename customization (`outputFileName`) with automatic extension resolution.
   * Binary-search iterative target byte budgeting (`targetSizeBytes`) with `targetMet` outcome reporting.
   * EXIF orientation normalization and GPS metadata stripping.
   * Safe intermediate caching with `clearCache()` and zero mutations to original source files.

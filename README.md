@@ -82,7 +82,7 @@ final PickedMedia? validPhoto = await MediaForge.pickImage(
 
 ### 3. Image Processing & Optimization
 
-Downscale, compress, meet target byte limits, and strip GPS EXIF:
+Downscale, compress, meet target byte limits, strip GPS EXIF, and customize output filenames:
 
 ```dart
 final ProcessedMedia processed = await MediaForge.processImage(
@@ -93,7 +93,8 @@ final ProcessedMedia processed = await MediaForge.processImage(
     quality: 80,
     targetSizeBytes: 300 * 1024, // Budget: 300 KB
     stripGpsMetadata: true,      // Privacy default
-    format: ImageFormat.jpeg,
+    format: ImageFormat.jpeg,    // jpeg, png, webp, or heic
+    outputFileName: 'profile_avatar', // Optional custom base filename
   ),
 );
 
