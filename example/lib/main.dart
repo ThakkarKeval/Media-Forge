@@ -900,6 +900,10 @@ class _ImageStudioHomePageState extends State<ImageStudioHomePage> {
                             '${processed.savingsPercentage!.toStringAsFixed(1)}% (-${_formatBytes(processed.savingsBytes)})',
                             highlightColor: Colors.green,
                           ),
+                        _buildMetricRow(
+                          'File',
+                          processed.path.split('/').last,
+                        ),
                       ] else ...[
                         _buildMetricRow('Size', '—'),
                         _buildMetricRow('Resolution', '—'),
