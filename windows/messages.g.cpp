@@ -816,13 +816,15 @@ NativeImageProcessOptions::NativeImageProcessOptions(
   const int64_t* quality,
   const int64_t* target_size_bytes,
   const bool* strip_gps_metadata,
-  const std::string* format)
+  const std::string* format,
+  const std::string* output_file_name)
  : max_width_(max_width ? std::optional<int64_t>(*max_width) : std::nullopt),
     max_height_(max_height ? std::optional<int64_t>(*max_height) : std::nullopt),
     quality_(quality ? std::optional<int64_t>(*quality) : std::nullopt),
     target_size_bytes_(target_size_bytes ? std::optional<int64_t>(*target_size_bytes) : std::nullopt),
     strip_gps_metadata_(strip_gps_metadata ? std::optional<bool>(*strip_gps_metadata) : std::nullopt),
-    format_(format ? std::optional<std::string>(*format) : std::nullopt) {}
+    format_(format ? std::optional<std::string>(*format) : std::nullopt),
+    output_file_name_(output_file_name ? std::optional<std::string>(*output_file_name) : std::nullopt) {}
 
 const int64_t* NativeImageProcessOptions::max_width() const {
   return max_width_ ? &(*max_width_) : nullptr;
@@ -902,15 +904,29 @@ void NativeImageProcessOptions::set_format(std::string_view value_arg) {
 }
 
 
+const std::string* NativeImageProcessOptions::output_file_name() const {
+  return output_file_name_ ? &(*output_file_name_) : nullptr;
+}
+
+void NativeImageProcessOptions::set_output_file_name(const std::string_view* value_arg) {
+  output_file_name_ = value_arg ? std::optional<std::string>(*value_arg) : std::nullopt;
+}
+
+void NativeImageProcessOptions::set_output_file_name(std::string_view value_arg) {
+  output_file_name_ = value_arg;
+}
+
+
 EncodableList NativeImageProcessOptions::ToEncodableList() const {
   EncodableList list;
-  list.reserve(6);
+  list.reserve(7);
   list.push_back(max_width_ ? EncodableValue(*max_width_) : EncodableValue());
   list.push_back(max_height_ ? EncodableValue(*max_height_) : EncodableValue());
   list.push_back(quality_ ? EncodableValue(*quality_) : EncodableValue());
   list.push_back(target_size_bytes_ ? EncodableValue(*target_size_bytes_) : EncodableValue());
   list.push_back(strip_gps_metadata_ ? EncodableValue(*strip_gps_metadata_) : EncodableValue());
   list.push_back(format_ ? EncodableValue(*format_) : EncodableValue());
+  list.push_back(output_file_name_ ? EncodableValue(*output_file_name_) : EncodableValue());
   return list;
 }
 
@@ -940,11 +956,15 @@ NativeImageProcessOptions NativeImageProcessOptions::FromEncodableList(const Enc
   if (!encodable_format.IsNull()) {
     decoded.set_format(std::get<std::string>(encodable_format));
   }
+  auto& encodable_output_file_name = list[6];
+  if (!encodable_output_file_name.IsNull()) {
+    decoded.set_output_file_name(std::get<std::string>(encodable_output_file_name));
+  }
   return decoded;
 }
 
 bool NativeImageProcessOptions::operator==(const NativeImageProcessOptions& other) const {
-  return PigeonInternalDeepEquals(max_width_, other.max_width_) && PigeonInternalDeepEquals(max_height_, other.max_height_) && PigeonInternalDeepEquals(quality_, other.quality_) && PigeonInternalDeepEquals(target_size_bytes_, other.target_size_bytes_) && PigeonInternalDeepEquals(strip_gps_metadata_, other.strip_gps_metadata_) && PigeonInternalDeepEquals(format_, other.format_);
+  return PigeonInternalDeepEquals(max_width_, other.max_width_) && PigeonInternalDeepEquals(max_height_, other.max_height_) && PigeonInternalDeepEquals(quality_, other.quality_) && PigeonInternalDeepEquals(target_size_bytes_, other.target_size_bytes_) && PigeonInternalDeepEquals(strip_gps_metadata_, other.strip_gps_metadata_) && PigeonInternalDeepEquals(format_, other.format_) && PigeonInternalDeepEquals(output_file_name_, other.output_file_name_);
 }
 
 bool NativeImageProcessOptions::operator!=(const NativeImageProcessOptions& other) const {
@@ -959,6 +979,7 @@ size_t NativeImageProcessOptions::Hash() const {
   result = result * 31 + PigeonInternalDeepHash(target_size_bytes_);
   result = result * 31 + PigeonInternalDeepHash(strip_gps_metadata_);
   result = result * 31 + PigeonInternalDeepHash(format_);
+  result = result * 31 + PigeonInternalDeepHash(output_file_name_);
   return result;
 }
 
@@ -1004,6 +1025,13 @@ std::ostream& operator<<(
   os << ", format: ";
   if (obj.format_) {
     os << PigeonInternalToString(*obj.format_);
+  }
+  else {
+    os << "null";
+  }
+  os << ", output_file_name: ";
+  if (obj.output_file_name_) {
+    os << PigeonInternalToString(*obj.output_file_name_);
   }
   else {
     os << "null";

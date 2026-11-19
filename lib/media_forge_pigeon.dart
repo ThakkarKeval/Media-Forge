@@ -121,6 +121,7 @@ class PigeonMediaForge extends MediaForgePlatform {
         targetSizeBytes: options.targetSizeBytes,
         stripGpsMetadata: options.stripGpsMetadata,
         format: options.format?.name,
+        outputFileName: options.outputFileName,
       );
       final nativeResult = await _processorApi.processImage(
         path,

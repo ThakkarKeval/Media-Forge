@@ -368,6 +368,7 @@ struct NativeImageProcessOptions: Hashable, CustomStringConvertible {
   var targetSizeBytes: Int64? = nil
   var stripGpsMetadata: Bool? = nil
   var format: String? = nil
+  var outputFileName: String? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -378,6 +379,7 @@ struct NativeImageProcessOptions: Hashable, CustomStringConvertible {
     let targetSizeBytes: Int64? = nilOrValue(pigeonVar_list[3])
     let stripGpsMetadata: Bool? = nilOrValue(pigeonVar_list[4])
     let format: String? = nilOrValue(pigeonVar_list[5])
+    let outputFileName: String? = nilOrValue(pigeonVar_list[6])
 
     return NativeImageProcessOptions(
       maxWidth: maxWidth,
@@ -385,7 +387,8 @@ struct NativeImageProcessOptions: Hashable, CustomStringConvertible {
       quality: quality,
       targetSizeBytes: targetSizeBytes,
       stripGpsMetadata: stripGpsMetadata,
-      format: format
+      format: format,
+      outputFileName: outputFileName
     )
   }
   func toList() -> [Any?] {
@@ -396,13 +399,14 @@ struct NativeImageProcessOptions: Hashable, CustomStringConvertible {
       targetSizeBytes,
       stripGpsMetadata,
       format,
+      outputFileName,
     ]
   }
   static func == (lhs: NativeImageProcessOptions, rhs: NativeImageProcessOptions) -> Bool {
     if Swift.type(of: lhs) != Swift.type(of: rhs) {
       return false
     }
-    return MessagesPigeonInternal.deepEquals(lhs.maxWidth, rhs.maxWidth) && MessagesPigeonInternal.deepEquals(lhs.maxHeight, rhs.maxHeight) && MessagesPigeonInternal.deepEquals(lhs.quality, rhs.quality) && MessagesPigeonInternal.deepEquals(lhs.targetSizeBytes, rhs.targetSizeBytes) && MessagesPigeonInternal.deepEquals(lhs.stripGpsMetadata, rhs.stripGpsMetadata) && MessagesPigeonInternal.deepEquals(lhs.format, rhs.format)
+    return MessagesPigeonInternal.deepEquals(lhs.maxWidth, rhs.maxWidth) && MessagesPigeonInternal.deepEquals(lhs.maxHeight, rhs.maxHeight) && MessagesPigeonInternal.deepEquals(lhs.quality, rhs.quality) && MessagesPigeonInternal.deepEquals(lhs.targetSizeBytes, rhs.targetSizeBytes) && MessagesPigeonInternal.deepEquals(lhs.stripGpsMetadata, rhs.stripGpsMetadata) && MessagesPigeonInternal.deepEquals(lhs.format, rhs.format) && MessagesPigeonInternal.deepEquals(lhs.outputFileName, rhs.outputFileName)
   }
 
   func hash(into hasher: inout Hasher) {
@@ -413,10 +417,11 @@ struct NativeImageProcessOptions: Hashable, CustomStringConvertible {
     MessagesPigeonInternal.deepHash(value: targetSizeBytes, hasher: &hasher)
     MessagesPigeonInternal.deepHash(value: stripGpsMetadata, hasher: &hasher)
     MessagesPigeonInternal.deepHash(value: format, hasher: &hasher)
+    MessagesPigeonInternal.deepHash(value: outputFileName, hasher: &hasher)
   }
 
   public var description: String {
-    return "NativeImageProcessOptions(maxWidth: \(String(describing: maxWidth)), maxHeight: \(String(describing: maxHeight)), quality: \(String(describing: quality)), targetSizeBytes: \(String(describing: targetSizeBytes)), stripGpsMetadata: \(String(describing: stripGpsMetadata)), format: \(String(describing: format)))"
+    return "NativeImageProcessOptions(maxWidth: \(String(describing: maxWidth)), maxHeight: \(String(describing: maxHeight)), quality: \(String(describing: quality)), targetSizeBytes: \(String(describing: targetSizeBytes)), stripGpsMetadata: \(String(describing: stripGpsMetadata)), format: \(String(describing: format)), outputFileName: \(String(describing: outputFileName)))"
   }
 }
 

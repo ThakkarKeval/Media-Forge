@@ -353,12 +353,13 @@ G_DECLARE_FINAL_TYPE(MediaForgeNativeImageProcessOptions, media_forge_native_ima
  * target_size_bytes: field in this object.
  * strip_gps_metadata: field in this object.
  * format: field in this object.
+ * output_file_name: field in this object.
  *
  * Creates a new #NativeImageProcessOptions object.
  *
  * Returns: a new #MediaForgeNativeImageProcessOptions
  */
-MediaForgeNativeImageProcessOptions* media_forge_native_image_process_options_new(int64_t* max_width, int64_t* max_height, int64_t* quality, int64_t* target_size_bytes, gboolean* strip_gps_metadata, const gchar* format);
+MediaForgeNativeImageProcessOptions* media_forge_native_image_process_options_new(int64_t* max_width, int64_t* max_height, int64_t* quality, int64_t* target_size_bytes, gboolean* strip_gps_metadata, const gchar* format, const gchar* output_file_name);
 
 /**
  * media_forge_native_image_process_options_get_max_width
@@ -419,6 +420,16 @@ gboolean* media_forge_native_image_process_options_get_strip_gps_metadata(MediaF
  * Returns: the field value.
  */
 const gchar* media_forge_native_image_process_options_get_format(MediaForgeNativeImageProcessOptions* object);
+
+/**
+ * media_forge_native_image_process_options_get_output_file_name
+ * @object: a #MediaForgeNativeImageProcessOptions.
+ *
+ * Gets the value of the outputFileName field of @object.
+ *
+ * Returns: the field value.
+ */
+const gchar* media_forge_native_image_process_options_get_output_file_name(MediaForgeNativeImageProcessOptions* object);
 
 /**
  * media_forge_native_image_process_options_equals:

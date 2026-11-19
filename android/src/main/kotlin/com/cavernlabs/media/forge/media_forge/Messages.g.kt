@@ -400,7 +400,8 @@ data class NativeImageProcessOptions (
   val quality: Long? = null,
   val targetSizeBytes: Long? = null,
   val stripGpsMetadata: Boolean? = null,
-  val format: String? = null
+  val format: String? = null,
+  val outputFileName: String? = null
 )
  {
   companion object {
@@ -411,7 +412,8 @@ data class NativeImageProcessOptions (
       val targetSizeBytes = pigeonVar_list[3] as Long?
       val stripGpsMetadata = pigeonVar_list[4] as Boolean?
       val format = pigeonVar_list[5] as String?
-      return NativeImageProcessOptions(maxWidth, maxHeight, quality, targetSizeBytes, stripGpsMetadata, format)
+      val outputFileName = pigeonVar_list[6] as String?
+      return NativeImageProcessOptions(maxWidth, maxHeight, quality, targetSizeBytes, stripGpsMetadata, format, outputFileName)
     }
   }
   fun toList(): List<Any?> {
@@ -422,6 +424,7 @@ data class NativeImageProcessOptions (
       targetSizeBytes,
       stripGpsMetadata,
       format,
+      outputFileName,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -432,7 +435,7 @@ data class NativeImageProcessOptions (
       return true
     }
     val other = other as NativeImageProcessOptions
-    return MessagesPigeonUtils.deepEquals(this.maxWidth, other.maxWidth) && MessagesPigeonUtils.deepEquals(this.maxHeight, other.maxHeight) && MessagesPigeonUtils.deepEquals(this.quality, other.quality) && MessagesPigeonUtils.deepEquals(this.targetSizeBytes, other.targetSizeBytes) && MessagesPigeonUtils.deepEquals(this.stripGpsMetadata, other.stripGpsMetadata) && MessagesPigeonUtils.deepEquals(this.format, other.format)
+    return MessagesPigeonUtils.deepEquals(this.maxWidth, other.maxWidth) && MessagesPigeonUtils.deepEquals(this.maxHeight, other.maxHeight) && MessagesPigeonUtils.deepEquals(this.quality, other.quality) && MessagesPigeonUtils.deepEquals(this.targetSizeBytes, other.targetSizeBytes) && MessagesPigeonUtils.deepEquals(this.stripGpsMetadata, other.stripGpsMetadata) && MessagesPigeonUtils.deepEquals(this.format, other.format) && MessagesPigeonUtils.deepEquals(this.outputFileName, other.outputFileName)
   }
 
   override fun hashCode(): Int {
@@ -443,10 +446,11 @@ data class NativeImageProcessOptions (
     result = 31 * result + MessagesPigeonUtils.deepHash(this.targetSizeBytes)
     result = 31 * result + MessagesPigeonUtils.deepHash(this.stripGpsMetadata)
     result = 31 * result + MessagesPigeonUtils.deepHash(this.format)
+    result = 31 * result + MessagesPigeonUtils.deepHash(this.outputFileName)
     return result
   }
   override fun toString(): String {
-    return "NativeImageProcessOptions(maxWidth=$maxWidth, maxHeight=$maxHeight, quality=$quality, targetSizeBytes=$targetSizeBytes, stripGpsMetadata=$stripGpsMetadata, format=$format)"
+    return "NativeImageProcessOptions(maxWidth=$maxWidth, maxHeight=$maxHeight, quality=$quality, targetSizeBytes=$targetSizeBytes, stripGpsMetadata=$stripGpsMetadata, format=$format, outputFileName=$outputFileName)"
   }
 }
 

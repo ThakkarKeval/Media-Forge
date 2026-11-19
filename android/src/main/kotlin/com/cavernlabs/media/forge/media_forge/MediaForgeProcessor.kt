@@ -134,7 +134,7 @@ class MediaForgeProcessor(
         decodedBitmap.recycle()
 
         // 10. Write output file
-        val destFile = createCacheFile("PROC_", targetExt)
+        val destFile = createCacheFile("PROC_", targetExt, options.outputFileName)
         FileOutputStream(destFile).use { fos ->
             fos.write(compressedBytes)
         }
@@ -461,10 +461,21 @@ class MediaForgeProcessor(
         }
     }
 
-    private fun createCacheFile(prefix: String, suffix: String): File {
+    private fun createCacheFile(prefix: String, suffix: String, customName: String? = null): File {
         val dir = File(context.cacheDir, "media_forge").apply {
             if (!exists()) mkdirs()
         }
+
+        if (customName != null && customName.trim().isNotEmpty()) {
+            val sanitized = customName.trim().replace(Regex("[/\\\\?%*:|\"<>]"), "_")
+            val fileName = if (sanitized.endsWith(suffix, ignoreCase = true)) {
+                sanitized
+            } else {
+                "$sanitized$suffix"
+            }
+            return File(dir, fileName)
+        }
+
         return File.createTempFile(prefix, suffix, dir)
     }
 }

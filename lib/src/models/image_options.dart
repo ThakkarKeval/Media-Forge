@@ -20,6 +20,7 @@ class ImageProcessingOptions {
     this.targetSizeBytes,
     this.stripGpsMetadata = true,
     this.format,
+    this.outputFileName,
     this.preserveAspectRatio = true,
     this.allowUpscaling = false,
   }) : assert(
@@ -50,6 +51,11 @@ class ImageProcessingOptions {
   /// If null, preserves original format if supported, or defaults to JPEG.
   final ImageFormat? format;
 
+  /// Custom destination file name (e.g. `user_avatar` or `custom_photo.jpg`).
+  /// If specified without an extension, the appropriate extension for the
+  /// target format will be automatically appended.
+  final String? outputFileName;
+
   /// Whether resizing preserves the original aspect ratio. Defaults to `true`.
   final bool preserveAspectRatio;
 
@@ -58,5 +64,5 @@ class ImageProcessingOptions {
 
   @override
   String toString() =>
-      'ImageProcessingOptions(${maxWidth}x$maxHeight, q: $quality, target: $targetSizeBytes, stripGps: $stripGpsMetadata, format: ${format?.name})';
+      'ImageProcessingOptions(${maxWidth}x$maxHeight, q: $quality, target: $targetSizeBytes, stripGps: $stripGpsMetadata, format: ${format?.name}, name: $outputFileName)';
 }

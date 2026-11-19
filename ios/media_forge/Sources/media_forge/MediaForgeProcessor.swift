@@ -85,7 +85,7 @@ final class MediaForgeProcessor: NSObject, MediaForgeProcessorApi {
     )
 
     // Write output file
-    let destUrl = createCacheUrl(prefix: "PROC_", ext: targetExt)
+    let destUrl = createCacheUrl(prefix: "PROC_", ext: targetExt, customName: options.outputFileName)
     try compressedData.write(to: destUrl)
 
     // Copy EXIF metadata while stripping GPS if requested
@@ -309,11 +309,25 @@ final class MediaForgeProcessor: NSObject, MediaForgeProcessorApi {
     CGImageDestinationFinalize(destination)
   }
 
-  private func createCacheUrl(prefix: String, ext: String) -> URL {
+  private func createCacheUrl(prefix: String, ext: String, customName: String? = nil) -> URL {
     let cacheDir = FileManager.default.temporaryDirectory.appendingPathComponent("media_forge")
     if !FileManager.default.fileExists(atPath: cacheDir.path) {
       try? FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true)
     }
+
+    if let custom = customName, !custom.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+      var sanitized = custom.trimmingCharacters(in: .whitespacesAndNewlines)
+        .replacingOccurrences(of: "/", with: "_")
+        .replacingOccurrences(of: "\\", with: "_")
+        .replacingOccurrences(of: ":", with: "_")
+
+      let dotExt = ".\(ext)"
+      if !sanitized.lowercased().hasSuffix(dotExt.lowercased()) {
+        sanitized = "\(sanitized)\(dotExt)"
+      }
+      return cacheDir.appendingPathComponent(sanitized)
+    }
+
     return cacheDir.appendingPathComponent("\(prefix)\(UUID().uuidString).\(ext)")
   }
 }

@@ -83,6 +83,7 @@ class NativeImageProcessOptions {
     this.targetSizeBytes,
     this.stripGpsMetadata,
     this.format,
+    this.outputFileName,
   });
 
   int? maxWidth;
@@ -91,6 +92,7 @@ class NativeImageProcessOptions {
   int? targetSizeBytes;
   bool? stripGpsMetadata;
   String? format;
+  String? outputFileName;
 }
 
 class NativeProcessedMedia {

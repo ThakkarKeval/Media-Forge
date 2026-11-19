@@ -58,6 +58,9 @@ class _ImageStudioHomePageState extends State<ImageStudioHomePage> {
   bool _enableTargetBudget = true;
   bool _stripGps = true;
   ImageFormat _format = ImageFormat.jpeg;
+  String _customPrefix = 'forge_opt';
+  bool _useCustomFileName = false;
+  final TextEditingController _fileNameController = TextEditingController(text: 'forge_opt');
 
   // Batch Job state
   BatchJob? _activeBatchJob;
@@ -81,6 +84,7 @@ class _ImageStudioHomePageState extends State<ImageStudioHomePage> {
   @override
   void dispose() {
     _batchSub?.cancel();
+    _fileNameController.dispose();
     super.dispose();
   }
 
@@ -100,6 +104,9 @@ class _ImageStudioHomePageState extends State<ImageStudioHomePage> {
             _enableTargetBudget ? (_targetSizeKb * 1024).toInt() : null,
         stripGpsMetadata: _stripGps,
         format: _format,
+        outputFileName: _useCustomFileName && _customPrefix.trim().isNotEmpty
+            ? _customPrefix.trim()
+            : null,
       );
 
   // --- Picker Actions ---
@@ -176,8 +183,15 @@ class _ImageStudioHomePageState extends State<ImageStudioHomePage> {
     });
 
     try {
+      final baseCustomName = _useCustomFileName && _customPrefix.trim().isNotEmpty
+          ? _customPrefix.trim()
+          : null;
+      final options = baseCustomName != null
+          ? _currentOptions
+          : _currentOptions;
+
       final stopwatch = Stopwatch()..start();
-      final result = await MediaForge.processImage(path, options: _currentOptions);
+      final result = await MediaForge.processImage(path, options: options);
       stopwatch.stop();
 
       if (!mounted) return;
@@ -700,6 +714,37 @@ class _ImageStudioHomePageState extends State<ImageStudioHomePage> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+
+                // Custom Filename Option
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Custom Output Filename'),
+                  subtitle: const Text('Specify exact base name (extension auto-resolved)'),
+                  value: _useCustomFileName,
+                  onChanged: (val) => setState(() => _useCustomFileName = val),
+                ),
+
+                if (_useCustomFileName)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, bottom: 8),
+                    child: TextField(
+                      controller: _fileNameController,
+                      decoration: InputDecoration(
+                        labelText: 'File Name',
+                        hintText: 'e.g. avatar_small, profile_photo',
+                        helperText: 'Saved as: ${_fileNameController.text.trim().isEmpty ? "forge_opt" : _fileNameController.text.trim()}.${_format.name == "jpeg" ? "jpg" : _format.name}',
+                        prefixIcon: const Icon(Icons.drive_file_rename_outline),
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                      onChanged: (val) {
+                        setState(() {
+                          _customPrefix = val;
+                        });
+                      },
+                    ),
+                  ),
                 const SizedBox(height: 8),
               ],
             ),

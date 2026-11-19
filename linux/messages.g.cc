@@ -897,6 +897,7 @@ struct _MediaForgeNativeImageProcessOptions {
   int64_t* target_size_bytes;
   gboolean* strip_gps_metadata;
   gchar* format;
+  gchar* output_file_name;
 };
 
 G_DEFINE_TYPE(MediaForgeNativeImageProcessOptions, media_forge_native_image_process_options, G_TYPE_OBJECT)
@@ -909,6 +910,7 @@ static void media_forge_native_image_process_options_dispose(GObject* object) {
   g_clear_pointer(&self->target_size_bytes, g_free);
   g_clear_pointer(&self->strip_gps_metadata, g_free);
   g_clear_pointer(&self->format, g_free);
+  g_clear_pointer(&self->output_file_name, g_free);
   G_OBJECT_CLASS(media_forge_native_image_process_options_parent_class)->dispose(object);
 }
 
@@ -919,7 +921,7 @@ static void media_forge_native_image_process_options_class_init(MediaForgeNative
   G_OBJECT_CLASS(klass)->dispose = media_forge_native_image_process_options_dispose;
 }
 
-MediaForgeNativeImageProcessOptions* media_forge_native_image_process_options_new(int64_t* max_width, int64_t* max_height, int64_t* quality, int64_t* target_size_bytes, gboolean* strip_gps_metadata, const gchar* format) {
+MediaForgeNativeImageProcessOptions* media_forge_native_image_process_options_new(int64_t* max_width, int64_t* max_height, int64_t* quality, int64_t* target_size_bytes, gboolean* strip_gps_metadata, const gchar* format, const gchar* output_file_name) {
   MediaForgeNativeImageProcessOptions* self = MEDIA_FORGE_NATIVE_IMAGE_PROCESS_OPTIONS(g_object_new(media_forge_native_image_process_options_get_type(), nullptr));
   if (max_width != nullptr) {
     self->max_width = static_cast<int64_t*>(malloc(sizeof(int64_t)));
@@ -962,6 +964,12 @@ MediaForgeNativeImageProcessOptions* media_forge_native_image_process_options_ne
   else {
     self->format = nullptr;
   }
+  if (output_file_name != nullptr) {
+    self->output_file_name = g_strdup(output_file_name);
+  }
+  else {
+    self->output_file_name = nullptr;
+  }
   return self;
 }
 
@@ -995,6 +1003,11 @@ const gchar* media_forge_native_image_process_options_get_format(MediaForgeNativ
   return self->format;
 }
 
+const gchar* media_forge_native_image_process_options_get_output_file_name(MediaForgeNativeImageProcessOptions* self) {
+  g_return_val_if_fail(MEDIA_FORGE_IS_NATIVE_IMAGE_PROCESS_OPTIONS(self), nullptr);
+  return self->output_file_name;
+}
+
 static FlValue* media_forge_native_image_process_options_to_list(MediaForgeNativeImageProcessOptions* self) {
   FlValue* values = fl_value_new_list();
   fl_value_append_take(values, self->max_width != nullptr ? fl_value_new_int(*self->max_width) : fl_value_new_null());
@@ -1003,6 +1016,7 @@ static FlValue* media_forge_native_image_process_options_to_list(MediaForgeNativ
   fl_value_append_take(values, self->target_size_bytes != nullptr ? fl_value_new_int(*self->target_size_bytes) : fl_value_new_null());
   fl_value_append_take(values, self->strip_gps_metadata != nullptr ? fl_value_new_bool(*self->strip_gps_metadata) : fl_value_new_null());
   fl_value_append_take(values, self->format != nullptr ? fl_value_new_string(self->format) : fl_value_new_null());
+  fl_value_append_take(values, self->output_file_name != nullptr ? fl_value_new_string(self->output_file_name) : fl_value_new_null());
   return values;
 }
 
@@ -1047,7 +1061,12 @@ static MediaForgeNativeImageProcessOptions* media_forge_native_image_process_opt
   if (fl_value_get_type(value5) != FL_VALUE_TYPE_NULL) {
     format = fl_value_get_string(value5);
   }
-  return media_forge_native_image_process_options_new(max_width, max_height, quality, target_size_bytes, strip_gps_metadata, format);
+  FlValue* value6 = fl_value_get_list_value(values, 6);
+  const gchar* output_file_name = nullptr;
+  if (fl_value_get_type(value6) != FL_VALUE_TYPE_NULL) {
+    output_file_name = fl_value_get_string(value6);
+  }
+  return media_forge_native_image_process_options_new(max_width, max_height, quality, target_size_bytes, strip_gps_metadata, format, output_file_name);
 }
 
 gboolean media_forge_native_image_process_options_equals(MediaForgeNativeImageProcessOptions* a, MediaForgeNativeImageProcessOptions* b) {
@@ -1090,6 +1109,9 @@ gboolean media_forge_native_image_process_options_equals(MediaForgeNativeImagePr
   if (g_strcmp0(a->format, b->format) != 0) {
     return FALSE;
   }
+  if (g_strcmp0(a->output_file_name, b->output_file_name) != 0) {
+    return FALSE;
+  }
   return TRUE;
 }
 
@@ -1102,6 +1124,7 @@ guint media_forge_native_image_process_options_hash(MediaForgeNativeImageProcess
   result = result * 31 + (self->target_size_bytes != nullptr ? static_cast<guint>(*self->target_size_bytes) : 0);
   result = result * 31 + (self->strip_gps_metadata != nullptr ? static_cast<guint>(*self->strip_gps_metadata) : 0);
   result = result * 31 + (self->format != nullptr ? g_str_hash(self->format) : 0);
+  result = result * 31 + (self->output_file_name != nullptr ? g_str_hash(self->output_file_name) : 0);
   return result;
 }
 
@@ -1146,6 +1169,13 @@ gchar* media_forge_native_image_process_options_to_string(MediaForgeNativeImageP
   g_string_append(str, ", format: ");
   if (self->format != nullptr) {
     g_string_append_printf(str, "\"%s\"", self->format);
+  }
+  else {
+    g_string_append(str, "null");
+  }
+  g_string_append(str, ", output_file_name: ");
+  if (self->output_file_name != nullptr) {
+    g_string_append_printf(str, "\"%s\"", self->output_file_name);
   }
   else {
     g_string_append(str, "null");

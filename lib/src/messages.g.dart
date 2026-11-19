@@ -10,9 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart' show immutable, protected, visibleForTesting;
 
 Object? _extractReplyValueOrThrow(
-  List<Object?>? replyList,
-  String channelName, {
-  required bool isNullValid,
+    List<Object?>? replyList,
+    String channelName, {
+    required bool isNullValid,
 }) {
   if (replyList == null) {
     throw PlatformException(
@@ -46,9 +46,8 @@ bool _deepEquals(Object? a, Object? b) {
   }
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed.every(
-          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
-        );
+        a.indexed
+            .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
   }
   if (a is Map && b is Map) {
     if (a.length != b.length) {
@@ -97,11 +96,22 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
-enum NativeMediaType { image, video, mixed }
 
-enum NativeMediaSource { gallery, camera }
+enum NativeMediaType {
+  image,
+  video,
+  mixed;
+}
 
-enum NativeCameraDevice { rear, front }
+enum NativeMediaSource {
+  gallery,
+  camera;
+}
+
+enum NativeCameraDevice {
+  rear,
+  front;
+}
 
 class NativePickerOptions {
   NativePickerOptions({
@@ -117,12 +127,15 @@ class NativePickerOptions {
   int? maxDurationSeconds;
 
   List<Object?> _toList() {
-    return <Object?>[maxItems, cameraDevice, maxDurationSeconds];
+    return <Object?>[
+      maxItems,
+      cameraDevice,
+      maxDurationSeconds,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static NativePickerOptions decode(Object result) {
     result as List<Object?>;
@@ -142,9 +155,7 @@ class NativePickerOptions {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(maxItems, other.maxItems) &&
-        _deepEquals(cameraDevice, other.cameraDevice) &&
-        _deepEquals(maxDurationSeconds, other.maxDurationSeconds);
+    return _deepEquals(maxItems, other.maxItems) && _deepEquals(cameraDevice, other.cameraDevice) && _deepEquals(maxDurationSeconds, other.maxDurationSeconds);
   }
 
   @override
@@ -199,8 +210,7 @@ class NativePickedMedia {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static NativePickedMedia decode(Object result) {
     result as List<Object?>;
@@ -225,14 +235,7 @@ class NativePickedMedia {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(path, other.path) &&
-        _deepEquals(type, other.type) &&
-        _deepEquals(name, other.name) &&
-        _deepEquals(mimeType, other.mimeType) &&
-        _deepEquals(sizeBytes, other.sizeBytes) &&
-        _deepEquals(width, other.width) &&
-        _deepEquals(height, other.height) &&
-        _deepEquals(durationMs, other.durationMs);
+    return _deepEquals(path, other.path) && _deepEquals(type, other.type) && _deepEquals(name, other.name) && _deepEquals(mimeType, other.mimeType) && _deepEquals(sizeBytes, other.sizeBytes) && _deepEquals(width, other.width) && _deepEquals(height, other.height) && _deepEquals(durationMs, other.durationMs);
   }
 
   @override
@@ -259,12 +262,15 @@ class NativeLostDataResponse {
   String? errorMessage;
 
   List<Object?> _toList() {
-    return <Object?>[items, errorCode, errorMessage];
+    return <Object?>[
+      items,
+      errorCode,
+      errorMessage,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static NativeLostDataResponse decode(Object result) {
     result as List<Object?>;
@@ -284,9 +290,7 @@ class NativeLostDataResponse {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(items, other.items) &&
-        _deepEquals(errorCode, other.errorCode) &&
-        _deepEquals(errorMessage, other.errorMessage);
+    return _deepEquals(items, other.items) && _deepEquals(errorCode, other.errorCode) && _deepEquals(errorMessage, other.errorMessage);
   }
 
   @override
@@ -307,6 +311,7 @@ class NativeImageProcessOptions {
     this.targetSizeBytes,
     this.stripGpsMetadata,
     this.format,
+    this.outputFileName,
   });
 
   int? maxWidth;
@@ -321,6 +326,8 @@ class NativeImageProcessOptions {
 
   String? format;
 
+  String? outputFileName;
+
   List<Object?> _toList() {
     return <Object?>[
       maxWidth,
@@ -329,12 +336,12 @@ class NativeImageProcessOptions {
       targetSizeBytes,
       stripGpsMetadata,
       format,
+      outputFileName,
     ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static NativeImageProcessOptions decode(Object result) {
     result as List<Object?>;
@@ -345,25 +352,20 @@ class NativeImageProcessOptions {
       targetSizeBytes: result[3] as int?,
       stripGpsMetadata: result[4] as bool?,
       format: result[5] as String?,
+      outputFileName: result[6] as String?,
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! NativeImageProcessOptions ||
-        other.runtimeType != runtimeType) {
+    if (other is! NativeImageProcessOptions || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(maxWidth, other.maxWidth) &&
-        _deepEquals(maxHeight, other.maxHeight) &&
-        _deepEquals(quality, other.quality) &&
-        _deepEquals(targetSizeBytes, other.targetSizeBytes) &&
-        _deepEquals(stripGpsMetadata, other.stripGpsMetadata) &&
-        _deepEquals(format, other.format);
+    return _deepEquals(maxWidth, other.maxWidth) && _deepEquals(maxHeight, other.maxHeight) && _deepEquals(quality, other.quality) && _deepEquals(targetSizeBytes, other.targetSizeBytes) && _deepEquals(stripGpsMetadata, other.stripGpsMetadata) && _deepEquals(format, other.format) && _deepEquals(outputFileName, other.outputFileName);
   }
 
   @override
@@ -372,7 +374,7 @@ class NativeImageProcessOptions {
 
   @override
   String toString() {
-    return 'NativeImageProcessOptions(maxWidth: $maxWidth, maxHeight: $maxHeight, quality: $quality, targetSizeBytes: $targetSizeBytes, stripGpsMetadata: $stripGpsMetadata, format: $format)';
+    return 'NativeImageProcessOptions(maxWidth: $maxWidth, maxHeight: $maxHeight, quality: $quality, targetSizeBytes: $targetSizeBytes, stripGpsMetadata: $stripGpsMetadata, format: $format, outputFileName: $outputFileName)';
   }
 }
 
@@ -422,8 +424,7 @@ class NativeProcessedMedia {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static NativeProcessedMedia decode(Object result) {
     result as List<Object?>;
@@ -449,15 +450,7 @@ class NativeProcessedMedia {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(path, other.path) &&
-        _deepEquals(originalPath, other.originalPath) &&
-        _deepEquals(mimeType, other.mimeType) &&
-        _deepEquals(sizeBytes, other.sizeBytes) &&
-        _deepEquals(originalSizeBytes, other.originalSizeBytes) &&
-        _deepEquals(width, other.width) &&
-        _deepEquals(height, other.height) &&
-        _deepEquals(changed, other.changed) &&
-        _deepEquals(targetMet, other.targetMet);
+    return _deepEquals(path, other.path) && _deepEquals(originalPath, other.originalPath) && _deepEquals(mimeType, other.mimeType) && _deepEquals(sizeBytes, other.sizeBytes) && _deepEquals(originalSizeBytes, other.originalSizeBytes) && _deepEquals(width, other.width) && _deepEquals(height, other.height) && _deepEquals(changed, other.changed) && _deepEquals(targetMet, other.targetMet);
   }
 
   @override
@@ -508,8 +501,7 @@ class NativeVideoMetadata {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static NativeVideoMetadata decode(Object result) {
     result as List<Object?>;
@@ -533,13 +525,7 @@ class NativeVideoMetadata {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(path, other.path) &&
-        _deepEquals(mimeType, other.mimeType) &&
-        _deepEquals(sizeBytes, other.sizeBytes) &&
-        _deepEquals(width, other.width) &&
-        _deepEquals(height, other.height) &&
-        _deepEquals(durationMs, other.durationMs) &&
-        _deepEquals(rotationDegrees, other.rotationDegrees);
+    return _deepEquals(path, other.path) && _deepEquals(mimeType, other.mimeType) && _deepEquals(sizeBytes, other.sizeBytes) && _deepEquals(width, other.width) && _deepEquals(height, other.height) && _deepEquals(durationMs, other.durationMs) && _deepEquals(rotationDegrees, other.rotationDegrees);
   }
 
   @override
@@ -552,6 +538,7 @@ class NativeVideoMetadata {
   }
 }
 
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -559,31 +546,31 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    } else if (value is NativeMediaType) {
+    }    else if (value is NativeMediaType) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    } else if (value is NativeMediaSource) {
+    }    else if (value is NativeMediaSource) {
       buffer.putUint8(130);
       writeValue(buffer, value.index);
-    } else if (value is NativeCameraDevice) {
+    }    else if (value is NativeCameraDevice) {
       buffer.putUint8(131);
       writeValue(buffer, value.index);
-    } else if (value is NativePickerOptions) {
+    }    else if (value is NativePickerOptions) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    } else if (value is NativePickedMedia) {
+    }    else if (value is NativePickedMedia) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is NativeLostDataResponse) {
+    }    else if (value is NativeLostDataResponse) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    } else if (value is NativeImageProcessOptions) {
+    }    else if (value is NativeImageProcessOptions) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    } else if (value is NativeProcessedMedia) {
+    }    else if (value is NativeProcessedMedia) {
       buffer.putUint8(136);
       writeValue(buffer, value.encode());
-    } else if (value is NativeVideoMetadata) {
+    }    else if (value is NativeVideoMetadata) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
     } else {
@@ -626,21 +613,20 @@ class MediaForgePluginApi {
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
   MediaForgePluginApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+      BinaryMessenger? binaryMessenger, 
+      String messageChannelSuffix = '', 
+      })
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
 
   final BinaryMessenger? pigeonVar_binaryMessenger;
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
+
   Future<String> getPlatformVersion() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.media_forge.MediaForgePluginApi.getPlatformVersion$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.media_forge.MediaForgePluginApi.getPlatformVersion$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -649,10 +635,11 @@ class MediaForgePluginApi {
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as String;
   }
 }
@@ -662,90 +649,74 @@ class MediaForgePickerApi {
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
   MediaForgePickerApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+      BinaryMessenger? binaryMessenger, 
+      String messageChannelSuffix = '', 
+      })
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
 
   final BinaryMessenger? pigeonVar_binaryMessenger;
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<NativePickedMedia?> pickImage(
-    NativeMediaSource source,
-    NativePickerOptions? options,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickImage$pigeonVar_messageChannelSuffix';
+
+  Future<NativePickedMedia?> pickImage(NativeMediaSource source, NativePickerOptions? options) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickImage$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[source, options],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[source, options]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
     return pigeonVar_replyValue as NativePickedMedia?;
   }
 
-  Future<NativePickedMedia?> pickVideo(
-    NativeMediaSource source,
-    NativePickerOptions? options,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickVideo$pigeonVar_messageChannelSuffix';
+  Future<NativePickedMedia?> pickVideo(NativeMediaSource source, NativePickerOptions? options) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickVideo$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[source, options],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[source, options]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
     return pigeonVar_replyValue as NativePickedMedia?;
   }
 
-  Future<List<NativePickedMedia>> pickMultiple(
-    NativeMediaType type,
-    NativePickerOptions? options,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickMultiple$pigeonVar_messageChannelSuffix';
+  Future<List<NativePickedMedia>> pickMultiple(NativeMediaType type, NativePickerOptions? options) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.media_forge.MediaForgePickerApi.pickMultiple$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[type, options],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[type, options]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return (pigeonVar_replyValue! as List<Object?>).cast<NativePickedMedia>();
   }
 
   Future<NativeLostDataResponse> retrieveLostData() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.media_forge.MediaForgePickerApi.retrieveLostData$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.media_forge.MediaForgePickerApi.retrieveLostData$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -754,10 +725,11 @@ class MediaForgePickerApi {
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as NativeLostDataResponse;
   }
 }
@@ -767,89 +739,74 @@ class MediaForgeProcessorApi {
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
   MediaForgeProcessorApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+      BinaryMessenger? binaryMessenger, 
+      String messageChannelSuffix = '', 
+      })
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
 
   final BinaryMessenger? pigeonVar_binaryMessenger;
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<NativeProcessedMedia> processImage(
-    String path,
-    NativeImageProcessOptions options,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.processImage$pigeonVar_messageChannelSuffix';
+
+  Future<NativeProcessedMedia> processImage(String path, NativeImageProcessOptions options) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.processImage$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[path, options],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[path, options]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as NativeProcessedMedia;
   }
 
   Future<NativeVideoMetadata> inspectVideo(String path) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.inspectVideo$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.inspectVideo$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[path],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[path]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as NativeVideoMetadata;
   }
 
-  Future<String> createVideoThumbnail(
-    String videoPath,
-    int atMs,
-    int? maxWidth,
-    int? maxHeight,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.createVideoThumbnail$pigeonVar_messageChannelSuffix';
+  Future<String> createVideoThumbnail(String videoPath, int atMs, int? maxWidth, int? maxHeight) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.createVideoThumbnail$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[videoPath, atMs, maxWidth, maxHeight],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[videoPath, atMs, maxWidth, maxHeight]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as String;
   }
 
   Future<bool> clearCache() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.clearCache$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.media_forge.MediaForgeProcessorApi.clearCache$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -858,10 +815,11 @@ class MediaForgeProcessorApi {
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as bool;
   }
 }

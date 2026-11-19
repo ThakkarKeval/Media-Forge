@@ -247,7 +247,8 @@ class NativeImageProcessOptions {
     const int64_t* quality,
     const int64_t* target_size_bytes,
     const bool* strip_gps_metadata,
-    const std::string* format);
+    const std::string* format,
+    const std::string* output_file_name);
 
   const int64_t* max_width() const;
   void set_max_width(const int64_t* value_arg);
@@ -273,6 +274,10 @@ class NativeImageProcessOptions {
   void set_format(const std::string_view* value_arg);
   void set_format(std::string_view value_arg);
 
+  const std::string* output_file_name() const;
+  void set_output_file_name(const std::string_view* value_arg);
+  void set_output_file_name(std::string_view value_arg);
+
   bool operator==(const NativeImageProcessOptions& other) const;
   bool operator!=(const NativeImageProcessOptions& other) const;
   /// Returns a hash code value for the object. This method is supported for the benefit of hash tables.
@@ -292,6 +297,7 @@ class NativeImageProcessOptions {
   std::optional<int64_t> target_size_bytes_;
   std::optional<bool> strip_gps_metadata_;
   std::optional<std::string> format_;
+  std::optional<std::string> output_file_name_;
 };
 
 

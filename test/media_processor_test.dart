@@ -79,10 +79,12 @@ void main() {
           maxWidth: 1920,
           quality: 80,
           targetSizeBytes: 5000,
+          outputFileName: 'my_custom_photo',
         ),
       );
 
       expect(result.path, '${tempDir.path}/optimized.jpg');
+      expect(fakeProcessorApi.lastOptions?.outputFileName, 'my_custom_photo');
       expect(result.originalPath, sampleFile.path);
       expect(result.sizeBytes, 4000);
       expect(result.originalSizeBytes, 10000);
@@ -145,6 +147,7 @@ void main() {
 
 class FakeMediaForgeProcessorApi implements MediaForgeProcessorApi {
   NativeProcessedMedia? nextProcessedMedia;
+  NativeImageProcessOptions? lastOptions;
   bool clearCacheResult = true;
   Object? errorToThrow;
 
@@ -153,6 +156,7 @@ class FakeMediaForgeProcessorApi implements MediaForgeProcessorApi {
     String path,
     NativeImageProcessOptions options,
   ) async {
+    lastOptions = options;
     if (errorToThrow != null) throw errorToThrow!;
     return nextProcessedMedia ??
         NativeProcessedMedia(path: path, originalPath: path, changed: false);
