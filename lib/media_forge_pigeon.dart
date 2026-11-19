@@ -5,10 +5,12 @@ import 'media_forge_platform_interface.dart';
 import 'src/errors/error_codes.dart';
 import 'src/errors/media_forge_exception.dart';
 import 'src/messages.g.dart';
+import 'src/models/image_options.dart';
 import 'src/models/lost_data_response.dart';
 import 'src/models/media_source.dart';
 import 'src/models/media_type.dart';
 import 'src/models/picked_media.dart';
+import 'src/models/processed_media.dart';
 import 'src/models/selection_options.dart';
 
 /// An implementation of [MediaForgePlatform] that uses Pigeon for native platforms.
@@ -17,11 +19,14 @@ class PigeonMediaForge extends MediaForgePlatform {
   PigeonMediaForge({
     @visibleForTesting MediaForgePluginApi? pluginApi,
     @visibleForTesting MediaForgePickerApi? pickerApi,
+    @visibleForTesting MediaForgeProcessorApi? processorApi,
   }) : _pluginApi = pluginApi ?? MediaForgePluginApi(),
-       _pickerApi = pickerApi ?? MediaForgePickerApi();
+       _pickerApi = pickerApi ?? MediaForgePickerApi(),
+       _processorApi = processorApi ?? MediaForgeProcessorApi();
 
   final MediaForgePluginApi _pluginApi;
   final MediaForgePickerApi _pickerApi;
+  final MediaForgeProcessorApi _processorApi;
 
   @override
   Future<String?> getPlatformVersion() async {
@@ -102,6 +107,39 @@ class PigeonMediaForge extends MediaForgePlatform {
     }
   }
 
+  @override
+  Future<ProcessedMedia> processImage({
+    required String path,
+    required ImageProcessingOptions options,
+  }) async {
+    try {
+      final nativeOptions = NativeImageProcessOptions(
+        maxWidth: options.maxWidth,
+        maxHeight: options.maxHeight,
+        quality: options.quality,
+        targetSizeBytes: options.targetSizeBytes,
+        stripGpsMetadata: options.stripGpsMetadata,
+        format: options.format?.name,
+      );
+      final nativeResult = await _processorApi.processImage(
+        path,
+        nativeOptions,
+      );
+      return _toProcessedMedia(nativeResult);
+    } catch (e) {
+      throw _wrapException(e);
+    }
+  }
+
+  @override
+  Future<bool> clearCache() async {
+    try {
+      return await _processorApi.clearCache();
+    } catch (e) {
+      throw _wrapException(e);
+    }
+  }
+
   // --- Helpers ---
 
   NativeMediaSource _toNativeSource(MediaSource source) {
@@ -174,6 +212,20 @@ class PigeonMediaForge extends MediaForgePlatform {
     );
   }
 
+  ProcessedMedia _toProcessedMedia(NativeProcessedMedia native) {
+    return ProcessedMedia(
+      path: native.path,
+      originalPath: native.originalPath,
+      mimeType: native.mimeType,
+      sizeBytes: native.sizeBytes,
+      originalSizeBytes: native.originalSizeBytes,
+      width: native.width,
+      height: native.height,
+      changed: native.changed,
+      targetMet: native.targetMet,
+    );
+  }
+
   LostDataResponse _toLostDataResponse(NativeLostDataResponse native) {
     final items = native.items.map(_toPickedMedia).toList();
     MediaForgeException? exception;
@@ -196,6 +248,11 @@ class PigeonMediaForge extends MediaForgePlatform {
       return MediaForgeErrorCode.fileNotFound;
     } else if (lower.contains('unsupported')) {
       return MediaForgeErrorCode.unsupportedFormat;
+    } else if (lower.contains('target_unreachable') ||
+        lower.contains('targetunreachable')) {
+      return MediaForgeErrorCode.targetUnreachable;
+    } else if (lower.contains('processing')) {
+      return MediaForgeErrorCode.processingFailed;
     }
     return MediaForgeErrorCode.platformFailure;
   }

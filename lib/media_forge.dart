@@ -1,23 +1,29 @@
 export 'media_forge_platform_interface.dart';
 export 'src/errors/error_codes.dart';
 export 'src/errors/media_forge_exception.dart';
+export 'src/models/image_options.dart';
 export 'src/models/lost_data_response.dart';
 export 'src/models/media_source.dart';
 export 'src/models/media_type.dart';
 export 'src/models/picked_media.dart';
+export 'src/models/processed_media.dart';
 export 'src/models/selection_options.dart';
 export 'src/models/validation_result.dart';
 export 'src/picker/media_picker.dart';
 export 'src/picker/picker_validator.dart';
+export 'src/processor/media_processor.dart';
 
 import 'media_forge_platform_interface.dart';
+import 'src/models/image_options.dart';
 import 'src/models/lost_data_response.dart';
 import 'src/models/media_source.dart';
 import 'src/models/media_type.dart';
 import 'src/models/picked_media.dart';
+import 'src/models/processed_media.dart';
 import 'src/models/selection_options.dart';
 import 'src/picker/media_picker.dart';
 import 'src/picker/picker_validator.dart';
+import 'src/processor/media_processor.dart';
 
 /// Top-level facade providing convenient access to picking and processing media.
 class MediaForge {
@@ -69,6 +75,35 @@ class MediaForge {
       options: options,
       validator: validator,
     );
+  }
+
+  /// Convenience helper to pick a photo and immediately process it with [options].
+  static Future<ProcessedMedia?> pickAndProcessImage({
+    MediaSource source = MediaSource.gallery,
+    CameraDevice preferredCameraDevice = CameraDevice.rear,
+    MediaSelectionOptions? selectionOptions,
+    ImageProcessingOptions processingOptions = const ImageProcessingOptions(),
+  }) async {
+    final picked = await pickImage(
+      source: source,
+      preferredCameraDevice: preferredCameraDevice,
+      options: selectionOptions,
+    );
+    if (picked == null) return null;
+    return processImage(picked.path, options: processingOptions);
+  }
+
+  /// Processes and optimizes an existing local image at [path].
+  static Future<ProcessedMedia> processImage(
+    String path, {
+    ImageProcessingOptions options = const ImageProcessingOptions(),
+  }) {
+    return MediaProcessor.processImage(path, options: options);
+  }
+
+  /// Clears managed temporary intermediate output files.
+  static Future<bool> clearCache() {
+    return MediaProcessor.clearCache();
   }
 
   /// Retrieves any pending media recovered after Android Activity recreation.

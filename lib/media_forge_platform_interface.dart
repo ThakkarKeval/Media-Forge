@@ -1,10 +1,12 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'media_forge_pigeon.dart';
+import 'src/models/image_options.dart';
 import 'src/models/lost_data_response.dart';
 import 'src/models/media_source.dart';
 import 'src/models/media_type.dart';
 import 'src/models/picked_media.dart';
+import 'src/models/processed_media.dart';
 import 'src/models/selection_options.dart';
 
 /// The common platform interface for the MediaForge plugin.
@@ -65,5 +67,18 @@ abstract class MediaForgePlatform extends PlatformInterface {
   /// Retrieves lost data after Android Activity recreation.
   Future<LostDataResponse> retrieveLostData() {
     throw UnimplementedError('retrieveLostData() has not been implemented.');
+  }
+
+  /// Processes and optimizes a local image file with [options].
+  Future<ProcessedMedia> processImage({
+    required String path,
+    required ImageProcessingOptions options,
+  }) {
+    throw UnimplementedError('processImage() has not been implemented.');
+  }
+
+  /// Clears managed temporary intermediate output files.
+  Future<bool> clearCache() {
+    throw UnimplementedError('clearCache() has not been implemented.');
   }
 }

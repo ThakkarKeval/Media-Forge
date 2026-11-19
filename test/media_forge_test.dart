@@ -34,6 +34,17 @@ class MockMediaForgePlatform
   @override
   Future<LostDataResponse> retrieveLostData() =>
       Future.value(const LostDataResponse.empty());
+
+  @override
+  Future<ProcessedMedia> processImage({
+    required String path,
+    required ImageProcessingOptions options,
+  }) => Future.value(
+    ProcessedMedia(path: path, originalPath: path, changed: false),
+  );
+
+  @override
+  Future<bool> clearCache() => Future.value(true);
 }
 
 void main() {
