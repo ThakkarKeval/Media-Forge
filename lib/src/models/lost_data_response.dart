@@ -5,15 +5,10 @@ import 'picked_media.dart';
 /// was destroyed and recreated during an active picker or camera session.
 class LostDataResponse {
   /// Constructs a [LostDataResponse].
-  const LostDataResponse({
-    this.items = const [],
-    this.exception,
-  });
+  const LostDataResponse({this.items = const [], this.exception});
 
   /// Constructs an empty response indicating no lost data was pending.
-  const LostDataResponse.empty()
-      : items = const [],
-        exception = null;
+  const LostDataResponse.empty() : items = const [], exception = null;
 
   /// Recovered media items that were picked or captured before Activity recreation.
   final List<PickedMedia> items;

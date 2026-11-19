@@ -8,7 +8,7 @@ void main() {
 
   test('getPlatformVersion', () async {
     final api = FakeMediaForgePluginApi(platformVersion: '42');
-    final plugin = PigeonMediaForge(api: api);
+    final plugin = PigeonMediaForge(pluginApi: api);
 
     expect(await plugin.getPlatformVersion(), '42');
   });

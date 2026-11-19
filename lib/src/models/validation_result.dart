@@ -1,9 +1,7 @@
 /// Outcome of validating a [PickedMedia] against [MediaSelectionOptions].
 class ValidationResult {
   /// Constructs a successful [ValidationResult].
-  const ValidationResult.valid()
-      : isValid = true,
-        violations = const [];
+  const ValidationResult.valid() : isValid = true, violations = const [];
 
   /// Constructs an invalid [ValidationResult] with one or more [violations].
   const ValidationResult.invalid(this.violations) : isValid = false;

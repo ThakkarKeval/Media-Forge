@@ -63,5 +63,6 @@ class PickedMedia {
           sizeBytes == other.sizeBytes;
 
   @override
-  int get hashCode => path.hashCode ^ type.hashCode ^ (sizeBytes?.hashCode ?? 0);
+  int get hashCode =>
+      path.hashCode ^ type.hashCode ^ (sizeBytes?.hashCode ?? 0);
 }
