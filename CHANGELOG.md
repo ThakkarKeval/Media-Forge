@@ -1,3 +1,9 @@
+## 0.1.1
+
+* Added custom output filename support (`outputFileName`) with automatic extension mapping and illegal character sanitization across Dart, Android, and iOS.
+* Expanded supported formats to include HEIC/HEIF (`ImageFormat.heic`) with native encoders on Android (API 30+) and iOS.
+* Modernized the example app with a minimal, clutter-free home screen and a dedicated settings page.
+
 ## 0.1.0
 
 Initial release of `media_forge`: a dependable, local-only Flutter plugin for picking, validating, and optimizing photos and inspecting videos on Android and iOS.
