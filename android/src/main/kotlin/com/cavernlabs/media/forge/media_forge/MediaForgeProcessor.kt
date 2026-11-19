@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.media.ExifInterface
+import android.media.MediaMetadataRetriever
 import android.os.Build
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -158,7 +159,43 @@ class MediaForgeProcessor(
     }
 
     override suspend fun inspectVideo(path: String): NativeVideoMetadata = withContext(Dispatchers.IO) {
-        throw FlutterError("unimplemented", "inspectVideo is part of Milestone 3", null)
+        val file = File(path)
+        if (!file.exists()) {
+            throw FlutterError("file_not_found", "Video file does not exist: $path", null)
+        }
+
+        val retriever = MediaMetadataRetriever()
+        try {
+            retriever.setDataSource(file.absolutePath)
+
+            val rawDuration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+            val durationMs = rawDuration?.toLongOrNull()
+
+            val rawWidth = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull()
+            val rawHeight = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull()
+            val rawRotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+            val mimeType = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE)
+
+            val isRotated90 = rawRotation == 90 || rawRotation == 270
+            val orientedWidth: Long? = if (isRotated90 && rawHeight != null) rawHeight.toLong() else rawWidth?.toLong()
+            val orientedHeight: Long? = if (isRotated90 && rawWidth != null) rawWidth.toLong() else rawHeight?.toLong()
+
+            NativeVideoMetadata(
+                path = file.absolutePath,
+                mimeType = mimeType ?: "video/mp4",
+                sizeBytes = file.length(),
+                width = orientedWidth,
+                height = orientedHeight,
+                durationMs = durationMs,
+                rotationDegrees = rawRotation.toLong(),
+            )
+        } catch (e: Exception) {
+            throw FlutterError("inspection_failed", "Failed to inspect video: ${e.message}", null)
+        } finally {
+            try {
+                retriever.release()
+            } catch (_: Exception) {}
+        }
     }
 
     override suspend fun createVideoThumbnail(
@@ -167,7 +204,61 @@ class MediaForgeProcessor(
         maxWidth: Long?,
         maxHeight: Long?,
     ): String = withContext(Dispatchers.IO) {
-        throw FlutterError("unimplemented", "createVideoThumbnail is part of Milestone 3", null)
+        val file = File(videoPath)
+        if (!file.exists()) {
+            throw FlutterError("file_not_found", "Video file does not exist: $videoPath", null)
+        }
+
+        val retriever = MediaMetadataRetriever()
+        try {
+            retriever.setDataSource(file.absolutePath)
+
+            // Extract frame at microsecond time
+            val timeMicros = max(0L, atMs) * 1000L
+            val extractedBitmap: Bitmap = retriever.getFrameAtTime(
+                timeMicros,
+                MediaMetadataRetriever.OPTION_CLOSEST_SYNC
+            ) ?: retriever.frameAtTime
+            ?: throw FlutterError("thumbnail_failed", "Could not extract video frame at ${atMs}ms", null)
+
+            var frame = extractedBitmap
+
+            // Check if scaling is requested
+            if (maxWidth != null || maxHeight != null) {
+                val (targetW, targetH) = calculateTargetDimensions(
+                    frame.width,
+                    frame.height,
+                    maxWidth?.toInt(),
+                    maxHeight?.toInt(),
+                )
+                if (targetW != frame.width || targetH != frame.height) {
+                    val scaled = Bitmap.createScaledBitmap(frame, targetW, targetH, true)
+                    if (scaled != frame) {
+                        frame.recycle()
+                        frame = scaled
+                    }
+                }
+            }
+
+            // Save to unique JPEG thumbnail file in cache
+            val cacheDir = File(context.cacheDir, "media_forge").apply { mkdirs() }
+            val uuidPart = java.util.UUID.randomUUID().toString().substring(0, 8)
+            val thumbFile = File(cacheDir, "thumb_${System.currentTimeMillis()}_$uuidPart.jpg")
+
+            FileOutputStream(thumbFile).use { outStream: FileOutputStream ->
+                frame.compress(Bitmap.CompressFormat.JPEG, 85, outStream)
+            }
+            frame.recycle()
+
+            thumbFile.absolutePath
+        } catch (e: Exception) {
+            if (e is FlutterError) throw e
+            throw FlutterError("thumbnail_failed", "Failed to generate video thumbnail: ${e.message}", null)
+        } finally {
+            try {
+                retriever.release()
+            } catch (_: Exception) {}
+        }
     }
 
     override suspend fun clearCache(): Boolean = withContext(Dispatchers.IO) {
