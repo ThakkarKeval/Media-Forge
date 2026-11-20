@@ -1,3 +1,7 @@
+## 0.1.2
+
+* Verified and aligned repository metadata and pubspec configuration for pub.dev automated verification.
+
 ## 0.1.1
 
 * Added custom output filename support (`outputFileName`) with automatic extension mapping and illegal character sanitization across Dart, Android, and iOS.
